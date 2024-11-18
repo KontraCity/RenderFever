@@ -1,12 +1,25 @@
 // Library {fmt}
 #include <fmt/format.h>
 
-// Library RenderFever
-#include <rf/utility.hpp>
+// RenderFever Engine
+#include <rf/graphics/window.hpp>
+using namespace rf;
 
 int main()
 {
-    fmt::print("Hello, RenderFever Engine!\n");
-    fmt::print("Random integer {}\n", rf::Utility::Random(0, 100));
-    fmt::print("Random real: {}\n", rf::Utility::Random(0.0, 1.0));
+    try
+    {
+        Graphics::Window window(800, 600, "../../../engine/resources");
+        window.run();
+    }
+    catch (const std::exception& error)
+    {
+        fmt::print(stderr, "Error: {}\n", error.what());
+        return -1;
+    }
+    catch (...)
+    {
+        fmt::print(stderr, "Unknown error\n");
+        return -1;
+    }
 }
