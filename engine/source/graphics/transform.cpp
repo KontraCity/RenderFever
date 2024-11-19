@@ -2,6 +2,12 @@
 
 namespace rf {
 
+Graphics::Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) noexcept
+    : m_position(position)
+    , m_rotation(rotation)
+    , m_scale(scale)
+{}
+
 void Graphics::Transform::transform(Shader& shader) const
 {
     // TODO: Rotate model around a single axis rather than three
@@ -13,11 +19,5 @@ void Graphics::Transform::transform(Shader& shader) const
     model = glm::scale(model, m_scale);
     shader.set("Model", model);
 }
-
-Graphics::Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
-    : m_position(position)
-    , m_rotation(rotation)
-    , m_scale(scale)
-{}
 
 } // namespace rf

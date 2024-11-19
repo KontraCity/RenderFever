@@ -76,6 +76,15 @@ namespace Graphics
         size_t m_cursorPosEventSubscriberId = 0;
         size_t m_scrollEventSubscriberId = 0;
 
+    public:
+        Camera() noexcept;
+
+        Camera(const Camera& other) = delete;
+
+        Camera(Camera&& other) = delete;
+
+        ~Camera();
+
     private:
         /// @brief Process single key event
         /// @param key The key event is associated with
@@ -99,18 +108,14 @@ namespace Graphics
         void onScroll(double xOffset, double yOffset);
 
     public:
-        Camera();
-
-        ~Camera();
-
-        /// @brief Reset camera
-        void reset();
-
         /// @brief Capture camera scene
         /// @param shader The shader to capture with
         /// @param width Window width
         /// @param height Window height
         void capture(Shader& shader, unsigned int width, unsigned int height);
+
+        /// @brief Reset camera
+        void reset();
     };
 }
 

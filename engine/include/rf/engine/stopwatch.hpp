@@ -15,10 +15,11 @@ namespace Engine
 
     public:
         /// @brief Initialize and start stopwatch
-        Stopwatch()
+        Stopwatch() noexcept
             : m_start(clock::now())
         {}
 
+    public:
         /// @brief Reset stopwatch
         inline void reset()
         {

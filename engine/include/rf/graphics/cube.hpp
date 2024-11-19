@@ -19,7 +19,7 @@ namespace Graphics
         unsigned int m_elementBufferObject = 0;
 
     public:
-        Cube();
+        Cube() noexcept;
 
         Cube(const Cube& other) = delete;
 
@@ -27,6 +27,7 @@ namespace Graphics
 
         ~Cube();
 
+    public:
         /// @brief Draw cube to the screen
         /// @param shader The shader to draw with
         void draw(Shader& shader) const;

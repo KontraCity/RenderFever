@@ -75,7 +75,7 @@ namespace Model
 
 namespace rf {
 
-Graphics::Cube::Cube()
+Graphics::Cube::Cube() noexcept
 {
     // Vertex array object
     glGenVertexArrays(1, &m_vertexArrayObject);

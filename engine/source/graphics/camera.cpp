@@ -3,6 +3,27 @@ using namespace rf::Graphics::CameraConst;
 
 namespace rf {
 
+Graphics::Camera::Camera() noexcept
+{
+    reset();
+    m_keyEventSubscriberId = Engine::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));
+    m_inputEventSubscriberId = Engine::Input::Input.subscribe(std::bind(&Camera::onInput, this, _1, _2));
+    m_cursorPosEventSubscriberId = Engine::Input::CursorPos.subscribe(std::bind(&Camera::onCursorPos, this, _1, _2));
+    m_scrollEventSubscriberId = Engine::Input::Scroll.subscribe(std::bind(&Camera::onScroll, this, _1, _2));
+}
+
+Graphics::Camera::~Camera()
+{
+    if (m_keyEventSubscriberId)
+        Engine::Input::Key.unsubscribe(m_keyEventSubscriberId);
+    if (m_inputEventSubscriberId)
+        Engine::Input::Input.unsubscribe(m_inputEventSubscriberId);
+    if (m_cursorPosEventSubscriberId)
+        Engine::Input::CursorPos.unsubscribe(m_cursorPosEventSubscriberId);
+    if (m_scrollEventSubscriberId)
+        Engine::Input::Scroll.unsubscribe(m_scrollEventSubscriberId);
+}
+
 void Graphics::Camera::onKey(int key, int action, int mods)
 {
     if (key == GLFW_KEY_R)
@@ -56,37 +77,6 @@ void Graphics::Camera::onScroll(double xOffset, double yOffset)
     m_zoom = Engine::Utility::Limit(m_zoom + yOffset * Sensivity::Scroll * m_zoom, Zoom::Min, Zoom::Max);
 }
 
-Graphics::Camera::Camera()
-{
-    reset();
-    m_keyEventSubscriberId = Engine::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));
-    m_inputEventSubscriberId = Engine::Input::Input.subscribe(std::bind(&Camera::onInput, this, _1, _2));
-    m_cursorPosEventSubscriberId = Engine::Input::CursorPos.subscribe(std::bind(&Camera::onCursorPos, this, _1, _2));
-    m_scrollEventSubscriberId = Engine::Input::Scroll.subscribe(std::bind(&Camera::onScroll, this, _1, _2));
-}
-
-Graphics::Camera::~Camera()
-{
-    if (m_keyEventSubscriberId)
-        Engine::Input::Key.unsubscribe(m_keyEventSubscriberId);
-    if (m_inputEventSubscriberId)
-        Engine::Input::Input.unsubscribe(m_inputEventSubscriberId);
-    if (m_cursorPosEventSubscriberId)
-        Engine::Input::CursorPos.unsubscribe(m_cursorPosEventSubscriberId);
-    if (m_scrollEventSubscriberId)
-        Engine::Input::Scroll.unsubscribe(m_scrollEventSubscriberId);
-}
-
-void Graphics::Camera::reset()
-{
-    m_position = Defaults::Position;
-    m_front = Defaults::Front;
-    m_up = Defaults::Up;
-    m_yaw = Defaults::Yaw;
-    m_pitch = Defaults::Pitch;
-    m_zoom = Defaults::Zoom;
-}
-
 void Graphics::Camera::capture(Shader& shader, unsigned int width, unsigned int height)
 {
     // Direction
@@ -106,6 +96,16 @@ void Graphics::Camera::capture(Shader& shader, unsigned int width, unsigned int 
     glm::mat4 projection(1.0f);
     projection = glm::perspective(glm::radians(45.0f / m_zoom), static_cast<float>(width) / height, Perspective::Near, Perspective::Far);
     shader.set("Projection", projection);
+}
+
+void Graphics::Camera::reset()
+{
+    m_position = Defaults::Position;
+    m_front = Defaults::Front;
+    m_up = Defaults::Up;
+    m_yaw = Defaults::Yaw;
+    m_pitch = Defaults::Pitch;
+    m_zoom = Defaults::Zoom;
 }
 
 } // namespace rf

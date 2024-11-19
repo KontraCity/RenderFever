@@ -14,6 +14,9 @@
 // Library {fmt}
 #include <fmt/format.h>
 
+// Custom modules
+#include "rf/graphics/texture.hpp"
+
 namespace rf {
 
 namespace Graphics
@@ -23,7 +26,7 @@ namespace Graphics
     private:
         /// @brief Read file from disk
         /// @param filePath Path to the file
-        /// @throw std::runtime_error if file couldn't be opened
+        /// @throw std::runtime_error if the file couldn't be opened
         /// @return File contents
         static std::string ReadFile(const std::string& filePath);
 
@@ -51,16 +54,21 @@ namespace Graphics
         unsigned int m_fragmentShader = 0;
         unsigned int m_shaderProgram = 0;
 
+    public:
+        Shader() noexcept = default;
+
+        Shader(const Shader& other) = delete;
+
+        Shader(Shader&& other) = delete;
+
+        ~Shader();
+
     private:
         /// @brief Free allocated resources
         /// @param freeShaderProgram Whether to free shader program or not
         void free(bool freeShaderProgram = true);
 
     public:
-        Shader() = default;
-
-        ~Shader();
-
         /// @brief Read, compile shaders and link shader program
         /// @param vertexShaderFilePath Path to vertex shader source file
         /// @param fragmentShaderFilePath Path to fragment shader source file
@@ -94,6 +102,12 @@ namespace Graphics
         /// @param name Matrix name
         /// @param matrix The matrix to set
         void set(const std::string& name, const glm::mat4& matrix);
+
+        /// @brief Set uniform texture
+        /// @param name Texture name
+        /// @param texture The texture to set
+        /// @param id Texture ID
+        void set(const std::string& name, const Texture& texture, int id);
     };
 }
 

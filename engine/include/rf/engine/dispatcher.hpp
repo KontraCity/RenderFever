@@ -25,9 +25,16 @@ namespace Engine
         std::map<size_t, Callback> m_callbacks;
 
     public:
+        Dispatcher() noexcept = default;
+
+        Dispatcher(const Dispatcher& other) = delete;
+
+        Dispatcher(Dispatcher&& other) = delete;
+
+    public:
         /// @brief Broadcast event
         /// @param parameters Event parameters to broadcast
-        void broadcast(Parameters... parameters) const
+        inline void broadcast(Parameters... parameters) const
         {
             std::lock_guard lock(m_mutex);
             for (const auto& entry : m_callbacks)
@@ -37,7 +44,7 @@ namespace Engine
         /// @brief Subscribe to event
         /// @param callback Callback function to call on event
         /// @return Subscriber ID
-        size_t subscribe(const Callback& callback)
+        inline size_t subscribe(const Callback& callback)
         {
             std::lock_guard lock(m_mutex);
             m_callbacks.emplace(m_id, callback);
@@ -46,14 +53,14 @@ namespace Engine
 
         /// @brief Unsubscribe from event
         /// @param id Subscriber ID
-        void unsubscribe(size_t id)
+        inline void unsubscribe(size_t id)
         {
             std::lock_guard lock(m_mutex);
             m_callbacks.erase(id);
         }
 
         /// @brief Reset all callbacks
-        void reset()
+        inline void reset()
         {
             std::lock_guard lock(m_mutex);
             m_callbacks.clear();

@@ -61,6 +61,11 @@ unsigned int Graphics::Shader::LinkShaderProgram(unsigned int vertexShader, unsi
     throw std::runtime_error(fmt::format("rf::Graphics::Shader::LinkShaderProgram(): Couldn't link shader program:\n{}", error));
 }
 
+Graphics::Shader::~Shader()
+{
+    free();
+}
+
 void Graphics::Shader::free(bool freeShaderProgram)
 {
     if (m_vertexShader)
@@ -80,11 +85,6 @@ void Graphics::Shader::free(bool freeShaderProgram)
         glDeleteProgram(m_shaderProgram);
         m_shaderProgram = 0;
     }
-}
-
-Graphics::Shader::~Shader()
-{
-    free();
 }
 
 void Graphics::Shader::make(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
@@ -134,6 +134,13 @@ void Graphics::Shader::set(const std::string& name, const glm::mat4& matrix)
     use();
     int location = glGetUniformLocation(m_shaderProgram, ('u' + name).c_str());
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Graphics::Shader::set(const std::string& name, const Texture& texture, int id)
+{
+    glActiveTexture(GL_TEXTURE0 + id);
+    texture.bind();
+    set(name, id);
 }
 
 } // namespace rf

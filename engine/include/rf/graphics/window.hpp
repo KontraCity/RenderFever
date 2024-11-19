@@ -14,6 +14,7 @@
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cube.hpp"
 #include "rf/graphics/shader.hpp"
+#include "rf/graphics/texture.hpp"
 
 namespace rf {
 
@@ -39,11 +40,26 @@ namespace Graphics
         /* Resources */
         Camera m_camera;
         Shader m_shader;
+        Texture::Pointer m_texture;
 
         /* Variables */
         float m_currentFrameTime = 0.0;
         float m_deltaTime = 0.0;
         float m_lastFrameTime = 0.0;
+
+    public:
+        /// @brief Create window and prepare for run loop
+        /// @param width Window width
+        /// @param height Window height
+        /// @param resourcesPath Path to resources directory
+        /// @throw std::runtime_error if internal error occurs
+        Window(unsigned int width, unsigned int height, const std::string& resourcesPath);
+
+        Window(const Window& other) = delete;
+
+        Window(Window&& other) = delete;
+
+        ~Window();
 
     private:
         /// @brief Process single key event
@@ -62,15 +78,6 @@ namespace Graphics
         void showFps() const;
 
     public:
-        /// @brief Create window and prepare for run loop
-        /// @param width Window width
-        /// @param height Window height
-        /// @param resourcesPath Path to resources directory
-        /// @throw std::runtime_error if internal error occurs
-        Window(unsigned int width, unsigned int height, const std::string& resourcesPath);
-
-        ~Window();
-
         /// @brief Start run loop
         void run();
     };

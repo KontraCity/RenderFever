@@ -10,6 +10,75 @@ void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, in
     glViewport(0, 0, width, height);
 }
 
+Graphics::Window::Window(unsigned int width, unsigned int height, const std::string& resourcesPath)
+    : m_logger(Engine::Utility::CreateLogger("window"))
+    , m_width(width)
+    , m_height(height)
+{
+    // Initialize GLFW
+    if (glfwInit() != GLFW_TRUE)
+        throw std::runtime_error("rf::Graphics::Window::Window(): Couldn't initialize GLFW");
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Create GLFW window
+    m_window = glfwCreateWindow(m_width, m_height, "RenderFever Engine", NULL, NULL);
+    if (!m_window)
+    {
+        glfwTerminate();
+        throw std::runtime_error("rf::Graphics::Window::Window(): Couldn't create GLFW window");
+    }
+    glfwMakeContextCurrent(m_window);
+
+    // Configure GLFW
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetFramebufferSizeCallback(m_window, &Window::FrameBufferSizeCallback);
+    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) { Engine::Input::Key.broadcast(key, action, mods); });
+    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) { Engine::Input::CursorPos.broadcast(x, y); });
+    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xOffset, double yOffset) { Engine::Input::Scroll.broadcast(xOffset, yOffset); });
+    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    Engine::Input::Key.subscribe(std::bind(&Graphics::Window::onKey, this, _1, _2, _3));
+
+    // Initializee GLEW
+    GLenum result = glewInit();
+    if (result != GLEW_OK)
+    {
+        glfwTerminate();
+        throw std::runtime_error(fmt::format(
+            "rf::Graphics::Window::Window(): Couldn't initialize GLEW: \"{}\"",
+            reinterpret_cast<const char*>(glewGetErrorString(result)
+        )));
+    }
+
+    // Configure OpenGL
+    glEnable(GL_DEPTH_TEST);
+    glViewport(0, 0, m_width, m_height);
+
+    try
+    {
+        // Make shaders
+        Engine::Stopwatch stopwatch;
+        m_shader.make(resourcesPath + "/../shaders/vertex/main.vert", resourcesPath + "/../shaders/fragment/main.frag");
+        m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
+
+        // Load textures
+        stopwatch.reset();
+        m_texture = std::make_shared<Texture>(resourcesPath + "/textures/container.jpg", GL_RGB);
+        m_logger.info("[{:>5.3f} s] Textures loaded", stopwatch.seconds());
+    }
+    catch (...)
+    {
+        glfwTerminate();
+        throw;
+    }
+}
+
+Graphics::Window::~Window()
+{
+    glfwTerminate();
+}
+
 void Graphics::Window::onKey(int key, int action, int mods)
 {
     switch (key)
@@ -69,74 +138,11 @@ void Graphics::Window::showFps() const
     fmt::print("FPS: {:>6.1f} (min/max for 3s: {:>6.1f}, {:6.1f})\r", fps, min, max);
 }
 
-Graphics::Window::Window(unsigned int width, unsigned int height, const std::string& resourcesPath)
-    : m_logger(Engine::Utility::CreateLogger("window"))
-    , m_width(width)
-    , m_height(height)
-{
-    // Initialize GLFW
-    if (glfwInit() != GLFW_TRUE)
-        throw std::runtime_error("rf::Graphics::Window::Window(): Couldn't initialize GLFW");
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // Create GLFW window
-    m_window = glfwCreateWindow(m_width, m_height, "RenderFever Engine", NULL, NULL);
-    if (!m_window)
-    {
-        glfwTerminate();
-        throw std::runtime_error("rf::Graphics::Window::Window(): Couldn't create GLFW window");
-    }
-    glfwMakeContextCurrent(m_window);
-
-    // Configure GLFW
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetFramebufferSizeCallback(m_window, &Window::FrameBufferSizeCallback);
-    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) { Engine::Input::Key.broadcast(key, action, mods); });
-    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) { Engine::Input::CursorPos.broadcast(x, y); });
-    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xOffset, double yOffset) { Engine::Input::Scroll.broadcast(xOffset, yOffset); });
-    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    Engine::Input::Key.subscribe(std::bind(&Graphics::Window::onKey, this, _1, _2, _3));
-
-    // Initializee GLEW
-    GLenum result = glewInit();
-    if (result != GLEW_OK)
-    {
-        glfwTerminate();
-        throw std::runtime_error(fmt::format(
-            "rf::Graphics::Window::Window(): Couldn't initialize GLEW: \"{}\"",
-            reinterpret_cast<const char*>(glewGetErrorString(result)
-        )));
-    }
-
-    // Configure OpenGL
-    glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, m_width, m_height);
-
-    try
-    {
-        // Make shaders
-        Engine::Stopwatch stopwatch;
-        m_shader.make(resourcesPath + "/shaders/main/shader.vert", resourcesPath + "/shaders/main/shader.frag");
-        m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
-    }
-    catch (...)
-    {
-        glfwTerminate();
-        throw;
-    }
-}
-
-Graphics::Window::~Window()
-{
-    glfwTerminate();
-}
-
 void Graphics::Window::run()
 {
     Cube cube;
     cube.position().z = -1;
+    m_shader.set("Texture", *m_texture, 0);
     
     m_stopwatch.reset();
     while (!glfwWindowShouldClose(m_window))

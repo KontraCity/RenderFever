@@ -8,7 +8,10 @@ in vec2 ioTexCoords;
 // Output
 out vec4 ioFragColor;
 
+// Uniforms
+uniform sampler2D uTexture;
+
 void main()
 {
-    ioFragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ioFragColor = texture(uTexture, ioTexCoords);
 }
