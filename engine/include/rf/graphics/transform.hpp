@@ -24,10 +24,10 @@ namespace Graphics
         /// @param scale Transform scale
         Transform(const glm::vec3& position = glm::vec3(0.0f), const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) noexcept;
 
-    protected:
-        /// @brief Apply transformations
-        /// @param shader The shader to apply transformations to
-        void transform(Shader& shader) const;
+    public:
+        /// @brief Apply transformation
+        /// @param shader The shader to apply transformation to
+        void apply(Shader& shader) const;
 
     public:
         /// @brief Get transform position

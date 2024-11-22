@@ -121,8 +121,9 @@ Graphics::Cube::~Cube()
 
 void Graphics::Cube::draw(Shader& shader) const
 {
-    // Transform
-    transform(shader);
+    // Apply
+    m_transform.apply(shader);
+    m_material.apply(shader);
 
     // Draw
     glBindVertexArray(m_vertexArrayObject);

@@ -21,7 +21,7 @@ namespace Graphics
         namespace Defaults
         {
             constexpr glm::vec3 Position = glm::vec3(0.0f, 0.0f, 3.0f);
-            constexpr glm::vec3 Front = glm::vec3(0.0f, 0.0f, -1.0f);
+            constexpr glm::vec3 Direction = glm::vec3(0.0f, 0.0f, -1.0f);
             constexpr glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
             constexpr float Yaw = -90.0f;
             constexpr float Pitch = 0.0f;
@@ -60,21 +60,22 @@ namespace Graphics
         }
     }
 
-    class Camera : public Transform
+    class Camera
     {
     private:
-        /* Variables */
-        glm::vec3 m_front;
-        glm::vec3 m_up;
-        float m_yaw = 0.0f;
-        float m_pitch = 0.0f;
-        float m_zoom = 0.0f;
-
         /* Subscriber IDs */
         size_t m_keyEventSubscriberId = 0;
         size_t m_inputEventSubscriberId = 0;
         size_t m_cursorPosEventSubscriberId = 0;
         size_t m_scrollEventSubscriberId = 0;
+
+        /* Variables */
+        glm::vec3 m_position;
+        glm::vec3 m_direction;
+        glm::vec3 m_up;
+        float m_yaw = 0.0f;
+        float m_pitch = 0.0f;
+        float m_zoom = 0.0f;
 
     public:
         Camera() noexcept;
@@ -110,12 +111,42 @@ namespace Graphics
     public:
         /// @brief Capture camera scene
         /// @param shader The shader to capture with
+        /// @param lightingShader The lighting shader to capture lights with
         /// @param width Window width
         /// @param height Window height
-        void capture(Shader& shader, unsigned int width, unsigned int height);
+        void capture(Shader& shader, Shader& lightingShader, unsigned int width, unsigned int height);
 
         /// @brief Reset camera
         void reset();
+
+    public:
+        /// @brief Get camera position
+        /// @return Camera position
+        inline const glm::vec3& position() const
+        {
+            return m_position;
+        }
+
+        /// @brief Get camera position
+        /// @return Camera position
+        inline glm::vec3& position()
+        {
+            return m_position;
+        }
+    
+        /// @brief Get camera direction
+        /// @return Camera direction
+        inline const glm::vec3& direction() const
+        {
+            return m_direction;
+        }
+
+        /// @brief Get camera direction
+        /// @return Camera direction
+        inline glm::vec3& direction()
+        {
+            return m_direction;
+        }
     };
 }
 

@@ -15,6 +15,8 @@
 #include <fmt/format.h>
 
 // Custom modules
+#include "rf/graphics/lighting/types.hpp"
+#include "rf/graphics/color.hpp"
 #include "rf/graphics/texture.hpp"
 
 namespace rf {
@@ -102,6 +104,26 @@ namespace Graphics
         /// @param name Matrix name
         /// @param matrix The matrix to set
         void set(const std::string& name, const glm::mat4& matrix);
+
+        /// @brief Set uniform lighting properties
+        /// @param name Lighting properties name
+        /// @param properties The lighting properties to set
+        void set(const std::string& name, const Lighting::Properties& properties);
+
+        /// @brief Set uniform lighting attenuation
+        /// @param name Lighting attenuation name
+        /// @param attenuation The lighting attenuation to set
+        void set(const std::string& name, const Lighting::Attenuation& attenuation);
+
+        /// @brief Set uniform lighting cutoff
+        /// @param name Lighting cutoff name
+        /// @param cutoff The lighting cutoff to set
+        void set(const std::string& name, Lighting::Cutoff cutoff);
+
+        /// @brief Set uniform color
+        /// @param name Color name
+        /// @param color The color to set
+        void set(const std::string& name, Color color);
 
         /// @brief Set uniform texture
         /// @param name Texture name

@@ -14,10 +14,17 @@ add_library(RenderFever STATIC
 
     # Graphics modules
     "source/graphics/camera.cpp"
+    "source/graphics/color.cpp"
     "source/graphics/cube.cpp"
+    "source/graphics/material.cpp"
     "source/graphics/shader.cpp"
     "source/graphics/texture.cpp"
     "source/graphics/transform.cpp"
     "source/graphics/window.cpp"
+
+    # Graphics lighting modules
+    "source/graphics/lighting/directional_light.cpp"
+    "source/graphics/lighting/point_light.cpp"
+    "source/graphics/lighting/spot_light.cpp"
 )
 target_link_libraries(RenderFever PRIVATE ${Libraries})

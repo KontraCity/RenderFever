@@ -136,6 +136,31 @@ void Graphics::Shader::set(const std::string& name, const glm::mat4& matrix)
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
+void Graphics::Shader::set(const std::string& name, const Lighting::Properties& properties)
+{
+    set(name + ".ambient", properties.ambient);
+    set(name + ".diffuse", properties.diffuse);
+    set(name + ".specular", properties.specular);
+}
+
+void Graphics::Shader::set(const std::string& name, const Lighting::Attenuation& attenuation)
+{
+    set(name + ".constant", attenuation.constant);
+    set(name + ".linear", attenuation.linear);
+    set(name + ".quadratic", attenuation.quadratic);
+}
+
+void Graphics::Shader::set(const std::string& name, Lighting::Cutoff cutoff)
+{
+    set(name + ".inner", glm::cos(glm::radians(cutoff.inner)));
+    set(name + ".outer", glm::cos(glm::radians(cutoff.outer)));
+}
+
+void Graphics::Shader::set(const std::string& name, Color color)
+{
+    set(name, color.vector());
+}
+
 void Graphics::Shader::set(const std::string& name, const Texture& texture, int id)
 {
     glActiveTexture(GL_TEXTURE0 + id);

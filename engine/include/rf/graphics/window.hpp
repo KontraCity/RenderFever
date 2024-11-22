@@ -11,6 +11,9 @@
 #include "rf/engine/utility.hpp"
 
 // Custom graphics modules
+#include "rf/graphics/lighting/directional_light.hpp"
+#include "rf/graphics/lighting/point_light.hpp"
+#include "rf/graphics/lighting/spot_light.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cube.hpp"
 #include "rf/graphics/shader.hpp"
@@ -40,12 +43,15 @@ namespace Graphics
         /* Resources */
         Camera m_camera;
         Shader m_shader;
-        Texture::Pointer m_texture;
+        Shader m_lightingShader;
+        Texture::Pointer m_containerTexture;
+        Texture::Pointer m_containerSpecular;
 
         /* Variables */
         float m_currentFrameTime = 0.0;
         float m_deltaTime = 0.0;
         float m_lastFrameTime = 0.0;
+        bool m_flashlight = true;
 
     public:
         /// @brief Create window and prepare for run loop

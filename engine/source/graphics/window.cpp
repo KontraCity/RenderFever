@@ -60,11 +60,13 @@ Graphics::Window::Window(unsigned int width, unsigned int height, const std::str
         // Make shaders
         Engine::Stopwatch stopwatch;
         m_shader.make(resourcesPath + "/../shaders/vertex/main.vert", resourcesPath + "/../shaders/fragment/main.frag");
+        m_lightingShader.make(resourcesPath + "/../shaders/vertex/lighting.vert", resourcesPath + "/../shaders/fragment/lighting.frag");
         m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
 
         // Load textures
         stopwatch.reset();
-        m_texture = std::make_shared<Texture>(resourcesPath + "/textures/container.jpg", GL_RGB);
+        m_containerTexture = std::make_shared<Texture>(resourcesPath + "/textures/container/texture.png", GL_RGBA);
+        m_containerSpecular = std::make_shared<Texture>(resourcesPath + "/textures/container/specular.png", GL_RGBA);
         m_logger.info("[{:>5.3f} s] Textures loaded", stopwatch.seconds());
     }
     catch (...)
@@ -99,6 +101,12 @@ void Graphics::Window::onKey(int key, int action, int mods)
         {
             if (action == GLFW_PRESS)
                 toggleVSync();
+            break;
+        }
+        case GLFW_KEY_F:
+        {
+            if (action == GLFW_PRESS)
+                m_flashlight = !m_flashlight;
             break;
         }
     }
@@ -140,10 +148,17 @@ void Graphics::Window::showFps() const
 
 void Graphics::Window::run()
 {
-    Cube cube;
-    cube.position().z = -1;
-    m_shader.set("Texture", *m_texture, 0);
+    Lighting::DirectionalLight sun;
+    sun.properties() = { 0.4f, 0.9f, 1.0f };
+    sun.direction() = { -1.0f, -1.0f, -1.0f };
+
+    Cube container;
+    container.material().texture() = m_containerTexture;
+    container.material().specular() = m_containerSpecular;
     
+    Lighting::SpotLight flashlight;
+    flashlight.cutoff() = {20, 25};
+
     m_stopwatch.reset();
     while (!glfwWindowShouldClose(m_window))
     {
@@ -155,12 +170,18 @@ void Graphics::Window::run()
 
         // Prepare
         Engine::Input::Input.broadcast(m_window, m_deltaTime);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        flashlight.position() = m_camera.position();
+        flashlight.direction() = m_camera.direction();
+        flashlight.color() = m_flashlight ? Color{ 255, 255, 255 } : Color{ 0, 0, 0 };
+
         // Render
-        cube.draw(m_shader);
-        m_camera.capture(m_shader, m_width, m_height);
+        sun.illuminate(m_shader);
+        container.draw(m_shader);
+        flashlight.illuminate(m_shader);
+        m_camera.capture(m_shader, m_lightingShader, m_width, m_height);
 
         // Done
         glfwSwapBuffers(m_window);
