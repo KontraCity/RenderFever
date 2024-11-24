@@ -2,7 +2,7 @@
 
 namespace rf {
 
-Graphics::Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) noexcept
+Graphics::Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
     : m_position(position)
     , m_rotation(rotation)
     , m_scale(scale)

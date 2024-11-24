@@ -57,11 +57,11 @@ namespace Graphics
         unsigned int m_shaderProgram = 0;
 
     public:
-        Shader() noexcept = default;
+        Shader() = default;
 
         Shader(const Shader& other) = delete;
 
-        Shader(Shader&& other) = delete;
+        Shader(Shader&& other) noexcept = delete;
 
         ~Shader();
 

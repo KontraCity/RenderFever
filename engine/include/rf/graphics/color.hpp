@@ -18,17 +18,17 @@ namespace Graphics
         uint8_t m_blue = 255;
 
     public:
-        Color() noexcept = default;
+        Color() = default;
 
         /// @brief Create color from components
         /// @param red Red color component
         /// @param green Green color component
         /// @param blue Blue color component
-        Color(uint8_t red, uint8_t green, uint8_t blue) noexcept;
+        Color(uint8_t red, uint8_t green, uint8_t blue);
 
         /// @brief Create color from color vector
         /// @param vector Color vector
-        Color(const glm::vec3& vector) noexcept;
+        Color(const glm::vec3& vector);
 
     public:
         /// @brief Get red color component

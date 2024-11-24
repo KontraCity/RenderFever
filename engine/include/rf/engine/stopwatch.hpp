@@ -15,7 +15,7 @@ namespace Engine
 
     public:
         /// @brief Initialize and start stopwatch
-        Stopwatch() noexcept
+        Stopwatch()
             : m_start(clock::now())
         {}
 

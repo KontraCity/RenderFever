@@ -22,13 +22,19 @@ namespace Engine
         int m_channels = 0;
 
     public:
-        Image() noexcept = default;
-
-        /// @brief Load image file
+        /// @brief Load image from file
         /// @param imageFilePath Path to the image file
         /// @param verticalFlip Whether to flip the image vertically on load or not
         /// @throw std::runtime_error if the image couldn't be loaded
         Image(const std::string& imageFilePath, bool verticalFlip = false);
+
+        /// @brief Load image from buffer
+        /// @param data The buffer to load
+        /// @param length Length of the buffer
+        /// @param verticalFlip Whether to flip the image vertically on load or not
+        Image(const uint8_t* data, size_t length, bool verticalFlip = false);
+
+        Image() = default;
 
         Image(const Image& other) = delete;
 
@@ -41,11 +47,17 @@ namespace Engine
         void free();
 
     public:
-        /// @brief Load image file
+        /// @brief Load image from file
         /// @param imageFilePath Path to the image file
         /// @param verticalFlip Whether to flip the image vertically on load or not
         /// @throw std::runtime_error if the image couldn't be loaded
         void load(const std::string& imageFilePath, bool verticalFlip = false);
+
+        /// @brief Load image from buffer
+        /// @param data The buffer to load
+        /// @param length Length of the buffer
+        /// @param verticalFlip Whether to flip the image vertically on load or not
+        void load(const uint8_t* data, size_t length, bool verticalFlip = false);
 
     public:
         /// @brief Check if image contains data

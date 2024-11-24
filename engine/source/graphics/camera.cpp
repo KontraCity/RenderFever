@@ -3,7 +3,7 @@ using namespace rf::Graphics::CameraConst;
 
 namespace rf {
 
-Graphics::Camera::Camera() noexcept
+Graphics::Camera::Camera()
 {
     reset();
     m_keyEventSubscriberId = Engine::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));

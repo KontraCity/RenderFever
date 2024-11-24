@@ -11,18 +11,18 @@ namespace Graphics
     class Material
     {
     private:
-        Texture::Pointer m_texture;
+        Texture::Pointer m_diffuse;
         Texture::Pointer m_specular;
         float m_shininess = 32.0f;
 
     public:
-        Material() noexcept = default;
+        Material() = default;
 
         /// @brief Create material
-        /// @param texture Material texture
+        /// @param diffuse Material diffuse texture
         /// @param specular Material specular map
         /// @param shininess Material shininess
-        Material(const Texture::Pointer& texture, const Texture::Pointer& specular, float shininess) noexcept;
+        Material(const Texture::Pointer& diffuse, const Texture::Pointer& specular, float shininess);
 
     public:
         /// @brief Apply material
@@ -30,18 +30,18 @@ namespace Graphics
         void apply(Shader& shader) const;
 
     public:
-        /// @brief Get material texture
-        /// @return Material texture
-        inline const Texture::Pointer& texture() const
+        /// @brief Get material diffuse texture
+        /// @return Material diffuse texture
+        inline const Texture::Pointer& diffuse() const
         {
-            return m_texture;
+            return m_diffuse;
         }
 
-        /// @brief Get material texture
-        /// @return Material texture
-        inline Texture::Pointer& texture()
+        /// @brief Get material diffuse texture
+        /// @return Material diffuse texture
+        inline Texture::Pointer& diffuse()
         {
-            return m_texture;
+            return m_diffuse;
         }
 
         /// @brief Get material specular map

@@ -21,24 +21,36 @@ namespace Graphics
         // Shared texture instance
         using Pointer = std::shared_ptr<Texture>;
 
+        enum class Type
+        {
+            None,       // No texture
+            Diffuse,    // Diffuse texture
+            Specular,   // Specular map
+        };
+
     private:
-        /// @brief Load texture from image file
-        /// @param imageFilePath Path to the image file
-        /// @param format Image format (GL_RGB, GL_RGBA, etc)
-        /// @throw std::runtime_error if the texture couldn't be loaded
-        static unsigned int LoadTexture(const std::string& imageFilePath, int format);
+        /// @brief Load texture from image
+        /// @param The image to load the texture from
+        static unsigned int LoadTexture(const Engine::Image& image);
 
     private:
         unsigned int m_texture = 0;
+        Type m_type = Type::None;
 
     public:
-        Texture() noexcept = default;
-
-        /// @brief Load texture from image file
+        /// @brief Load texture from file
         /// @param imageFilePath Path to the image file
-        /// @param format Image format (GL_RGB, GL_RGBA, etc)
+        /// @param type Texture type
         /// @throw std::runtime_error if the texture couldn't be loaded
-        Texture(const std::string& imageFilePath, int format = GL_RGB);
+        Texture(const std::string& imageFilePath, Type type);
+
+        /// @brief Load texture from buffer
+        /// @param data The buffer to load
+        /// @param length Length of the buffer
+        /// @param type Texture type
+        Texture(const uint8_t* data, size_t length, Type type);
+
+        Texture() = default;
 
         Texture(const Texture& other) = delete;
 
@@ -51,11 +63,17 @@ namespace Graphics
         void free();
 
     public:
-        /// @brief Load texture from image file
+        /// @brief Load texture from file
         /// @param imageFilePath Path to the image file
-        /// @param format Image format (GL_RGB, GL_RGBA, etc)
+        /// @param type Texture type
         /// @throw std::runtime_error if the texture couldn't be loaded
-        void load(const std::string& imageFilePath, int format = GL_RGB);
+        void load(const std::string& imageFilePath, Type type);
+
+        /// @brief Load texture from buffer
+        /// @param data The buffer to load
+        /// @param length Length of the buffer
+        /// @param type Texture type
+        void load(const uint8_t* data, size_t length, Type type);
 
         /// @brief Bind this texture
         void bind() const;
@@ -84,6 +102,20 @@ namespace Graphics
         inline operator bool() const
         {
             return static_cast<bool>(m_texture);
+        }
+    
+        /// @brief Get texture type
+        /// @return Texture type
+        inline Type type() const
+        {
+            return m_type;
+        }
+
+        /// @brief Get texture type
+        /// @return Texture type
+        inline Type& type()
+        {
+            return m_type;
         }
     };
 }

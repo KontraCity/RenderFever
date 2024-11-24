@@ -17,6 +17,8 @@ add_library(RenderFever STATIC
     "source/graphics/color.cpp"
     "source/graphics/cube.cpp"
     "source/graphics/material.cpp"
+    "source/graphics/mesh.cpp"
+    "source/graphics/model.cpp"
     "source/graphics/shader.cpp"
     "source/graphics/texture.cpp"
     "source/graphics/transform.cpp"

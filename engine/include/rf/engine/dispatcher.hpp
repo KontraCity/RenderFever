@@ -25,11 +25,11 @@ namespace Engine
         std::map<size_t, Callback> m_callbacks;
 
     public:
-        Dispatcher() noexcept = default;
+        Dispatcher() = default;
 
         Dispatcher(const Dispatcher& other) = delete;
 
-        Dispatcher(Dispatcher&& other) = delete;
+        Dispatcher(Dispatcher&& other) noexcept = delete;
 
     public:
         /// @brief Broadcast event

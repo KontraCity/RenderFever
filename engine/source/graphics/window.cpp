@@ -53,6 +53,7 @@ Graphics::Window::Window(unsigned int width, unsigned int height, const std::str
 
     // Configure OpenGL
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glViewport(0, 0, m_width, m_height);
 
     try
@@ -65,9 +66,14 @@ Graphics::Window::Window(unsigned int width, unsigned int height, const std::str
 
         // Load textures
         stopwatch.reset();
-        m_containerTexture = std::make_shared<Texture>(resourcesPath + "/textures/container/texture.png", GL_RGBA);
-        m_containerSpecular = std::make_shared<Texture>(resourcesPath + "/textures/container/specular.png", GL_RGBA);
+        m_containerTexture = std::make_shared<Texture>(resourcesPath + "/textures/container/texture.png", Texture::Type::Diffuse);
+        m_containerSpecularMap = std::make_shared<Texture>(resourcesPath + "/textures/container/specular.png", Texture::Type::Specular);
         m_logger.info("[{:>5.3f} s] Textures loaded", stopwatch.seconds());
+
+        // Load models
+        stopwatch.reset();
+        m_backpack.load(resourcesPath + "/models/backpack.glb");
+        m_logger.info("[{:>5.3f} s] Models loaded", stopwatch.seconds());
     }
     catch (...)
     {
@@ -152,17 +158,17 @@ void Graphics::Window::run()
     sun.properties() = { 0.4f, 0.9f, 1.0f };
     sun.direction() = { -1.0f, -1.0f, -1.0f };
 
-    Cube container;
-    container.material().texture() = m_containerTexture;
-    container.material().specular() = m_containerSpecular;
-    
     Lighting::SpotLight flashlight;
-    flashlight.cutoff() = {20, 25};
+    flashlight.cutoff() = { 20, 25 };
+
+    Cube container;
+    container.material() = { m_containerTexture, m_containerSpecularMap, 32.0f };
+    container.transform().position().y = -2.0f;
 
     m_stopwatch.reset();
     while (!glfwWindowShouldClose(m_window))
     {
-        // Time
+        // Calculate times
         m_currentFrameTime = m_stopwatch.seconds();
         m_deltaTime = m_currentFrameTime - m_lastFrameTime;
         m_lastFrameTime = m_currentFrameTime;
@@ -170,20 +176,24 @@ void Graphics::Window::run()
 
         // Prepare
         Engine::Input::Input.broadcast(m_window, m_deltaTime);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Transform
         flashlight.position() = m_camera.position();
         flashlight.direction() = m_camera.direction();
         flashlight.color() = m_flashlight ? Color{ 255, 255, 255 } : Color{ 0, 0, 0 };
 
-        // Render
+        // Illuminate
         sun.illuminate(m_shader);
-        container.draw(m_shader);
         flashlight.illuminate(m_shader);
-        m_camera.capture(m_shader, m_lightingShader, m_width, m_height);
+
+        // Draw
+        container.draw(m_shader);
+        m_backpack.draw(m_shader);
 
         // Done
+        m_camera.capture(m_shader, m_lightingShader, m_width, m_height);
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }

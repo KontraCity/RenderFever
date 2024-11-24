@@ -32,7 +32,7 @@ namespace Graphics
         {
             constexpr float Slow = 1.0f;
             constexpr float Normal = 2.5f;
-            constexpr float Fast = 10.0f;
+            constexpr float Fast = 20.0f;
         }
 
         namespace Sensivity
@@ -56,7 +56,7 @@ namespace Graphics
         namespace Perspective
         {
             constexpr float Near = 0.1f;
-            constexpr float Far = 100.0f;
+            constexpr float Far = 10000.0f;
         }
     }
 
@@ -78,11 +78,11 @@ namespace Graphics
         float m_zoom = 0.0f;
 
     public:
-        Camera() noexcept;
+        Camera();
 
         Camera(const Camera& other) = delete;
 
-        Camera(Camera&& other) = delete;
+        Camera(Camera&& other) noexcept = delete;
 
         ~Camera();
 

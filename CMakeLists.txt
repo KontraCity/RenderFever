@@ -9,6 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 ## --- Libraries configuration --- ##
 set(Libraries
@@ -18,6 +19,7 @@ set(Libraries
     GLEW::GLEW
     glfw
     glm::glm
+    assimp::assimp
 )
 
 ## --- Engine and Executable configuration --- ##

@@ -9,7 +9,7 @@ struct FragProperties
 
 struct Material
 {
-    sampler2D texture;
+    sampler2D diffuse;
     sampler2D specular;
     float shininess;
 };
@@ -74,13 +74,13 @@ uniform Material uMaterial;
 vec3 CalcDirectionalLight(DirectionalLight light)
 {
     // Ambient lighting
-    vec3 ambient = light.color * light.properties.ambient * vec3(texture(uMaterial.texture, ioFragProperties.texCoords));
+    vec3 ambient = light.color * light.properties.ambient * vec3(texture(uMaterial.diffuse, ioFragProperties.texCoords));
 
     // Diffuse lighting
     vec3 normal = normalize(ioFragProperties.normal);
     vec3 lightDirection = normalize(-light.direction);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * vec3(texture(uMaterial.texture, ioFragProperties.texCoords));
+    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * vec3(texture(uMaterial.diffuse, ioFragProperties.texCoords));
 
     // Specular lighting
     vec3 viewDirection = normalize(-ioFragProperties.position);
@@ -95,13 +95,13 @@ vec3 CalcDirectionalLight(DirectionalLight light)
 vec3 CalcPointLight(PointLight light)
 {
     // Ambient lighting
-    vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.texture, ioFragProperties.texCoords).rgb;
+    vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
     // Diffuse lighting
     vec3 normal = normalize(ioFragProperties.normal);
     vec3 lightDirection = normalize(light.position - ioFragProperties.position);
     float diffuseValue = max(0.0f, dot(lightDirection, normal));
-    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * texture(uMaterial.texture, ioFragProperties.texCoords).rgb;
+    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
     // Specular lighting
     vec3 viewDirection = normalize(-ioFragProperties.position);
@@ -123,13 +123,13 @@ vec3 CalcPointLight(PointLight light)
 vec3 CalcSpotLight(SpotLight light)
 {
     // Ambient lighting
-    vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.texture, ioFragProperties.texCoords).rgb;
+    vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
     // Diffuse lighting
     vec3 normal = normalize(ioFragProperties.normal);
     vec3 lightDirection = normalize(light.position - ioFragProperties.position);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * texture(uMaterial.texture, ioFragProperties.texCoords).rgb;
+    vec3 diffuse = light.color * light.properties.diffuse * diffuseValue * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
     // Specular lighting
     vec3 viewDirection = normalize(-ioFragProperties.position);

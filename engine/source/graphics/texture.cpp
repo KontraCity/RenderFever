@@ -2,28 +2,33 @@
 
 namespace rf {
 
-unsigned int Graphics::Texture::LoadTexture(const std::string& imageFilePath, int format)
+unsigned int Graphics::Texture::LoadTexture(const Engine::Image& image)
 {
-    Engine::Image image(imageFilePath, true);
     unsigned int texture;
     glGenTextures(1, &texture);
-
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, image.width(), image.height(), 0, format, GL_UNSIGNED_BYTE, image.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
 }
 
-Graphics::Texture::Texture(const std::string& imageFilePath, int format)
+Graphics::Texture::Texture(const std::string& imageFilePath, Type type)
 {
-    load(imageFilePath, format);
+    load(imageFilePath, type);
+}
+
+Graphics::Texture::Texture(const uint8_t* data, size_t length, Type type)
+{
+    load(data, length, type);
 }
 
 Graphics::Texture::Texture(Texture&& other) noexcept
     : m_texture(other.m_texture)
+    , m_type(other.m_type)
 {
     other.m_texture = 0;
+    other.m_type = Type::None;
 }
 
 Graphics::Texture::~Texture()
@@ -38,12 +43,22 @@ void Graphics::Texture::free()
         glDeleteTextures(1, &m_texture);
         m_texture = 0;
     }
+    m_type = Type::None;
 }
 
-void Graphics::Texture::load(const std::string& imageFilePath, int format)
+void Graphics::Texture::load(const std::string& imageFilePath, Type type)
 {
     free(); // avoid memory leaks if load() was called already
-    m_texture = LoadTexture(imageFilePath, format);
+    m_texture = LoadTexture({ imageFilePath, true });
+    m_type = type;
+    setFiltering(GL_LINEAR);
+}
+
+void Graphics::Texture::load(const uint8_t* data, size_t length, Type type)
+{
+    free(); // avoid memory leaks if load() was called already
+    m_texture = LoadTexture({ data, length, false });
+    m_type = type;
     setFiltering(GL_LINEAR);
 }
 

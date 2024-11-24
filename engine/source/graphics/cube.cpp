@@ -48,34 +48,34 @@ namespace Model
 
     constexpr int Indices[] = {
         // Front
-        0, 1, 2,
-        1, 2, 3,
+         0,  2,  1,
+         1,  2,  3,
 
         // Right
-        4, 5, 6,
-        5, 6, 7,
+         4,  6,  5,
+         5,  6,  7,
 
         // Back
-        8, 9, 10,
-        9, 10, 11,
+         8, 10,  9,
+         9, 10, 11,
 
         // Left
-        12, 13, 14,
+        12, 14, 13,
         13, 14, 15,
 
         // Top
-        16, 17, 18,
+        16, 18, 17,
         17, 18, 19,
 
         // Bottom
-        20, 21, 22,
+        20, 22, 21,
         21, 22, 23,
     };
 }
 
 namespace rf {
 
-Graphics::Cube::Cube() noexcept
+Graphics::Cube::Cube()
 {
     // Vertex array object
     glGenVertexArrays(1, &m_vertexArrayObject);

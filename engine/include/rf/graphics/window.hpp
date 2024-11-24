@@ -11,11 +11,10 @@
 #include "rf/engine/utility.hpp"
 
 // Custom graphics modules
-#include "rf/graphics/lighting/directional_light.hpp"
-#include "rf/graphics/lighting/point_light.hpp"
-#include "rf/graphics/lighting/spot_light.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cube.hpp"
+#include "rf/graphics/lighting.hpp"
+#include "rf/graphics/model.hpp"
 #include "rf/graphics/shader.hpp"
 #include "rf/graphics/texture.hpp"
 
@@ -45,7 +44,8 @@ namespace Graphics
         Shader m_shader;
         Shader m_lightingShader;
         Texture::Pointer m_containerTexture;
-        Texture::Pointer m_containerSpecular;
+        Texture::Pointer m_containerSpecularMap;
+        Model m_backpack;
 
         /* Variables */
         float m_currentFrameTime = 0.0;
@@ -63,7 +63,7 @@ namespace Graphics
 
         Window(const Window& other) = delete;
 
-        Window(Window&& other) = delete;
+        Window(Window&& other) noexcept = delete;
 
         ~Window();
 

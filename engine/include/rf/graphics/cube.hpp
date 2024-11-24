@@ -25,7 +25,7 @@ namespace Graphics
         Material m_material;
 
     public:
-        Cube() noexcept;
+        Cube();
 
         Cube(const Cube& other) = delete;
 
