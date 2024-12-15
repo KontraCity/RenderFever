@@ -31,6 +31,7 @@ namespace Graphics
     private:
         /// @brief Load texture from image
         /// @param The image to load the texture from
+        /// @return Loaded texture
         static unsigned int LoadTexture(const Engine::Image& image);
 
     private:
@@ -97,8 +98,8 @@ namespace Graphics
         void setWrapping(int mode);
 
     public:
-        /// @brief Check if texture is loaded
-        /// @return True if texture is loaded
+        /// @brief Check if the texture is loaded
+        /// @return True if the texture is loaded
         inline operator bool() const
         {
             return static_cast<bool>(m_texture);

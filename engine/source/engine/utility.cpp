@@ -40,4 +40,28 @@ double Engine::Utility::Random(double min, double max)
     return std::uniform_real_distribution(min, max)(generator);
 }
 
+void Engine::Utility::ToUpperCase(std::string& string)
+{
+    for (char& character : string)
+        character = std::toupper(character);
+}
+
+std::string Engine::Utility::UpperCaseString(std::string string)
+{
+    ToUpperCase(string);
+    return string;
+}
+
+void Engine::Utility::ToLowerCase(std::string& string)
+{
+    for (char& character : string)
+        character = std::tolower(character);
+}
+
+std::string Engine::Utility::LowerCaseString(std::string string)
+{
+    ToLowerCase(string);
+    return string;
+}
+
 } // namespace rf

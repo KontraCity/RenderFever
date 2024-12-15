@@ -9,7 +9,7 @@ int main()
 {
     try
     {
-        Graphics::Window window(800, 600, "../../../engine/resources");
+        Graphics::Window window(1280, 720);
         window.run();
     }
     catch (const std::exception& error)

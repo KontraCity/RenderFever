@@ -1,4 +1,4 @@
-# RenderFever Game Engine
+# RenderFever Engine
 God help us all.
 
 ## Build
@@ -23,7 +23,7 @@ Using `vcpkg` to install the dependencies:
 > vcpkg install assimp
 ```
 Using `Visual Studio` to build:
-1. Set `REAL_VCPKG_ROOT` environment variable to path to the root directory `vcpkg`
+1. Set `REAL_VCPKG_ROOT` environment variable to path to the root directory of `vcpkg`
 2. Open Visual Studio and clone https://github.com/KontraCity/RenderFever.git
 3. Open directory in solution explorer, let CMake configure the project
 4. Select `x64 Release` configuration, build the project

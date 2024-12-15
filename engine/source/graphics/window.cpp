@@ -10,7 +10,7 @@ void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, in
     glViewport(0, 0, width, height);
 }
 
-Graphics::Window::Window(unsigned int width, unsigned int height, const std::string& resourcesPath)
+Graphics::Window::Window(unsigned int width, unsigned int height)
     : m_logger(Engine::Utility::CreateLogger("window"))
     , m_width(width)
     , m_height(height)
@@ -60,19 +60,22 @@ Graphics::Window::Window(unsigned int width, unsigned int height, const std::str
     {
         // Make shaders
         Engine::Stopwatch stopwatch;
-        m_shader.make(resourcesPath + "/../shaders/vertex/main.vert", resourcesPath + "/../shaders/fragment/main.frag");
-        m_lightingShader.make(resourcesPath + "/../shaders/vertex/lighting.vert", resourcesPath + "/../shaders/fragment/lighting.frag");
+        m_shader.make("shaders/vertex/main.vert", "shaders/fragment/main.frag");
+        m_lightingShader.make("shaders/vertex/lighting.vert", "shaders/fragment/lighting.frag");
+        m_skyboxShader.make("shaders/vertex/skybox.vert", "shaders/fragment/skybox.frag");
         m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
 
         // Load textures
         stopwatch.reset();
-        m_containerTexture = std::make_shared<Texture>(resourcesPath + "/textures/container/texture.png", Texture::Type::Diffuse);
-        m_containerSpecularMap = std::make_shared<Texture>(resourcesPath + "/textures/container/specular.png", Texture::Type::Specular);
+        m_containerMaterial.diffuse() = std::make_shared<Texture>("textures/container/texture.png", Texture::Type::Diffuse);
+        m_containerMaterial.specular() = std::make_shared<Texture>("textures/container/specular.png", Texture::Type::Specular);
+        m_containerMaterial.shininess() = 32.0f;
+        m_skyboxCubemap = std::make_shared<Cubemap>("textures/skybox");
         m_logger.info("[{:>5.3f} s] Textures loaded", stopwatch.seconds());
 
         // Load models
         stopwatch.reset();
-        m_backpack.load(resourcesPath + "/models/backpack.glb");
+        m_backpack.load("models/backpack.glb");
         m_logger.info("[{:>5.3f} s] Models loaded", stopwatch.seconds());
     }
     catch (...)
@@ -154,16 +157,25 @@ void Graphics::Window::showFps() const
 
 void Graphics::Window::run()
 {
+    // Sun
     Lighting::DirectionalLight sun;
-    sun.properties() = { 0.4f, 0.9f, 1.0f };
-    sun.direction() = { -1.0f, -1.0f, -1.0f };
+    sun.properties() = { 0.2f, 0.9f, 1.0f };
+    sun.direction() = { 1.0f, -1.0f, -1.0f };
 
+    // Flashlight
     Lighting::SpotLight flashlight;
     flashlight.cutoff() = { 20, 25 };
 
+    // Backpack
+    m_backpack.transform().position().y = 3.0f;
+
+    // Container
     Cube container;
-    container.material() = { m_containerTexture, m_containerSpecularMap, 32.0f };
-    container.transform().position().y = -2.0f;
+    container.material() = m_containerMaterial;
+
+    // Skybox
+    Skybox skybox;
+    skybox.cubemap() = m_skyboxCubemap;
 
     m_stopwatch.reset();
     while (!glfwWindowShouldClose(m_window))
@@ -192,8 +204,11 @@ void Graphics::Window::run()
         container.draw(m_shader);
         m_backpack.draw(m_shader);
 
+        // Skybox
+        skybox.draw(m_skyboxShader);
+
         // Done
-        m_camera.capture(m_shader, m_lightingShader, m_width, m_height);
+        m_camera.capture(m_shader, m_lightingShader, m_skyboxShader, m_width, m_height);
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }

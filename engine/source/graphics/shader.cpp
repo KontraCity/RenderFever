@@ -161,6 +161,13 @@ void Graphics::Shader::set(const std::string& name, Color color)
     set(name, color.vector());
 }
 
+void Graphics::Shader::set(const std::string& name, const Cubemap& cubemap, int id)
+{
+    glActiveTexture(GL_TEXTURE0 + id);
+    cubemap.bind();
+    set(name, id);
+}
+
 void Graphics::Shader::set(const std::string& name, const Texture& texture, int id)
 {
     glActiveTexture(GL_TEXTURE0 + id);

@@ -3,6 +3,7 @@
 // STL modules
 #include <chrono>
 #include <random>
+#include <string>
 
 // Library spdlog
 #include <spdlog/spdlog.h>
@@ -41,6 +42,24 @@ namespace Engine
         /// @param max Max real value
         /// @return Generated real
         double Random(double min, double max);
+
+        /// @brief Convert string to upper case
+        /// @param string The string to convert
+        void ToUpperCase(std::string& string);
+
+        /// @brief Get upper case version of a string
+        /// @param string The string to get upper case version of
+        /// @return Upper case version of the string
+        std::string UpperCaseString(std::string string);
+
+        /// @brief Convert string to lower case
+        /// @param string The string to convert
+        void ToLowerCase(std::string& string);
+
+        /// @brief Get lower case version of a string
+        /// @param string The string to get lower case version of
+        /// @return Lower case version of the string
+        std::string LowerCaseString(std::string string);
     }
 }
 

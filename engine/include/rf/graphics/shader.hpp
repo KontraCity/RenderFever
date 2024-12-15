@@ -17,6 +17,7 @@
 // Custom modules
 #include "rf/graphics/lighting/types.hpp"
 #include "rf/graphics/color.hpp"
+#include "rf/graphics/cubemap.hpp"
 #include "rf/graphics/texture.hpp"
 
 namespace rf {
@@ -124,6 +125,12 @@ namespace Graphics
         /// @param name Color name
         /// @param color The color to set
         void set(const std::string& name, Color color);
+
+        /// @brief Set uniform cubemap
+        /// @param name Cubemap name
+        /// @param cubemap The cubemap to set
+        /// @param id Cubemap ID
+        void set(const std::string& name, const Cubemap& cubemap, int id);
 
         /// @brief Set uniform texture
         /// @param name Texture name

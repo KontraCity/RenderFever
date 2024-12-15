@@ -28,5 +28,5 @@ add_library(RenderFever STATIC
     "source/graphics/lighting/directional_light.cpp"
     "source/graphics/lighting/point_light.cpp"
     "source/graphics/lighting/spot_light.cpp"
-)
+ "source/graphics/cubemap.cpp" "source/graphics/skybox.cpp")
 target_link_libraries(RenderFever PRIVATE ${Libraries})

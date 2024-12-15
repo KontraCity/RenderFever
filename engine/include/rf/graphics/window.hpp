@@ -13,9 +13,11 @@
 // Custom graphics modules
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cube.hpp"
+#include "rf/graphics/cubemap.hpp"
 #include "rf/graphics/lighting.hpp"
 #include "rf/graphics/model.hpp"
 #include "rf/graphics/shader.hpp"
+#include "rf/graphics/skybox.hpp"
 #include "rf/graphics/texture.hpp"
 
 namespace rf {
@@ -43,23 +45,23 @@ namespace Graphics
         Camera m_camera;
         Shader m_shader;
         Shader m_lightingShader;
-        Texture::Pointer m_containerTexture;
-        Texture::Pointer m_containerSpecularMap;
+        Shader m_skyboxShader;
+        Material m_containerMaterial;
         Model m_backpack;
+        Cubemap::Pointer m_skyboxCubemap;
 
         /* Variables */
         float m_currentFrameTime = 0.0;
         float m_deltaTime = 0.0;
         float m_lastFrameTime = 0.0;
-        bool m_flashlight = true;
+        bool m_flashlight = false;
 
     public:
         /// @brief Create window and prepare for run loop
         /// @param width Window width
         /// @param height Window height
-        /// @param resourcesPath Path to resources directory
         /// @throw std::runtime_error if internal error occurs
-        Window(unsigned int width, unsigned int height, const std::string& resourcesPath);
+        Window(unsigned int width, unsigned int height);
 
         Window(const Window& other) = delete;
 
