@@ -30,6 +30,7 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create GLFW window
     m_window = glfwCreateWindow(m_width, m_height, "RenderFever Engine", NULL, NULL);
@@ -63,6 +64,7 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
     // Configure OpenGL
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, m_width, m_height);
 
     try
@@ -121,6 +123,12 @@ void Graphics::Window::onKey(int key, int action, int mods)
                 toggleVSync();
             break;
         }
+        case GLFW_KEY_T:
+        {
+            if (action == GLFW_PRESS)
+                toggleAntiAliasing();
+            break;
+        }
         case GLFW_KEY_F:
         {
             if (action == GLFW_PRESS)
@@ -142,6 +150,13 @@ void Graphics::Window::toggleVSync()
     static bool enabled = true;
     enabled = !enabled;
     glfwSwapInterval(static_cast<int>(enabled));
+}
+
+void Graphics::Window::toggleAntiAliasing()
+{
+    static bool enabled = true;
+    enabled = !enabled;
+    enabled ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
 }
 
 void Graphics::Window::showFps() const

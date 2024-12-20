@@ -79,6 +79,9 @@ namespace Graphics
         /// @brief Toggle VSync frame limiter
         void toggleVSync();
 
+        /// @brief Toggle anti aliasing
+        void toggleAntiAliasing();
+
         /// @brief Show FPS to console
         void showFps() const;
 

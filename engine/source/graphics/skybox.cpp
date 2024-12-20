@@ -127,12 +127,21 @@ void Graphics::Skybox::draw(Shader& shader) const
     // Apply
     shader.set("Cubemap", *m_cubemap, 0);
 
-    // Draw
+    // Prepare configuration
     glDepthFunc(GL_LEQUAL);
+    bool aaWasEnabled = glIsEnabled(GL_MULTISAMPLE);
+    if (aaWasEnabled)
+        glDisable(GL_MULTISAMPLE);
+
+    // Draw
     glBindVertexArray(m_vertexArrayObject);
     glDrawElements(GL_TRIANGLES, sizeof(Model::Indices), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+    
+    // Reset configuration
     glDepthFunc(GL_LESS);
+    if (aaWasEnabled)
+        glEnable(GL_MULTISAMPLE);
 }
 
 } // namespace rf
