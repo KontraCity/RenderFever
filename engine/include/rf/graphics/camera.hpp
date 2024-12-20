@@ -1,16 +1,12 @@
 #pragma once
 
 // Graphics libraries
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-// Custom engine
-#include "rf/engine/input.hpp"
-#include "rf/engine/utility.hpp"
 
 // Custom graphics modules
 #include "rf/graphics/shader.hpp"
-#include "rf/graphics/transform.hpp"
 
 namespace rf {
 

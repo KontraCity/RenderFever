@@ -1,5 +1,17 @@
 #include "rf/graphics/shader.hpp"
 
+// STL modules
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+
+// Graphics libraries
+#include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
+
+// Library {fmt}
+#include <fmt/format.h>
+
 namespace rf {
 
 std::string Graphics::Shader::ReadFile(const std::string& filePath)

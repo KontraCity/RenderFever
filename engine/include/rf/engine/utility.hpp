@@ -1,13 +1,10 @@
 #pragma once
 
 // STL modules
-#include <chrono>
-#include <random>
 #include <string>
 
 // Library spdlog
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace rf {
 

@@ -1,5 +1,15 @@
 #include "rf/graphics/model.hpp"
 
+// STL modules
+#include <stdexcept>
+
+// Library Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+// Library {fmt}
+#include <fmt/format.h>
+
 namespace rf {
 
 void Graphics::Model::processNode(const aiScene* scene, aiNode* node)

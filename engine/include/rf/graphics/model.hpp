@@ -5,12 +5,9 @@
 #include <vector>
 #include <map>
 #include <filesystem>
-#include <stdexcept>
 
 // Library Assimp
-#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 // Custom modules
 #include "rf/graphics/mesh.hpp"

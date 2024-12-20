@@ -2,17 +2,9 @@
 
 // STL modules
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
 
 // Graphics libraries
-#include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// Library {fmt}
-#include <fmt/format.h>
 
 // Custom modules
 #include "rf/graphics/lighting/types.hpp"

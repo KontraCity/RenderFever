@@ -2,6 +2,7 @@
 
 // Graphics libraries
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 // Custom modules
 #include "rf/graphics/shader.hpp"

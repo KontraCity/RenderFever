@@ -3,10 +3,6 @@
 // STL modules
 #include <vector>
 
-// Graphics libraries
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-
 // Custom modules
 #include "rf/graphics/shader.hpp"
 #include "rf/graphics/texture.hpp"

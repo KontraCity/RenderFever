@@ -1,5 +1,12 @@
 #include "rf/engine/utility.hpp"
 
+// STL modules
+#include <chrono>
+#include <random>
+
+// Library spdlog
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 namespace rf {
 
 spdlog::logger Engine::Utility::CreateLogger(const std::string& name)

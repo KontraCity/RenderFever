@@ -1,13 +1,8 @@
 #pragma once
 
 // STL modules
-#include <stdexcept>
-
-// Library {fmt}
-#include <fmt/format.h>
-
-// External modules
-#include "rf/external/stb_image.h"
+#include <cstdint>
+#include <string>
 
 namespace rf {
 

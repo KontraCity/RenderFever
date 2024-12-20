@@ -1,6 +1,13 @@
 #include "rf/graphics/camera.hpp"
 using namespace rf::Graphics::CameraConst;
 
+// Graphics libraries
+#include <glm/gtc/matrix_transform.hpp>
+
+// Custom engine modules
+#include "rf/engine/input.hpp"
+#include "rf/engine/utility.hpp"
+
 namespace rf {
 
 Graphics::Camera::Camera()

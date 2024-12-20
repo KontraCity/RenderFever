@@ -1,6 +1,21 @@
 #include "rf/graphics/cubemap.hpp"
 
+// STL modules
+#include <map>
+#include <filesystem>
+#include <stdexcept>
+
+// Graphics libraries
+#include <GL/glew.h>
+
+// Custom modules
+#include "rf/engine/image.hpp"
+#include "rf/engine/utility.hpp"
+
 namespace rf {
+
+/* Namespace aliases and imports */
+namespace fs = std::filesystem;
 
 unsigned int Graphics::Cubemap::LoadCubemap(const std::string& cubemapDirectoryPath)
 {

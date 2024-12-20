@@ -3,10 +3,6 @@
 // STL modules
 #include <memory>
 #include <string>
-#include <stdexcept>
-
-// Graphics libraries
-#include <GL/glew.h>
 
 // Custom modules
 #include "rf/engine/image.hpp"

@@ -3,22 +3,19 @@
 // Graphics libraries
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+
+// Library spdlog
+#include <spdlog/spdlog.h>
 
 // Custom engine modules
-#include "rf/engine/input.hpp"
 #include "rf/engine/stopwatch.hpp"
-#include "rf/engine/utility.hpp"
 
 // Custom graphics modules
 #include "rf/graphics/camera.hpp"
-#include "rf/graphics/cube.hpp"
 #include "rf/graphics/cubemap.hpp"
-#include "rf/graphics/lighting.hpp"
+#include "rf/graphics/material.hpp"
 #include "rf/graphics/model.hpp"
 #include "rf/graphics/shader.hpp"
-#include "rf/graphics/skybox.hpp"
-#include "rf/graphics/texture.hpp"
 
 namespace rf {
 

@@ -1,5 +1,14 @@
 #include "rf/engine/image.hpp"
 
+// STL modules
+#include <stdexcept>
+
+// Library {fmt}
+#include <fmt/format.h>
+
+// External modules
+#include "rf/external/stb_image.h"
+
 namespace rf {
 
 Engine::Image::Image(const std::string& imageFilePath, bool verticalFlip)

@@ -1,8 +1,5 @@
 #pragma once
 
-// Graphics libraries
-#include <GL/glew.h>
-
 // Custom modules
 #include "rf/graphics/shader.hpp"
 #include "rf/graphics/cubemap.hpp"

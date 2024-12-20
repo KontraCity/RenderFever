@@ -1,5 +1,8 @@
 #include "rf/graphics/cube.hpp"
 
+// Graphics libraries
+#include <GL/glew.h>
+
 namespace Model
 {
     constexpr float Vertices[] = {

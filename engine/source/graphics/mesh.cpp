@@ -1,5 +1,9 @@
 #include "rf/graphics/mesh.hpp"
 
+// Graphics libraries
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
 namespace rf {
 
 void Graphics::Mesh::CreateMesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices, unsigned int& vao, unsigned int& vbo, unsigned int& ebo)

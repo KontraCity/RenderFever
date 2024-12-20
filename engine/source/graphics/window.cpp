@@ -1,5 +1,14 @@
 #include "rf/graphics/window.hpp"
 
+// Custom engine modules
+#include "rf/engine/input.hpp"
+#include "rf/engine/utility.hpp"
+
+// Custom graphics modules
+#include "rf/graphics/cube.hpp"
+#include "rf/graphics/lighting.hpp"
+#include "rf/graphics/skybox.hpp"
+
 namespace rf {
      
 void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height)

@@ -1,5 +1,11 @@
 #include "rf/graphics/texture.hpp"
 
+// STL modules
+#include <stdexcept>
+
+// Graphics libraries
+#include <GL/glew.h>
+
 namespace rf {
 
 unsigned int Graphics::Texture::LoadTexture(const Engine::Image& image)
