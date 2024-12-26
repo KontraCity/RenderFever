@@ -33,7 +33,7 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create GLFW window
-    m_window = glfwCreateWindow(m_width, m_height, "RenderFever Engine", NULL, NULL);
+    m_window = glfwCreateWindow(m_width, m_height, "Loading...", NULL, NULL);
     if (!m_window)
     {
         glfwTerminate();
@@ -69,15 +69,11 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
 
     try
     {
-        // Make shaders
-        Engine::Stopwatch stopwatch;
-        m_shader.make("shaders/vertex/main.vert", "shaders/fragment/main.frag");
-        m_lightingShader.make("shaders/vertex/lighting.vert", "shaders/fragment/lighting.frag");
-        m_skyboxShader.make("shaders/vertex/skybox.vert", "shaders/fragment/skybox.frag");
-        m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
+        // Build shaders
+        buildShaders();
 
         // Load textures
-        stopwatch.reset();
+        Engine::Stopwatch stopwatch;
         m_containerMaterial.diffuse() = std::make_shared<Texture>("textures/container/texture.png", Texture::Type::Diffuse);
         m_containerMaterial.specular() = std::make_shared<Texture>("textures/container/specular.png", Texture::Type::Specular);
         m_containerMaterial.shininess() = 32.0f;
@@ -135,7 +131,29 @@ void Graphics::Window::onKey(int key, int action, int mods)
                 m_flashlight = !m_flashlight;
             break;
         }
+        case GLFW_KEY_I:
+        {
+            if (action == GLFW_PRESS)
+                buildShaders();
+            break;
+        }
+        case GLFW_KEY_N:
+        {
+            if (action == GLFW_PRESS)
+                m_showNormals = !m_showNormals;
+            break;
+        }
     }
+}
+
+void Graphics::Window::buildShaders()
+{
+    Engine::Stopwatch stopwatch;
+    m_shader.make("shaders/vertex/main.vert", "shaders/fragment/main.frag");
+    m_lightingShader.make("shaders/vertex/lighting.vert", "shaders/fragment/lighting.frag");
+    m_skyboxShader.make("shaders/vertex/skybox.vert", "shaders/fragment/skybox.frag");
+    m_normalShader.make("shaders/vertex/normal.vert", "shaders/fragment/normal.frag", "shaders/geometry/normal.geom");
+    m_logger.info("[{:>5.3f} s] Shaders built", stopwatch.seconds());
 }
 
 void Graphics::Window::toggleWireframe()
@@ -147,9 +165,8 @@ void Graphics::Window::toggleWireframe()
 
 void Graphics::Window::toggleVSync()
 {
-    static bool enabled = true;
-    enabled = !enabled;
-    glfwSwapInterval(static_cast<int>(enabled));
+    m_vsync = !m_vsync;
+    glfwSwapInterval(static_cast<int>(m_vsync));
 }
 
 void Graphics::Window::toggleAntiAliasing()
@@ -157,26 +174,6 @@ void Graphics::Window::toggleAntiAliasing()
     static bool enabled = true;
     enabled = !enabled;
     enabled ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
-}
-
-void Graphics::Window::showFps() const
-{
-    float fps = 1.0f / m_deltaTime;
-    static float min = fps;
-    static float max = fps;
-    static float resetTime = -1.0f;
-
-    if (resetTime == -1 || m_currentFrameTime - resetTime > 3.0f)
-    {
-        min = max = fps;
-        resetTime = m_currentFrameTime;
-    }
-
-    if (fps < min)
-        min = fps;
-    if (fps > max)
-        max = fps;
-    fmt::print("FPS: {:>6.1f} (min/max for 3s: {:>6.1f}, {:6.1f})\r", fps, min, max);
 }
 
 void Graphics::Window::run()
@@ -189,6 +186,7 @@ void Graphics::Window::run()
     // Flashlight
     Lighting::SpotLight flashlight;
     flashlight.cutoff() = { 20, 25 };
+    flashlight.attenuation() = { 1.0f, 0.0f, 0.0f };
 
     // Backpack
     m_backpack.transform().position().y = 3.0f;
@@ -196,6 +194,8 @@ void Graphics::Window::run()
     // Container
     Cube container;
     container.material() = m_containerMaterial;
+    container.transform().position().y = -100.0f;
+    container.transform().scale() = glm::vec3(100.0f);
 
     // Skybox
     Skybox skybox;
@@ -208,7 +208,7 @@ void Graphics::Window::run()
         m_currentFrameTime = m_stopwatch.seconds();
         m_deltaTime = m_currentFrameTime - m_lastFrameTime;
         m_lastFrameTime = m_currentFrameTime;
-        showFps();
+        glfwSetWindowTitle(m_window, fmt::format("RenderFever Engine [FPS: {:0>5.1f}, VSync {}]", 1.0f / m_deltaTime, m_vsync ? "on" : "off").c_str());
 
         // Prepare
         Engine::Input::Input.broadcast(m_window, m_deltaTime);
@@ -226,17 +226,21 @@ void Graphics::Window::run()
 
         // Draw
         container.draw(m_shader);
+        if (m_showNormals)
+            container.draw(m_normalShader);
         m_backpack.draw(m_shader);
+        if (m_showNormals)
+            m_backpack.draw(m_normalShader);
 
         // Skybox
         skybox.draw(m_skyboxShader);
 
         // Done
-        m_camera.capture(m_shader, m_lightingShader, m_skyboxShader, m_width, m_height);
+        m_camera.capture(m_shader, m_lightingShader, m_skyboxShader, m_normalShader, m_width, m_height);
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
-    m_logger.warn("{:<20}", "Stopped");
+    m_logger.warn("Stopped");
 }
 
 } // namespace rf

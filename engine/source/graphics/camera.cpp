@@ -80,7 +80,7 @@ void Graphics::Camera::onScroll(double xOffset, double yOffset)
     m_zoom = Engine::Utility::Limit(m_zoom + yOffset * Sensivity::Scroll * m_zoom, Zoom::Min, Zoom::Max);
 }
 
-void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, unsigned int width, unsigned int height)
+void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, Shader& normalShader, unsigned int width, unsigned int height)
 {
     // Direction
     glm::vec3 direction(
@@ -95,12 +95,14 @@ void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& s
     shader.set("View", view);
     lightingShader.set("View", view);
     skyboxShader.set("View", glm::mat3(view)); // to remove translation
+    normalShader.set("View", view);
 
     // Projection
     glm::mat4 projection = glm::perspective(glm::radians(45.0f / m_zoom), static_cast<float>(width) / height, Perspective::Near, Perspective::Far);
     shader.set("Projection", projection);
     lightingShader.set("Projection", projection);
     skyboxShader.set("Projection", projection);
+    normalShader.set("Projection", projection);
 }
 
 void Graphics::Camera::reset()

@@ -1,6 +1,6 @@
 #version 330 core
 
-// Vertice layout
+// Layout
 layout (location = 0) in vec3 aPos;
 
 // Uniforms

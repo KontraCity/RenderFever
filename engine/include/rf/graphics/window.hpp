@@ -43,6 +43,7 @@ namespace Graphics
         Shader m_shader;
         Shader m_lightingShader;
         Shader m_skyboxShader;
+        Shader m_normalShader;
         Material m_containerMaterial;
         Model m_backpack;
         Cubemap::Pointer m_skyboxCubemap;
@@ -51,6 +52,8 @@ namespace Graphics
         float m_currentFrameTime = 0.0;
         float m_deltaTime = 0.0;
         float m_lastFrameTime = 0.0;
+        bool m_vsync = true;
+        bool m_showNormals = false;
         bool m_flashlight = false;
 
     public:
@@ -73,6 +76,9 @@ namespace Graphics
         /// @param mods Bit field describing which modifier keys were held down
         void onKey(int key, int action, int mods);
 
+        /// @brief Build/rebuild shaders
+        void buildShaders();
+
         /// @brief Toggle wireframe rendering mode
         void toggleWireframe();
 
@@ -81,9 +87,6 @@ namespace Graphics
 
         /// @brief Toggle anti aliasing
         void toggleAntiAliasing();
-
-        /// @brief Show FPS to console
-        void showFps() const;
 
     public:
         /// @brief Start run loop

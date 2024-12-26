@@ -31,6 +31,8 @@ const char* Graphics::Shader::TypeToName(int type)
     {
         case GL_VERTEX_SHADER:
             return "vertex";
+        case GL_GEOMETRY_SHADER:
+            return "geometry";
         case GL_FRAGMENT_SHADER:
             return "fragment";
         default:
@@ -55,10 +57,12 @@ unsigned int Graphics::Shader::CompileShader(const char* source, int type)
     throw std::runtime_error(fmt::format("rf::Graphics::Shader::CompileShader(): Couldn't compile {} shader:\n{}", TypeToName(type), error));
 }
 
-unsigned int Graphics::Shader::LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader)
+unsigned int Graphics::Shader::LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader)
 {
     unsigned int program = glCreateProgram();
     glAttachShader(program, vertexShader);
+    if (geometryShader)
+        glAttachShader(program, geometryShader);
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
 
@@ -86,6 +90,12 @@ void Graphics::Shader::free(bool freeShaderProgram)
         m_vertexShader = 0;
     }
 
+    if (m_geometryShader)
+    {
+        glDeleteShader(m_geometryShader);
+        m_geometryShader = 0;
+    }
+
     if (m_fragmentShader)
     {
         glDeleteShader(m_fragmentShader);
@@ -99,12 +109,14 @@ void Graphics::Shader::free(bool freeShaderProgram)
     }
 }
 
-void Graphics::Shader::make(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
+void Graphics::Shader::make(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath)
 {
     free(); // avoid memory leaks if make() was called already
     m_vertexShader = CompileShader(ReadFile(vertexShaderFilePath).c_str(), GL_VERTEX_SHADER);
+    if (!geometryShaderFilePath.empty())
+        m_geometryShader = CompileShader(ReadFile(geometryShaderFilePath).c_str(), GL_GEOMETRY_SHADER);
     m_fragmentShader = CompileShader(ReadFile(fragmentShaderFilePath).c_str(), GL_FRAGMENT_SHADER);
-    m_shaderProgram = LinkShaderProgram(m_vertexShader, m_fragmentShader);
+    m_shaderProgram = LinkShaderProgram(m_vertexShader, m_fragmentShader, m_geometryShader);
     free(false);
 }
 

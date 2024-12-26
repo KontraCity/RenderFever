@@ -40,12 +40,14 @@ namespace Graphics
         /// @brief Link shader program
         /// @param vertexShader Compiled vertex shader
         /// @param fragmentShader Compiled fragment shader
+        /// @param geometryShader Compiled geometry shader
         /// @throw std::runtime_error if link error occurs
         /// @return Linked shader program
-        static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
+        static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader = 0);
 
     private:
         unsigned int m_vertexShader = 0;
+        unsigned int m_geometryShader = 0;
         unsigned int m_fragmentShader = 0;
         unsigned int m_shaderProgram = 0;
 
@@ -67,8 +69,9 @@ namespace Graphics
         /// @brief Read, compile shaders and link shader program
         /// @param vertexShaderFilePath Path to vertex shader source file
         /// @param fragmentShaderFilePath Path to fragment shader source file
-        /// @throw std::runtime_eerror if read/compile/link error occurs
-        void make(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+        /// @param geometryShaderFilePath Path to geometry shader source file
+        /// @throw std::runtime_error if read/compile/link error occurs
+        void make(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath = {});
 
         /// @brief Tell OpenGL to use this shader
         void use() const;

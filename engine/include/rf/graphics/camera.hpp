@@ -108,10 +108,11 @@ namespace Graphics
         /// @brief Capture camera scene
         /// @param shader The shader to capture objects with
         /// @param lightingShader The shader to capture lights with
-        /// @param skytboxShader The shader to capture skybox with
+        /// @param skyboxShader The shader to capture skybox with
+        /// @param normalShader The shader to capture normals with
         /// @param width Window width
         /// @param height Window height
-        void capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, unsigned int width, unsigned int height);
+        void capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, Shader& normalShader, unsigned int width, unsigned int height);
 
         /// @brief Reset camera
         void reset();
