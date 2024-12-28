@@ -19,33 +19,6 @@ namespace Graphics
     class Shader
     {
     private:
-        /// @brief Read file from disk
-        /// @param filePath Path to the file
-        /// @throw std::runtime_error if the file couldn't be opened
-        /// @return File contents
-        static std::string ReadFile(const std::string& filePath);
-
-        /// @brief Convert shader type to name
-        /// @param type Shader type
-        /// @return Converted shader name
-        static const char* TypeToName(int type);
-
-        /// @brief Compile shader from source
-        /// @param source Shader source
-        /// @param type Shader type
-        /// @throw std::runtime_error if compile error occurs
-        /// @return Compiled shader
-        static unsigned int CompileShader(const char* source, int type);
-
-        /// @brief Link shader program
-        /// @param vertexShader Compiled vertex shader
-        /// @param fragmentShader Compiled fragment shader
-        /// @param geometryShader Compiled geometry shader
-        /// @throw std::runtime_error if link error occurs
-        /// @return Linked shader program
-        static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader = 0);
-
-    private:
         unsigned int m_vertexShader = 0;
         unsigned int m_geometryShader = 0;
         unsigned int m_fragmentShader = 0;

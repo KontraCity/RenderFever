@@ -6,24 +6,30 @@
 
 namespace rf {
 
-void Graphics::Mesh::CreateMesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices, unsigned int& vao, unsigned int& vbo, unsigned int& ebo)
+/// @brief Create mesh
+/// @param vertices Mesh vertices
+/// @param indices Mesh indices
+/// @param vao Result vertex array object
+/// @param vbo Result vertex buffer object
+/// @param ebo Result element buffer object
+static void CreateMesh(const std::vector<Graphics::Mesh::Vertice>& vertices, const std::vector<Graphics::Mesh::Indice>& indices, unsigned int& vao, unsigned int& vbo, unsigned int& ebo)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertice) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertice), reinterpret_cast<void*>(0));
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Graphics::Mesh::Vertice) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Graphics::Mesh::Vertice), reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertice), reinterpret_cast<void*>(offsetof(Vertice, normal)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Graphics::Mesh::Vertice), reinterpret_cast<void*>(offsetof(Graphics::Mesh::Vertice, normal)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertice), reinterpret_cast<void*>(offsetof(Vertice, texCoords)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Graphics::Mesh::Vertice), reinterpret_cast<void*>(offsetof(Graphics::Mesh::Vertice, texCoords)));
     glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indice) * indices.size(), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Graphics::Mesh::Indice) * indices.size(), indices.data(), GL_STATIC_DRAW);
     glBindVertexArray(0);
 }
 

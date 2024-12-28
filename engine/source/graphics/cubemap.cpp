@@ -17,7 +17,11 @@ namespace rf {
 /* Namespace aliases and imports */
 namespace fs = std::filesystem;
 
-unsigned int Graphics::Cubemap::LoadCubemap(const std::string& cubemapDirectoryPath)
+/// @brief Load cubemap from directory
+/// @param cubemapDirectoryPath Path to the cubemap directory
+/// @throw std::runtime_error if the cubemap couldn't be loaded
+/// @return Loaded cubemap
+static unsigned int LoadCubemap(const std::string& cubemapDirectoryPath)
 {
     enum class Direction
     {

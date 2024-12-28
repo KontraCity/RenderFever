@@ -14,7 +14,11 @@
 
 namespace rf {
 
-std::string Graphics::Shader::ReadFile(const std::string& filePath)
+/// @brief Read file from disk
+/// @param filePath Path to the file
+/// @throw std::runtime_error if the file couldn't be opened
+/// @return File contents
+static std::string ReadFile(const std::string& filePath)
 {
     std::ifstream file(filePath);
     if (!file)
@@ -25,7 +29,10 @@ std::string Graphics::Shader::ReadFile(const std::string& filePath)
     return stream.str();
 }
 
-const char* Graphics::Shader::TypeToName(int type)
+/// @brief Convert shader type to name
+/// @param type Shader type
+/// @return Converted shader name
+static const char* TypeToName(int type)
 {
     switch (type)
     {
@@ -40,7 +47,12 @@ const char* Graphics::Shader::TypeToName(int type)
     }
 }
 
-unsigned int Graphics::Shader::CompileShader(const char* source, int type)
+/// @brief Compile shader from source
+/// @param source Shader source
+/// @param type Shader type
+/// @throw std::runtime_error if compile error occurs
+/// @return Compiled shader
+static unsigned int CompileShader(const char* source, int type)
 {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
@@ -57,7 +69,13 @@ unsigned int Graphics::Shader::CompileShader(const char* source, int type)
     throw std::runtime_error(fmt::format("rf::Graphics::Shader::CompileShader(): Couldn't compile {} shader:\n{}", TypeToName(type), error));
 }
 
-unsigned int Graphics::Shader::LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader)
+/// @brief Link shader program
+/// @param vertexShader Compiled vertex shader
+/// @param fragmentShader Compiled fragment shader
+/// @param geometryShader Compiled geometry shader
+/// @throw std::runtime_error if link error occurs
+/// @return Linked shader program
+static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader)
 {
     unsigned int program = glCreateProgram();
     glAttachShader(program, vertexShader);

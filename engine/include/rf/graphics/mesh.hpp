@@ -24,15 +24,6 @@ namespace Graphics
         using Indice = unsigned int;
 
     private:
-        /// @brief Create mesh
-        /// @param vertices Mesh vertices
-        /// @param indices Mesh indices
-        /// @param vao Result vertex array object
-        /// @param vbo Result vertex buffer object
-        /// @param ebo Result element buffer object
-        static void CreateMesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices, unsigned int& vao, unsigned int& vbo, unsigned int& ebo);
-
-    private:
         /* OpenGL objects */
         unsigned int m_vertexArrayObject = 0;
         unsigned int m_vertexBufferObject = 0;

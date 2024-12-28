@@ -25,12 +25,6 @@ namespace Graphics
         };
 
     private:
-        /// @brief Load texture from image
-        /// @param The image to load the texture from
-        /// @return Loaded texture
-        static unsigned int LoadTexture(const Engine::Image& image);
-
-    private:
         unsigned int m_texture = 0;
         Type m_type = Type::None;
 

@@ -8,7 +8,10 @@
 
 namespace rf {
 
-unsigned int Graphics::Texture::LoadTexture(const Engine::Image& image)
+/// @brief Load texture from image
+/// @param The image to load the texture from
+/// @return Loaded texture
+static unsigned int LoadTexture(const Engine::Image& image)
 {
     unsigned int texture;
     glGenTextures(1, &texture);

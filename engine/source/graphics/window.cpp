@@ -188,9 +188,6 @@ void Graphics::Window::run()
     flashlight.cutoff() = { 20, 25 };
     flashlight.attenuation() = { 1.0f, 0.0f, 0.0f };
 
-    // Backpack
-    m_backpack.transform().position().y = 3.0f;
-
     // Container
     Cube container;
     container.material() = m_containerMaterial;
