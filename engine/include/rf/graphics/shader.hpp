@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 
 // Custom modules
-#include "rf/graphics/lighting/types.hpp"
+#include "rf/graphics/light/types.hpp"
 #include "rf/graphics/color.hpp"
 #include "rf/graphics/cubemap.hpp"
 #include "rf/graphics/texture.hpp"
@@ -74,20 +74,20 @@ namespace Graphics
         /// @param matrix The matrix to set
         void set(const std::string& name, const glm::mat4& matrix);
 
-        /// @brief Set uniform lighting properties
-        /// @param name Lighting properties name
-        /// @param properties The lighting properties to set
-        void set(const std::string& name, const Lighting::Properties& properties);
+        /// @brief Set uniform light properties
+        /// @param name Light properties name
+        /// @param properties The light properties to set
+        void set(const std::string& name, const Light::Properties& properties);
 
-        /// @brief Set uniform lighting attenuation
-        /// @param name Lighting attenuation name
-        /// @param attenuation The lighting attenuation to set
-        void set(const std::string& name, const Lighting::Attenuation& attenuation);
+        /// @brief Set uniform light attenuation
+        /// @param name Light attenuation name
+        /// @param attenuation The light attenuation to set
+        void set(const std::string& name, const Light::Attenuation& attenuation);
 
-        /// @brief Set uniform lighting cutoff
-        /// @param name Lighting cutoff name
-        /// @param cutoff The lighting cutoff to set
-        void set(const std::string& name, Lighting::Cutoff cutoff);
+        /// @brief Set uniform light cutoff
+        /// @param name Light cutoff name
+        /// @param cutoff The light cutoff to set
+        void set(const std::string& name, Light::Cutoff cutoff);
 
         /// @brief Set uniform color
         /// @param name Color name

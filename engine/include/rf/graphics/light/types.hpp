@@ -4,7 +4,7 @@ namespace rf {
 
 namespace Graphics
 {
-    namespace Lighting
+    namespace Light
     {
         struct Properties
         {

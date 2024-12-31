@@ -4,6 +4,9 @@
 #include <memory>
 #include <string>
 
+// Graphics libraries
+#include <GL/glew.h>
+
 namespace rf {
     
 namespace Graphics
@@ -14,6 +17,13 @@ namespace Graphics
         // Shared cubemap instance
         using Pointer = std::shared_ptr<Cubemap>;
 
+    public:
+        /// @brief Unbind cubemap
+        static inline void Unbind()
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
+
     private:
         unsigned int m_cubemap = 0;
 
@@ -23,33 +33,17 @@ namespace Graphics
         /// @throw std::runtime_error if the cubemap couldn't be loaded
         Cubemap(const std::string& cubemapDirectoryPath);
 
-        Cubemap() = default;
-
         Cubemap(const Cubemap& other) = delete;
 
         Cubemap(Cubemap&& other) noexcept;
 
         ~Cubemap();
 
-    private:
-        /// @brief Free allocated resources
-        void free();
-
     public:
-        /// @brief Load cubemap from directory
-        /// @param cubemapDirectoryPath Path to the cubemap directory
-        /// @throw std::runtime_error if the cubemap couldn't be loaded
-        void load(const std::string& cubemapDirectoryPath);
-
         /// @brief Bind this cubemap
-        void bind() const;
-
-    public:
-        /// @brief Check if the cubemap is loaded
-        /// @return True if the cubemap is loaded
-        inline operator bool() const
+        inline void bind() const
         {
-            return static_cast<bool>(m_cubemap);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
         }
     };
 }

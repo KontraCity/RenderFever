@@ -4,14 +4,14 @@
 #include <glm/glm.hpp>
 
 // Custom modules
-#include "rf/graphics/lighting/types.hpp"
+#include "rf/graphics/light/types.hpp"
 #include "rf/graphics/shader.hpp"
 
 namespace rf {
 
 namespace Graphics
 {
-    namespace Lighting
+    namespace Light
     {
         class DirectionalLight
         {

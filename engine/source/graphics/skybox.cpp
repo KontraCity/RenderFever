@@ -3,6 +3,8 @@
 // Graphics libraries
 #include <GL/glew.h>
 
+namespace rf {
+
 namespace Model
 {
     constexpr float Vertices[] = {
@@ -76,50 +78,50 @@ namespace Model
     };
 }
 
-namespace rf {
-
 Graphics::Skybox::Skybox()
 {
-    // Vertex array object
-    glGenVertexArrays(1, &m_vertexArrayObject);
-    glBindVertexArray(m_vertexArrayObject);
+    // Vertex array
+    glGenVertexArrays(1, &m_vertexArray);
+    glBindVertexArray(m_vertexArray);
 
-    // Vertex buffer object
-    glGenBuffers(1, &m_vertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
+    // Vertex buffer
+    glGenBuffers(1, &m_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Model::Vertices), Model::Vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, reinterpret_cast<void*>(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
-    // Element buffer object
-    glGenBuffers(1, &m_elementBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBufferObject);
+    // Element array
+    glGenBuffers(1, &m_elementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Model::Indices), Model::Indices, GL_STATIC_DRAW);
+
+    // Bind cleanup
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
 Graphics::Skybox::Skybox(Skybox&& other) noexcept
-    : m_vertexArrayObject(other.m_vertexArrayObject)
-    , m_vertexBufferObject(other.m_vertexBufferObject)
-    , m_elementBufferObject(other.m_elementBufferObject)
+    : m_vertexArray(other.m_vertexArray)
+    , m_vertexBuffer(other.m_vertexBuffer)
+    , m_elementBuffer(other.m_elementBuffer)
     , m_cubemap(other.m_cubemap)
 {
-    other.m_vertexArrayObject = 0;
-    other.m_vertexBufferObject = 0;
-    other.m_elementBufferObject = 0;
-    other.m_cubemap = {};
+    other.m_vertexArray = 0;
+    other.m_vertexBuffer = 0;
+    other.m_elementBuffer = 0;
 }
 
 Graphics::Skybox::~Skybox()
 {
-    if (m_elementBufferObject)
-        glDeleteBuffers(1, &m_elementBufferObject);
-    if (m_vertexBufferObject)
-        glDeleteBuffers(1, &m_vertexBufferObject);
-    if (m_vertexArrayObject)
-        glDeleteVertexArrays(1, &m_vertexArrayObject);
+    if (m_elementBuffer)
+        glDeleteBuffers(1, &m_elementBuffer);
+    if (m_vertexBuffer)
+        glDeleteBuffers(1, &m_vertexBuffer);
+    if (m_vertexArray)
+        glDeleteVertexArrays(1, &m_vertexArray);
 }
 
 void Graphics::Skybox::draw(Shader& shader) const
@@ -134,7 +136,7 @@ void Graphics::Skybox::draw(Shader& shader) const
         glDisable(GL_MULTISAMPLE);
 
     // Draw
-    glBindVertexArray(m_vertexArrayObject);
+    glBindVertexArray(m_vertexArray);
     glDrawElements(GL_TRIANGLES, sizeof(Model::Indices), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     

@@ -23,13 +23,17 @@ static unsigned int LoadTexture(const Engine::Image& image)
 }
 
 Graphics::Texture::Texture(const std::string& imageFilePath, Type type)
+    : m_texture(LoadTexture({ imageFilePath, true }))
+    , m_type(type)
 {
-    load(imageFilePath, type);
+    setFiltering(GL_LINEAR);
 }
 
 Graphics::Texture::Texture(const uint8_t* data, size_t length, Type type)
+    : m_texture(LoadTexture({ data, length, false }))
+    , m_type(type)
 {
-    load(data, length, type);
+    setFiltering(GL_LINEAR);
 }
 
 Graphics::Texture::Texture(Texture&& other) noexcept
@@ -37,43 +41,12 @@ Graphics::Texture::Texture(Texture&& other) noexcept
     , m_type(other.m_type)
 {
     other.m_texture = 0;
-    other.m_type = Type::None;
 }
 
 Graphics::Texture::~Texture()
 {
-    free();
-}
-
-void Graphics::Texture::free()
-{
     if (m_texture)
-    {
         glDeleteTextures(1, &m_texture);
-        m_texture = 0;
-    }
-    m_type = Type::None;
-}
-
-void Graphics::Texture::load(const std::string& imageFilePath, Type type)
-{
-    free(); // avoid memory leaks if load() was called already
-    m_texture = LoadTexture({ imageFilePath, true });
-    m_type = type;
-    setFiltering(GL_LINEAR);
-}
-
-void Graphics::Texture::load(const uint8_t* data, size_t length, Type type)
-{
-    free(); // avoid memory leaks if load() was called already
-    m_texture = LoadTexture({ data, length, false });
-    m_type = type;
-    setFiltering(GL_LINEAR);
-}
-
-void Graphics::Texture::bind() const
-{
-    glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 
 void Graphics::Texture::setFiltering(int direction, int mode)

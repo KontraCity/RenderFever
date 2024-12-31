@@ -14,7 +14,6 @@
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cubemap.hpp"
 #include "rf/graphics/material.hpp"
-#include "rf/graphics/model.hpp"
 #include "rf/graphics/shader.hpp"
 
 namespace rf {
@@ -45,7 +44,6 @@ namespace Graphics
         Shader m_skyboxShader;
         Shader m_normalShader;
         Material m_containerMaterial;
-        Model m_backpack;
         Cubemap::Pointer m_skyboxCubemap;
 
         /* Variables */

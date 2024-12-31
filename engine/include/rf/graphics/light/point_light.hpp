@@ -4,24 +4,22 @@
 #include <glm/glm.hpp>
 
 // Custom modules
-#include "rf/graphics/lighting/types.hpp"
+#include "rf/graphics/light/types.hpp"
 #include "rf/graphics/shader.hpp"
 
 namespace rf {
 
 namespace Graphics
 {
-    namespace Lighting
+    namespace Light
     {
-        class SpotLight
+        class PointLight
         {
         private:
             Properties m_properties;
             Attenuation m_attenuation;
-            Cutoff m_cutoff;
             Color m_color;
             glm::vec3 m_position;
-            glm::vec3 m_direction;
 
         public:
             /// @brief Illuminate scene
@@ -57,20 +55,6 @@ namespace Graphics
                 return m_attenuation;
             }
 
-            /// @brief Get light cutoff
-            /// @return Light cutoff
-            inline Cutoff cutoff() const
-            {
-                return m_cutoff;
-            }
-
-            /// @brief Get light cutoff
-            /// @return Light cutoff
-            inline Cutoff& cutoff()
-            {
-                return m_cutoff;
-            }
-        
             /// @brief Get light color
             /// @return Light color
             inline Color color() const
@@ -97,20 +81,6 @@ namespace Graphics
             inline glm::vec3& position()
             {
                 return m_position;
-            }
-
-            /// @brief Get light direction
-            /// @return Light direction
-            inline const glm::vec3& direction() const
-            {
-                return m_direction;
-            }
-
-            /// @brief Get light direction
-            /// @return Light direction
-            inline glm::vec3& direction()
-            {
-                return m_direction;
             }
         };
     }

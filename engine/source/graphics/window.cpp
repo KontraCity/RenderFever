@@ -5,8 +5,10 @@
 #include "rf/engine/utility.hpp"
 
 // Custom graphics modules
-#include "rf/graphics/cube.hpp"
-#include "rf/graphics/lighting.hpp"
+#include "rf/graphics/light/lighting.hpp"
+#include "rf/graphics/mesh/cube.hpp"
+#include "rf/graphics/mesh/model.hpp"
+#include "rf/graphics/mesh/plane.hpp"
 #include "rf/graphics/skybox.hpp"
 
 namespace rf {
@@ -79,11 +81,6 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
         m_containerMaterial.shininess() = 32.0f;
         m_skyboxCubemap = std::make_shared<Cubemap>("textures/skybox");
         m_logger.info("[{:>5.3f} s] Textures loaded", stopwatch.seconds());
-
-        // Load models
-        stopwatch.reset();
-        m_backpack.load("models/backpack.glb");
-        m_logger.info("[{:>5.3f} s] Models loaded", stopwatch.seconds());
     }
     catch (...)
     {
@@ -179,20 +176,30 @@ void Graphics::Window::toggleAntiAliasing()
 void Graphics::Window::run()
 {
     // Sun
-    Lighting::DirectionalLight sun;
+    Light::DirectionalLight sun;
     sun.properties() = { 0.2f, 0.9f, 1.0f };
     sun.direction() = { 1.0f, -1.0f, -1.0f };
 
     // Flashlight
-    Lighting::SpotLight flashlight;
+    Light::SpotLight flashlight;
     flashlight.cutoff() = { 20, 25 };
     flashlight.attenuation() = { 1.0f, 0.0f, 0.0f };
 
     // Container
-    Cube container;
+    Mesh::Cube container;
     container.material() = m_containerMaterial;
-    container.transform().position().y = -100.0f;
-    container.transform().scale() = glm::vec3(100.0f);
+    container.transform().position().y = 10.0f;
+
+    // Backpack
+    m_stopwatch.reset();
+    Mesh::Model backpack("models/backpack.glb");
+    m_logger.info("[{:>5.3f} s] Models loaded", m_stopwatch.seconds());
+    
+    // Floor
+    Mesh::Plane plane;
+    plane.material() = m_containerMaterial;
+    plane.transform().position().y = -100.0f;
+    plane.transform().scale() = glm::vec3(100000.0f);
 
     // Skybox
     Skybox skybox;
@@ -225,9 +232,12 @@ void Graphics::Window::run()
         container.draw(m_shader);
         if (m_showNormals)
             container.draw(m_normalShader);
-        m_backpack.draw(m_shader);
+        plane.draw(m_shader);
         if (m_showNormals)
-            m_backpack.draw(m_normalShader);
+            plane.draw(m_normalShader);
+        backpack.draw(m_shader);
+        if (m_showNormals)
+            backpack.draw(m_normalShader);
 
         // Skybox
         skybox.draw(m_skyboxShader);

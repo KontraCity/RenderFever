@@ -1,8 +1,8 @@
-#include "rf/graphics/lighting/spot_light.hpp"
+#include "rf/graphics/light/spot_light.hpp"
 
 namespace rf {
 
-void Graphics::Lighting::SpotLight::illuminate(Shader& shader) const
+void Graphics::Light::SpotLight::illuminate(Shader& shader) const
 {
     shader.set("SpotLight.properties", m_properties);
     shader.set("SpotLight.attenuation", m_attenuation);

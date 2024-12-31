@@ -5,9 +5,6 @@
 #include <filesystem>
 #include <stdexcept>
 
-// Graphics libraries
-#include <GL/glew.h>
-
 // Custom modules
 #include "rf/engine/image.hpp"
 #include "rf/engine/utility.hpp"
@@ -17,11 +14,7 @@ namespace rf {
 /* Namespace aliases and imports */
 namespace fs = std::filesystem;
 
-/// @brief Load cubemap from directory
-/// @param cubemapDirectoryPath Path to the cubemap directory
-/// @throw std::runtime_error if the cubemap couldn't be loaded
-/// @return Loaded cubemap
-static unsigned int LoadCubemap(const std::string& cubemapDirectoryPath)
+Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath)
 {
     enum class Direction
     {
@@ -53,42 +46,40 @@ static unsigned int LoadCubemap(const std::string& cubemapDirectoryPath)
     if (files.size() != 6)
     {
         throw std::runtime_error(fmt::format(
-            "rf::Graphics::Cubemap::LoadCubemap(): Couldn't load cubemap \"{}\": only {}/6 sides found",
+            "rf::Graphics::Cubemap::Cubemap(): Couldn't load cubemap \"{}\": only {}/6 sides found",
             cubemapDirectoryPath, files.size()
         ));
     }
-    
-    unsigned int cubemap;
-    glGenTextures(1, &cubemap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
 
     try
     {
+        // Create
+        glGenTextures(1, &m_cubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
+
+        // Load
         for (const auto& entry : files)
         {
             Engine::Image image(entry.second.string());
             unsigned int target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<int>(entry.first);
             glTexImage2D(target, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
         }
+
+        // Configure
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        // Bind cleanup
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
     catch (...)
     {
-        glDeleteTextures(1, &cubemap);
+        glDeleteTextures(1, &m_cubemap);
         throw;
     }
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    return cubemap;
-}
-    
-Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath)
-{
-    load(cubemapDirectoryPath);
 }
 
 Graphics::Cubemap::Cubemap(Cubemap&& other) noexcept
@@ -99,27 +90,8 @@ Graphics::Cubemap::Cubemap(Cubemap&& other) noexcept
 
 Graphics::Cubemap::~Cubemap()
 {
-    free();
-}
-
-void Graphics::Cubemap::free()
-{
     if (m_cubemap)
-    {
         glDeleteTextures(1, &m_cubemap);
-        m_cubemap = 0;
-    }
-}
-
-void Graphics::Cubemap::load(const std::string& cubemapDirectoryPath)
-{
-    free(); // avoid memory leaks if load() was called already
-    m_cubemap = LoadCubemap(cubemapDirectoryPath);
-}
-
-void Graphics::Cubemap::bind() const
-{
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
 }
 
 } // namespace rf

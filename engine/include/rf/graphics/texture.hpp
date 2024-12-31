@@ -4,6 +4,9 @@
 #include <memory>
 #include <string>
 
+// Graphics libraries
+#include <GL/glew.h>
+
 // Custom modules
 #include "rf/engine/image.hpp"
 
@@ -24,6 +27,13 @@ namespace Graphics
             Specular,   // Specular map
         };
 
+    public:
+        /// @brief Unbind texture
+        static inline void Unbind()
+        {
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
     private:
         unsigned int m_texture = 0;
         Type m_type = Type::None;
@@ -41,34 +51,13 @@ namespace Graphics
         /// @param type Texture type
         Texture(const uint8_t* data, size_t length, Type type);
 
-        Texture() = default;
-
         Texture(const Texture& other) = delete;
 
         Texture(Texture&& other) noexcept;
 
         ~Texture();
 
-    private:
-        /// @brief Free allocated resources
-        void free();
-
     public:
-        /// @brief Load texture from file
-        /// @param imageFilePath Path to the image file
-        /// @param type Texture type
-        /// @throw std::runtime_error if the texture couldn't be loaded
-        void load(const std::string& imageFilePath, Type type);
-
-        /// @brief Load texture from buffer
-        /// @param data The buffer to load
-        /// @param length Length of the buffer
-        /// @param type Texture type
-        void load(const uint8_t* data, size_t length, Type type);
-
-        /// @brief Bind this texture
-        void bind() const;
-
         /// @brief Set texture filtering mode for direction
         /// @param direction Filtering direction (GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER, etc)
         /// @param mode The filtering mode to set (GL_NEAREST, GL_LINEAR, etc)
@@ -88,11 +77,10 @@ namespace Graphics
         void setWrapping(int mode);
 
     public:
-        /// @brief Check if the texture is loaded
-        /// @return True if the texture is loaded
-        inline operator bool() const
+        /// @brief Bind this texture
+        inline void bind() const
         {
-            return static_cast<bool>(m_texture);
+            glBindTexture(GL_TEXTURE_2D, m_texture);
         }
     
         /// @brief Get texture type

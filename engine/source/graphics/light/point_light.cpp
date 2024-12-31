@@ -1,8 +1,8 @@
-#include "rf/graphics/lighting/point_light.hpp"
+#include "rf/graphics/light/point_light.hpp"
 
 namespace rf {
 
-void Graphics::Lighting::PointLight::illuminate(Shader& shader) const
+void Graphics::Light::PointLight::illuminate(Shader& shader) const
 {
     shader.set("PointLight.properties", m_properties);
     shader.set("PointLight.attenuation", m_attenuation);
