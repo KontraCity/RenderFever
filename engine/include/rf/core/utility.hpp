@@ -6,26 +6,24 @@
 
 namespace rf {
 
-namespace Core {
-    namespace Utility {
-        spdlog::logger CreateLogger(const std::string& name);
+namespace Utility {
+    spdlog::logger CreateLogger(const std::string& name);
 
-        void Sleep(double seconds);
+    void Sleep(double seconds);
 
-        double Limit(double value, double min, double max);
+    double Limit(double value, double min, double max);
 
-        int Random(int min, int max);
+    int Random(int min, int max);
 
-        double Random(double min, double max);
+    double Random(double min, double max);
 
-        void ToUpperCase(std::string& string);
+    void ToUpperCase(std::string& string);
 
-        std::string UpperCaseString(std::string string);
+    std::string UpperCaseString(std::string string);
 
-        void ToLowerCase(std::string& string);
+    void ToLowerCase(std::string& string);
 
-        std::string LowerCaseString(std::string string);
-    }
+    std::string LowerCaseString(std::string string);
 }
 
 } // namespace rf

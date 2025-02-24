@@ -1,22 +1,19 @@
 #include "rf/core/image.hpp"
 
-#include <stdexcept>
-
-#include <fmt/format.h>
-
+#include "rf/core/error.hpp"
 #include "rf/external/stb_image.h"
 
 namespace rf {
 
-Core::Image::Image(const std::string& imageFilePath, bool verticalFlip) {
+Image::Image(const std::string& imageFilePath, bool verticalFlip) {
     load(imageFilePath, verticalFlip);
 }
 
-Core::Image::Image(const uint8_t* data, size_t length, bool verticalFlip) {
+Image::Image(const uint8_t* data, size_t length, bool verticalFlip) {
     load(data, length, verticalFlip);
 }
 
-Core::Image::Image(Image&& other) noexcept
+Image::Image(Image&& other) noexcept
     : m_data(other.m_data)
     , m_width(other.m_width)
     , m_height(other.m_height)
@@ -27,33 +24,31 @@ Core::Image::Image(Image&& other) noexcept
     other.m_channels = 0;
 }
 
-Core::Image::~Image() {
+Image::~Image() {
     free();
 }
 
-void Core::Image::free() {
+void Image::free() {
     if (m_data) {
         stbi_image_free(m_data);
         m_data = nullptr;
     }
 }
 
-void Core::Image::load(const std::string& imageFilePath, bool verticalFlip) {
+void Image::load(const std::string& imageFilePath, bool verticalFlip) {
     free(); // avoid memory leaks if load() was called already
     stbi_set_flip_vertically_on_load(verticalFlip);
     m_data = stbi_load(imageFilePath.c_str(), &m_width, &m_height, &m_channels, 4);
-    if (!m_data) {
-        throw std::runtime_error(fmt::format("rf::Core::Image::load(): Couldn't load image file \"{}\"", imageFilePath));
-    }
+    if (!m_data)
+        throw RF_LOCATED_ERROR("Couldn't load image from \"{}\" file", imageFilePath);
 }
 
-void Core::Image::load(const uint8_t* data, size_t length, bool verticalFlip) {
+void Image::load(const uint8_t* data, size_t length, bool verticalFlip) {
     free(); // avoid memory leaks if load() was called already
     stbi_set_flip_vertically_on_load(verticalFlip);
     m_data = stbi_load_from_memory(data, length, &m_width, &m_height, &m_channels, 4);
-    if (!m_data) {
-        throw std::runtime_error("rf::Core::Image::load(): Couldn't load image file");
-    }
+    if (!m_data)
+        throw RF_LOCATED_ERROR("Couldn't load image file from memory");
 }
 
 } // namespace rf

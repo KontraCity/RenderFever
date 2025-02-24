@@ -1,11 +1,9 @@
 #include "rf/graphics/mesh/model.hpp"
 
-#include <stdexcept>
-
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-#include <fmt/format.h>
+#include <rf/core/error.hpp>
 
 namespace rf {
 
@@ -14,7 +12,7 @@ Graphics::Mesh::Model::Model(const std::string& modelFilePath)
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(modelFilePath, aiProcess_Triangulate | aiProcess_FlipUVs);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-        throw std::runtime_error(fmt::format("rf::Graphics::Model::Model(): Couldn't load model \"{}\"", modelFilePath));
+        throw RF_LOCATED_ERROR("Couldn't load model from \"{}\" file", modelFilePath);
     processNode(scene, scene->mRootNode);
 }
 

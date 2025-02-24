@@ -1,5 +1,6 @@
 #include <fmt/format.h>
 
+#include <rf/core/error.hpp>
 #include <rf/graphics/window.hpp>
 using namespace rf;
 
@@ -8,8 +9,10 @@ int main() {
         Graphics::Window window(1280, 720);
         window.run();
     }
-    catch (const std::exception& error) {
-        fmt::print(stderr, "Error: {}\n", error.what());
+    catch (const Error& error) {
+        fmt::print(stderr, "{}: {}\n", error.location(), error.message());
+        if (!error.details().empty())
+            fmt::print("Details:\n{}\n", error.details());
         return -1;
     }
 }

@@ -2,23 +2,18 @@
 
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <fmt/format.h>
+#include <rf/core/error.hpp>
 
 namespace rf {
 
 static std::string ReadFile(const std::string& filePath) {
     std::ifstream file(filePath);
-    if (!file) {
-        throw std::runtime_error(fmt::format(
-            "rf::Graphics::Shader::ReadFile(): "
-            "Couldn't open file \"{}\"", filePath
-        ));
-    }
+    if (!file)
+        throw RF_LOCATED_ERROR("Couldn't open \"{}\" file", filePath);
 
     std::stringstream stream;
     stream << file.rdbuf();
@@ -53,6 +48,7 @@ static unsigned int CompileShader(const char* source, int type) {
     std::string error(result, '\0');
     glGetShaderInfoLog(shader, result, nullptr, error.data());
     throw std::runtime_error(fmt::format("rf::Graphics::Shader::CompileShader(): Couldn't compile {} shader:\n{}", TypeToName(type), error));
+    throw RF_LOCATED_DETAILED_ERROR(error, "Couldn't compile {} shader", TypeToName(type));
 }
 
 static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fragmentShader, unsigned int geometryShader) {
@@ -72,7 +68,7 @@ static unsigned int LinkShaderProgram(unsigned int vertexShader, unsigned int fr
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &result);
     std::string error(result, '\0');
     glGetProgramInfoLog(program, result, nullptr, error.data());
-    throw std::runtime_error(fmt::format("rf::Graphics::Shader::LinkShaderProgram(): Couldn't link shader program:\n{}", error));
+    throw RF_LOCATED_DETAILED_ERROR(error, "Couldn't link shader program");
 }
 
 Graphics::Shader::~Shader() {

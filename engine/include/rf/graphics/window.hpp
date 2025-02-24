@@ -23,7 +23,7 @@ namespace Graphics {
         GLFWwindow* m_window = nullptr;
         int m_width = 0;
         int m_height = 0;
-        Core::Stopwatch m_stopwatch;
+        Stopwatch m_stopwatch;
 
         Camera m_camera;
         Shader m_shader;

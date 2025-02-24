@@ -1,12 +1,10 @@
 #include "rf/graphics/texture.hpp"
 
-#include <stdexcept>
-
 #include <GL/glew.h>
 
 namespace rf {
 
-static unsigned int LoadTexture(const Core::Image& image) {
+static unsigned int LoadTexture(const Image& image) {
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);

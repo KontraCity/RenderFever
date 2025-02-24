@@ -2,9 +2,9 @@
 
 #include <map>
 #include <filesystem>
-#include <stdexcept>
 namespace fs = std::filesystem;
 
+#include "rf/core/error.hpp"
 #include "rf/core/image.hpp"
 #include "rf/core/utility.hpp"
 
@@ -22,7 +22,7 @@ Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath) {
 
     std::map<Direction, fs::path> files;
     for (const fs::directory_entry& file : fs::directory_iterator(cubemapDirectoryPath)) {
-        std::string name = Core::Utility::LowerCaseString(file.path().stem().string());
+        std::string name = Utility::LowerCaseString(file.path().stem().string());
         if (name == "right")
             files[Direction::Right] = file.path();
         else if (name == "left")
@@ -37,10 +37,10 @@ Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath) {
             files[Direction::Front] = file.path();
     }
     if (files.size() != 6) {
-        throw std::runtime_error(fmt::format(
-            "rf::Graphics::Cubemap::Cubemap(): Couldn't load cubemap \"{}\": only {}/6 sides found",
+        throw RF_LOCATED_ERROR(
+            "Couldn't load cubemap from \"{}\" directory: {}/6 sides found",
             cubemapDirectoryPath, files.size()
-        ));
+        );
     }
 
     try {
@@ -48,7 +48,7 @@ Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
 
         for (const auto& entry : files) {
-            Core::Image image(entry.second.string());
+            Image image(entry.second.string());
             unsigned int target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<int>(entry.first);
             glTexImage2D(target, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
         }
