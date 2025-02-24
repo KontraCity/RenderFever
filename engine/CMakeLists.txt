@@ -1,6 +1,6 @@
 add_library(RenderFever STATIC
-    "source/engine/image.cpp"
-    "source/engine/utility.cpp"
+    "source/core/image.cpp"
+    "source/core/utility.cpp"
 
     "source/external/stb_image.c"
 

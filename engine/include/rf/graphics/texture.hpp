@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 
-#include "rf/engine/image.hpp"
+#include "rf/core/image.hpp"
 
 namespace rf {
 

@@ -5,8 +5,8 @@
 #include <stdexcept>
 namespace fs = std::filesystem;
 
-#include "rf/engine/image.hpp"
-#include "rf/engine/utility.hpp"
+#include "rf/core/image.hpp"
+#include "rf/core/utility.hpp"
 
 namespace rf {
 
@@ -22,7 +22,7 @@ Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath) {
 
     std::map<Direction, fs::path> files;
     for (const fs::directory_entry& file : fs::directory_iterator(cubemapDirectoryPath)) {
-        std::string name = Engine::Utility::LowerCaseString(file.path().stem().string());
+        std::string name = Core::Utility::LowerCaseString(file.path().stem().string());
         if (name == "right")
             files[Direction::Right] = file.path();
         else if (name == "left")
@@ -48,7 +48,7 @@ Graphics::Cubemap::Cubemap(const std::string& cubemapDirectoryPath) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
 
         for (const auto& entry : files) {
-            Engine::Image image(entry.second.string());
+            Core::Image image(entry.second.string());
             unsigned int target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<int>(entry.first);
             glTexImage2D(target, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
         }

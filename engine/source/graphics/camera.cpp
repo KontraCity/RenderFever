@@ -3,24 +3,24 @@ using namespace rf::Graphics::CameraConst;
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "rf/engine/input.hpp"
-#include "rf/engine/utility.hpp"
+#include "rf/core/input.hpp"
+#include "rf/core/utility.hpp"
 
 namespace rf {
 
 Graphics::Camera::Camera() {
     reset();
-    m_keyEventSubscriberId = Engine::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));
-    m_inputEventSubscriberId = Engine::Input::Input.subscribe(std::bind(&Camera::onInput, this, _1, _2));
-    m_cursorPosEventSubscriberId = Engine::Input::CursorPos.subscribe(std::bind(&Camera::onCursorPos, this, _1, _2));
-    m_scrollEventSubscriberId = Engine::Input::Scroll.subscribe(std::bind(&Camera::onScroll, this, _1, _2));
+    m_keyEventSubscriberId = Core::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));
+    m_inputEventSubscriberId = Core::Input::Input.subscribe(std::bind(&Camera::onInput, this, _1, _2));
+    m_cursorPosEventSubscriberId = Core::Input::CursorPos.subscribe(std::bind(&Camera::onCursorPos, this, _1, _2));
+    m_scrollEventSubscriberId = Core::Input::Scroll.subscribe(std::bind(&Camera::onScroll, this, _1, _2));
 }
 
 Graphics::Camera::~Camera() {
-    Engine::Input::Key.unsubscribe(m_keyEventSubscriberId);
-    Engine::Input::Input.unsubscribe(m_inputEventSubscriberId);
-    Engine::Input::CursorPos.unsubscribe(m_cursorPosEventSubscriberId);
-    Engine::Input::Scroll.unsubscribe(m_scrollEventSubscriberId);
+    Core::Input::Key.unsubscribe(m_keyEventSubscriberId);
+    Core::Input::Input.unsubscribe(m_inputEventSubscriberId);
+    Core::Input::CursorPos.unsubscribe(m_cursorPosEventSubscriberId);
+    Core::Input::Scroll.unsubscribe(m_scrollEventSubscriberId);
 }
 
 void Graphics::Camera::onKey(int key, int action, int mods) {
@@ -62,11 +62,11 @@ void Graphics::Camera::onCursorPos(double x, double y) {
     lastX = x; lastY = y;
 
     m_yaw += xOffset * Sensivity::Move;
-    m_pitch = Engine::Utility::Limit(m_pitch + yOffset * Sensivity::Move / m_zoom, Pitch::Min, Pitch::Max);
+    m_pitch = Core::Utility::Limit(m_pitch + yOffset * Sensivity::Move / m_zoom, Pitch::Min, Pitch::Max);
 }
 
 void Graphics::Camera::onScroll(double xOffset, double yOffset) {
-    m_zoom = Engine::Utility::Limit(m_zoom + yOffset * Sensivity::Scroll * m_zoom, Zoom::Min, Zoom::Max);
+    m_zoom = Core::Utility::Limit(m_zoom + yOffset * Sensivity::Scroll * m_zoom, Zoom::Min, Zoom::Max);
 }
 
 void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, Shader& normalShader, unsigned int width, unsigned int height) {

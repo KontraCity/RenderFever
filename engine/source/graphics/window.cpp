@@ -1,7 +1,7 @@
 #include "rf/graphics/window.hpp"
 
-#include "rf/engine/input.hpp"
-#include "rf/engine/utility.hpp"
+#include "rf/core/input.hpp"
+#include "rf/core/utility.hpp"
 
 #include "rf/graphics/light/lighting.hpp"
 #include "rf/graphics/mesh/cube.hpp"
@@ -19,7 +19,7 @@ void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, in
 }
 
 Graphics::Window::Window(unsigned int width, unsigned int height)
-    : m_logger(Engine::Utility::CreateLogger("window"))
+    : m_logger(Core::Utility::CreateLogger("window"))
     , m_width(width)
     , m_height(height) {
     if (glfwInit() != GLFW_TRUE)
@@ -38,11 +38,11 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
 
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, &Window::FrameBufferSizeCallback);
-    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) { Engine::Input::Key.broadcast(key, action, mods); });
-    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) { Engine::Input::CursorPos.broadcast(x, y); });
-    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xOffset, double yOffset) { Engine::Input::Scroll.broadcast(xOffset, yOffset); });
+    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) { Core::Input::Key.broadcast(key, action, mods); });
+    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) { Core::Input::CursorPos.broadcast(x, y); });
+    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xOffset, double yOffset) { Core::Input::Scroll.broadcast(xOffset, yOffset); });
     glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    Engine::Input::Key.subscribe(std::bind(&Graphics::Window::onKey, this, _1, _2, _3));
+    Core::Input::Key.subscribe(std::bind(&Graphics::Window::onKey, this, _1, _2, _3));
 
     GLenum result = glewInit();
     if (result != GLEW_OK) {
@@ -61,7 +61,7 @@ Graphics::Window::Window(unsigned int width, unsigned int height)
     try {
         buildShaders();
 
-        Engine::Stopwatch stopwatch;
+        Core::Stopwatch stopwatch;
         m_containerMaterial.diffuse() = std::make_shared<Texture>("../../../../resources/textures/container/texture.png", Texture::Type::Diffuse);
         m_containerMaterial.specular() = std::make_shared<Texture>("../../../../resources/textures/container/specular.png", Texture::Type::Specular);
         m_containerMaterial.shininess() = 32.0f;
@@ -119,7 +119,7 @@ void Graphics::Window::onKey(int key, int action, int mods) {
 }
 
 void Graphics::Window::buildShaders() {
-    Engine::Stopwatch stopwatch;
+    Core::Stopwatch stopwatch;
     m_shader.make("../../../../resources/shaders/vertex/main.vert", "../../../../resources/shaders/fragment/main.frag");
     m_lightingShader.make("../../../../resources/shaders/vertex/lighting.vert", "../../../../resources/shaders/fragment/lighting.frag");
     m_skyboxShader.make("../../../../resources/shaders/vertex/skybox.vert", "../../../../resources/shaders/fragment/skybox.frag");
@@ -176,7 +176,7 @@ void Graphics::Window::run() {
         m_lastFrameTime = m_currentFrameTime;
         glfwSetWindowTitle(m_window, fmt::format("RenderFever Engine [FPS: {:0>5.1f}, VSync {}]", 1.0f / m_deltaTime, m_vsync ? "on" : "off").c_str());
 
-        Engine::Input::Input.broadcast(m_window, m_deltaTime);
+        Core::Input::Input.broadcast(m_window, m_deltaTime);
         glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

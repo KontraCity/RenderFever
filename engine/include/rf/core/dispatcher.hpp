@@ -7,7 +7,7 @@ using namespace std::placeholders;
 
 namespace rf {
 
-namespace Engine {
+namespace Core {
     template <typename... Parameters>
     class Dispatcher {
     public:

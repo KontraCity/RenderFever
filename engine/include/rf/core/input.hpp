@@ -3,11 +3,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "rf/engine/dispatcher.hpp"
+#include "rf/core/dispatcher.hpp"
 
 namespace rf {
 
-namespace Engine {
+namespace Core {
     namespace Input {
         /// @brief Single key event dispatcher
         /// @param (int) key The key event is associated with

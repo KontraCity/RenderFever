@@ -5,7 +5,7 @@
 
 namespace rf {
 
-namespace Engine {
+namespace Core {
     class Image {
     private:
         uint8_t* m_data = nullptr;

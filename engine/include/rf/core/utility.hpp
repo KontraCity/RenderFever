@@ -6,7 +6,7 @@
 
 namespace rf {
 
-namespace Engine {
+namespace Core {
     namespace Utility {
         spdlog::logger CreateLogger(const std::string& name);
 

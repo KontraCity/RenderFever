@@ -6,7 +6,7 @@
 
 namespace rf {
 
-static unsigned int LoadTexture(const Engine::Image& image) {
+static unsigned int LoadTexture(const Core::Image& image) {
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);

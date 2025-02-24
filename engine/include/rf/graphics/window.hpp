@@ -5,7 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "rf/engine/stopwatch.hpp"
+#include "rf/core/stopwatch.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/cubemap.hpp"
 #include "rf/graphics/material.hpp"
@@ -23,7 +23,7 @@ namespace Graphics {
         GLFWwindow* m_window = nullptr;
         int m_width = 0;
         int m_height = 0;
-        Engine::Stopwatch m_stopwatch;
+        Core::Stopwatch m_stopwatch;
 
         Camera m_camera;
         Shader m_shader;
