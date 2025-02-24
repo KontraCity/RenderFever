@@ -1,56 +1,48 @@
 #version 330 core
 
-struct FragProperties
-{
+struct FragProperties {
     vec3 position;
     vec3 normal;
     vec2 texCoords;
 };
 
-struct Material
-{
+struct Material {
     sampler2D diffuse;
     sampler2D specular;
     float shininess;
 };
 
-struct LightingProperties
-{
+struct LightingProperties {
     float ambient;
     float diffuse;
     float specular;
 };
 
-struct LightingAttenuation
-{
+struct LightingAttenuation {
     float constant;
     float linear;
     float quadratic;
 };
 
-struct LightingCutoff
-{
+struct LightingCutoff {
     float inner;
     float outer;
 };
 
-struct DirectionalLight
-{
+struct DirectionalLight {
     LightingProperties properties;
     vec3 color;
     vec3 direction;
 };
 
-struct PointLight
-{
+struct PointLight {
     LightingProperties properties;
     LightingAttenuation attenuation;
     vec3 color;
     vec3 position;
 };
 
-struct SpotLight
-{
+struct SpotLight {
     LightingProperties properties;
     LightingAttenuation attenuation;
     LightingCutoff cutoff;
@@ -59,20 +51,16 @@ struct SpotLight
     vec3 direction;
 };
 
-// Input
 in FragProperties ioFragProperties;
 in DirectionalLight ioDirectionalLight;
 in PointLight ioPointLight;
 in SpotLight ioSpotLight;
 
-// Output
 out vec4 ioFragColor;
 
-// Uniforms
 uniform Material uMaterial;
 
-vec3 CalcDirectionalLight(DirectionalLight light)
-{
+vec3 CalcDirectionalLight(DirectionalLight light) {
     // Ambient lighting
     vec3 ambient = light.color * light.properties.ambient * vec3(texture(uMaterial.diffuse, ioFragProperties.texCoords));
 
@@ -92,8 +80,7 @@ vec3 CalcDirectionalLight(DirectionalLight light)
     return result;
 }
 
-vec3 CalcPointLight(PointLight light)
-{
+vec3 CalcPointLight(PointLight light) {
     // Ambient lighting
     vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
@@ -120,8 +107,7 @@ vec3 CalcPointLight(PointLight light)
     return result * attenuation;
 }
 
-vec3 CalcSpotLight(SpotLight light)
-{
+vec3 CalcSpotLight(SpotLight light) {
     // Ambient lighting
     vec3 ambient = light.color * light.properties.ambient * texture(uMaterial.diffuse, ioFragProperties.texCoords).rgb;
 
@@ -152,9 +138,7 @@ vec3 CalcSpotLight(SpotLight light)
     return result * attenuation;
 }
 
-void main()
-{
-    // Lighting
+void main() {
     vec3 directionalLight = CalcDirectionalLight(ioDirectionalLight);
     vec3 pointLight = CalcPointLight(ioPointLight);
     vec3 spotLight = CalcSpotLight(ioSpotLight);

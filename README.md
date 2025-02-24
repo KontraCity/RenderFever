@@ -1,5 +1,11 @@
-# RenderFever Engine
+> Judge not, and you will not be judged;
+> condemn not, and you will not be condemned;
+> forgive, and you will be forgiven.
+
 God help us all.
+
+
+# RenderFever Engine
 
 ## Build
 #### Dependencies
@@ -26,7 +32,7 @@ Using `Visual Studio` to build:
 1. Set `REAL_VCPKG_ROOT` environment variable to path of the root directory of `vcpkg`
 2. Open Visual Studio and clone https://github.com/KontraCity/RenderFever.git
 3. Open directory in solution explorer, let CMake configure the project
-4. Select `x64 Release` configuration, build the project
+4. Select `Windows Release` configuration, build the project
 
 #### Linux
 Using `apt` to install the dependencies:

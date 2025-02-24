@@ -2,8 +2,7 @@
 
 namespace rf {
 
-void Graphics::Light::SpotLight::illuminate(Shader& shader) const
-{
+void Graphics::Light::SpotLight::illuminate(Shader& shader) const {
     shader.set("SpotLight.properties", m_properties);
     shader.set("SpotLight.attenuation", m_attenuation);
     shader.set("SpotLight.cutoff", m_cutoff);

@@ -1,12 +1,10 @@
 #include "rf/graphics/mesh/plane.hpp"
 
-// STL modules
 #include <array>
 
 namespace rf {
 
-namespace Model
-{
+namespace Model {
     constexpr std::array<Graphics::Mesh::Vertice, 4> Vertices = {{
         { {-0.5f, +0.0f, -0.5f}, {+0.0f, +1.0f, +0.0f}, {0.0f, 1.0f} },
         { {+0.5f, +0.0f, -0.5f}, {+0.0f, +1.0f, +0.0f}, {1.0f, 1.0f} },
@@ -29,8 +27,7 @@ Graphics::Mesh::Plane::Plane(Plane&& other) noexcept
     , m_transform(other.m_transform)
 {}
 
-void Graphics::Mesh::Plane::draw(Shader& shader) const
-{
+void Graphics::Mesh::Plane::draw(Shader& shader) const {
     m_transform.apply(shader);
     Mesh::draw(shader);
 }

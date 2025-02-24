@@ -1,12 +1,10 @@
 #include "rf/graphics/mesh/cube.hpp"
 
-// STL modules
 #include <array>
 
 namespace rf {
 
-namespace Model
-{
+namespace Model {
     constexpr std::array<Graphics::Mesh::Vertice, 24> Vertices = {{
         // Front
         { {-0.5f, +0.5f, +0.5f}, {+0.0f, +0.0f, +1.0f}, {0.0f, 1.0f} },
@@ -81,8 +79,7 @@ Graphics::Mesh::Cube::Cube(Cube&& other) noexcept
     , m_transform(other.m_transform)
 {}
 
-void Graphics::Mesh::Cube::draw(Shader& shader) const
-{
+void Graphics::Mesh::Cube::draw(Shader& shader) const {
     m_transform.apply(shader);
     Mesh::draw(shader);
 }

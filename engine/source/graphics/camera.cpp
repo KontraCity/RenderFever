@@ -1,17 +1,14 @@
 #include "rf/graphics/camera.hpp"
 using namespace rf::Graphics::CameraConst;
 
-// Graphics libraries
 #include <glm/gtc/matrix_transform.hpp>
 
-// Custom engine modules
 #include "rf/engine/input.hpp"
 #include "rf/engine/utility.hpp"
 
 namespace rf {
 
-Graphics::Camera::Camera()
-{
+Graphics::Camera::Camera() {
     reset();
     m_keyEventSubscriberId = Engine::Input::Key.subscribe(std::bind(&Camera::onKey, this, _1, _2, _3));
     m_inputEventSubscriberId = Engine::Input::Input.subscribe(std::bind(&Camera::onInput, this, _1, _2));
@@ -19,18 +16,15 @@ Graphics::Camera::Camera()
     m_scrollEventSubscriberId = Engine::Input::Scroll.subscribe(std::bind(&Camera::onScroll, this, _1, _2));
 }
 
-Graphics::Camera::~Camera()
-{
+Graphics::Camera::~Camera() {
     Engine::Input::Key.unsubscribe(m_keyEventSubscriberId);
     Engine::Input::Input.unsubscribe(m_inputEventSubscriberId);
     Engine::Input::CursorPos.unsubscribe(m_cursorPosEventSubscriberId);
     Engine::Input::Scroll.unsubscribe(m_scrollEventSubscriberId);
 }
 
-void Graphics::Camera::onKey(int key, int action, int mods)
-{
-    if (key == GLFW_KEY_R)
-    {
+void Graphics::Camera::onKey(int key, int action, int mods) {
+    if (key == GLFW_KEY_R) {
         if (action == GLFW_PRESS)
             m_zoom = 1.0f;
         else if (action == GLFW_REPEAT)
@@ -38,9 +32,7 @@ void Graphics::Camera::onKey(int key, int action, int mods)
     }
 }
 
-void Graphics::Camera::onInput(GLFWwindow* window, float deltaTime)
-{
-    // Movement speed
+void Graphics::Camera::onInput(GLFWwindow* window, float deltaTime) {
     bool shift = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
     bool alt = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
     float speed = Speed::Normal;
@@ -49,7 +41,6 @@ void Graphics::Camera::onInput(GLFWwindow* window, float deltaTime)
     else if (!shift && alt)
         speed = Speed::Slow;
 
-    // Camera movement
     if (glfwGetKey(window, GLFW_KEY_SPACE))
         m_position.y += deltaTime * speed;
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
@@ -64,8 +55,7 @@ void Graphics::Camera::onInput(GLFWwindow* window, float deltaTime)
         m_position -= deltaTime * speed * glm::normalize(glm::cross(m_direction, m_up));
 }
 
-void Graphics::Camera::onCursorPos(double x, double y)
-{
+void Graphics::Camera::onCursorPos(double x, double y) {
     static double lastX = x, lastY = y;
     double xOffset = x - lastX;
     double yOffset = lastY - y;
@@ -75,13 +65,11 @@ void Graphics::Camera::onCursorPos(double x, double y)
     m_pitch = Engine::Utility::Limit(m_pitch + yOffset * Sensivity::Move / m_zoom, Pitch::Min, Pitch::Max);
 }
 
-void Graphics::Camera::onScroll(double xOffset, double yOffset)
-{
+void Graphics::Camera::onScroll(double xOffset, double yOffset) {
     m_zoom = Engine::Utility::Limit(m_zoom + yOffset * Sensivity::Scroll * m_zoom, Zoom::Min, Zoom::Max);
 }
 
-void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, Shader& normalShader, unsigned int width, unsigned int height)
-{
+void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& skyboxShader, Shader& normalShader, unsigned int width, unsigned int height) {
     // Direction
     glm::vec3 direction(
         std::cos(glm::radians(m_yaw)) * std::cos(glm::radians(m_pitch)),
@@ -105,8 +93,7 @@ void Graphics::Camera::capture(Shader& shader, Shader& lightingShader, Shader& s
     normalShader.set("Projection", projection);
 }
 
-void Graphics::Camera::reset()
-{
+void Graphics::Camera::reset() {
     m_position = Defaults::Position;
     m_direction = Defaults::Direction;
     m_up = Defaults::Up;

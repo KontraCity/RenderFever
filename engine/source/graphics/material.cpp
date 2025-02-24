@@ -8,8 +8,7 @@ Graphics::Material::Material(const Texture::Pointer& diffuse, const Texture::Poi
     , m_shininess(shininess)
 {}
 
-void Graphics::Material::apply(Shader& shader) const
-{
+void Graphics::Material::apply(Shader& shader) const {
     if (m_diffuse)
         shader.set("Material.diffuse", *m_diffuse, 0);
     if (m_specular)

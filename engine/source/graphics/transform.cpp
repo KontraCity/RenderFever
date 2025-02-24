@@ -8,8 +8,7 @@ Graphics::Transform::Transform(const glm::vec3& position, const glm::vec3& rotat
     , m_scale(scale)
 {}
 
-void Graphics::Transform::apply(Shader& shader) const
-{
+void Graphics::Transform::apply(Shader& shader) const {
     // TODO: Rotate model around a single axis rather than three
     glm::mat4 model(1.0f);
     model = glm::translate(model, m_position);

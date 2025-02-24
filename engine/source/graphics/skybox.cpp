@@ -1,12 +1,10 @@
 #include "rf/graphics/skybox.hpp"
 
-// Graphics libraries
 #include <GL/glew.h>
 
 namespace rf {
 
-namespace Model
-{
+namespace Model {
     constexpr float Vertices[] = {
         // Front
         // Coordinates          Texture coordinates
@@ -78,13 +76,10 @@ namespace Model
     };
 }
 
-Graphics::Skybox::Skybox()
-{
-    // Vertex array
+Graphics::Skybox::Skybox() {
     glGenVertexArrays(1, &m_vertexArray);
     glBindVertexArray(m_vertexArray);
 
-    // Vertex buffer
     glGenBuffers(1, &m_vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Model::Vertices), Model::Vertices, GL_STATIC_DRAW);
@@ -93,12 +88,10 @@ Graphics::Skybox::Skybox()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, reinterpret_cast<void*>(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
-    // Element array
     glGenBuffers(1, &m_elementBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Model::Indices), Model::Indices, GL_STATIC_DRAW);
 
-    // Bind cleanup
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -107,15 +100,13 @@ Graphics::Skybox::Skybox(Skybox&& other) noexcept
     : m_vertexArray(other.m_vertexArray)
     , m_vertexBuffer(other.m_vertexBuffer)
     , m_elementBuffer(other.m_elementBuffer)
-    , m_cubemap(other.m_cubemap)
-{
+    , m_cubemap(other.m_cubemap) {
     other.m_vertexArray = 0;
     other.m_vertexBuffer = 0;
     other.m_elementBuffer = 0;
 }
 
-Graphics::Skybox::~Skybox()
-{
+Graphics::Skybox::~Skybox() {
     if (m_elementBuffer)
         glDeleteBuffers(1, &m_elementBuffer);
     if (m_vertexBuffer)
@@ -124,26 +115,23 @@ Graphics::Skybox::~Skybox()
         glDeleteVertexArrays(1, &m_vertexArray);
 }
 
-void Graphics::Skybox::draw(Shader& shader) const
-{
-    // Apply
+void Graphics::Skybox::draw(Shader& shader) const {
     shader.set("Cubemap", *m_cubemap, 0);
 
-    // Prepare configuration
     glDepthFunc(GL_LEQUAL);
     bool aaWasEnabled = glIsEnabled(GL_MULTISAMPLE);
-    if (aaWasEnabled)
+    if (aaWasEnabled) {
         glDisable(GL_MULTISAMPLE);
+    }
 
-    // Draw
     glBindVertexArray(m_vertexArray);
     glDrawElements(GL_TRIANGLES, sizeof(Model::Indices), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     
-    // Reset configuration
     glDepthFunc(GL_LESS);
-    if (aaWasEnabled)
+    if (aaWasEnabled) {
         glEnable(GL_MULTISAMPLE);
+    }
 }
 
 } // namespace rf

@@ -1,18 +1,14 @@
 #pragma once
 
-// Graphics libraries
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// Custom modules
 #include "rf/engine/dispatcher.hpp"
 
 namespace rf {
 
-namespace Engine
-{
-    namespace Input
-    {
+namespace Engine {
+    namespace Input {
         /// @brief Single key event dispatcher
         /// @param (int) key The key event is associated with
         /// @param (int) action Key action (press/repeat/release)
