@@ -16,9 +16,12 @@ namespace Graphics {
         };
 
     private:
+        static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
+
+    private:
         GLFWwindow* m_window = nullptr;
         std::string m_title;
-        Dimensions m_dimensions = {};
+        Dimensions m_dimensions;
 
     public:
         Window(const std::string& title, const Dimensions& dimensions);
