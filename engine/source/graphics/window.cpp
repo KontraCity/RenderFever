@@ -7,7 +7,22 @@ namespace rf {
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Input::Map& map = Engine::InputMap();
-    map.broadcast(key, action);
+    map.broadcastKeyEvent(key, action);
+}
+
+static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    Input::Map& map = Engine::InputMap();
+    map.broadcastKeyEvent(button, action);
+}
+
+static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
+    Input::Map& map = Engine::InputMap();
+    map.broadcastCursorMoveEvent(xPosition, yPosition);
+}
+
+static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+    Input::Map& map = Engine::InputMap();
+    map.broadcastScrollEvent(xOffset, yOffset);
 }
 
 void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -34,6 +49,9 @@ Graphics::Window::Window(const std::string& title, const Dimensions& dimensions)
     glfwMakeContextCurrent(m_window);
     glfwSetWindowUserPointer(m_window, this);
     glfwSetKeyCallback(m_window, &KeyCallback);
+    glfwSetMouseButtonCallback(m_window, &MouseButtonCallback);
+    glfwSetCursorPosCallback(m_window, &CursorMoveCallback);
+    glfwSetScrollCallback(m_window, &ScrollCallback);
     glfwSetFramebufferSizeCallback(m_window, &Window::FrameBufferSizeCallback);
 
     GLenum result = glewInit();
@@ -48,19 +66,6 @@ Graphics::Window::Window(const std::string& title, const Dimensions& dimensions)
 
 Graphics::Window::~Window() {
     glfwTerminate();
-}
-
-void Graphics::Window::update() {
-    glfwSwapBuffers(m_window);
-    glfwPollEvents();
-}
-
-void Graphics::Window::rename(const std::string& title) {
-    glfwSetWindowTitle(m_window, title.c_str());
-}
-
-void Graphics::Window::resize(const Dimensions& dimensions) {
-    glfwSetWindowSize(m_window, dimensions.width, dimensions.height);
 }
 
 } // namespace rf

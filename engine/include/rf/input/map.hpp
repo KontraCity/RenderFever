@@ -4,7 +4,8 @@
 #include <map>
 
 #include "rf/input/binding.hpp"
-#include "rf/input/key.hpp"
+#include "rf/input/event.hpp"
+#include "rf/input/input.hpp"
 
 namespace rf {
 
@@ -12,24 +13,15 @@ namespace Input {
     class Map {
     private:
         mutable std::mutex m_mutex;
-        std::map<Key, Binding::Handle> m_binds;
+        std::map<Input, Binding::Handle> m_binds;
         std::map<Binding::Handle, Binding> m_bindings;
         Binding::Handle m_nextBindingHandle = 1;
 
-    public:
-        inline void broadcast(int glfwKey, int glfwAction) const {
-            std::lock_guard lock(m_mutex);
-
-            Key key = GlfwMacroToKey(glfwKey);
-            Action action = GlfwMacroToAction(glfwAction);
-            if (key == Key::None || action == Action::None) {
-                // This key or action is unknown. Can't broadcast!
-                return;
-            }
-
-            const auto bindEntry = m_binds.find(key);
+    private:
+        inline void broadcast(Input input, const Event& event) const {
+            const auto bindEntry = m_binds.find(input);
             if (bindEntry == m_binds.end()) {
-                // This key is not bound. Broadcast not needed.
+                // This input is not bound. Broadcast not needed.
                 return;
             }
 
@@ -38,7 +30,34 @@ namespace Input {
                 // There is a bind but no binding?? Can't broadcast!
                 return;
             }
-            bindingEntry->second.dispatcher.broadcast(action);
+            bindingEntry->second.dispatcher.broadcast({ event });
+        }
+
+    public:
+        inline void broadcastKeyEvent(int glfwKey, int glfwAction) const {
+            std::lock_guard lock(m_mutex);
+            Input input = GlfwMacroToInput(glfwKey);
+            if (input == Input::None || IsSpecialInput(input)) {
+                // This key is unknown or special. Can't broadcast!
+                return;
+            }
+
+            KeyEvent event = GlfwMacroToKeyEvent(glfwAction);
+            if (event == KeyEvent::None) {
+                // This key event is unknown. Can't broadcast!
+                return;
+            }
+            broadcast(input, { event });
+        }
+
+        inline void broadcastCursorMoveEvent(double xPosition, double yPosition) const {
+            std::lock_guard lock(m_mutex);
+            broadcast(Input::Special_CursorMove, CursorMoveEvent{ xPosition, yPosition });
+        }
+
+        inline void broadcastScrollEvent(double xOffset, double yOffset) const {
+            std::lock_guard lock(m_mutex);
+            broadcast(Input::Special_Scroll, ScrollEvent{ xOffset, yOffset });
         }
 
         template <typename Id>
@@ -82,15 +101,15 @@ namespace Input {
             }
         }
 
-        inline void bind(Key key, Binding::Handle handle) {
+        inline void bind(Input input, Binding::Handle handle) {
             std::lock_guard lock(m_mutex);
             if (m_bindings.contains(handle))
-                m_binds[key] = handle;
+                m_binds[input] = handle;
         }
 
-        inline void unbind(Key key) {
+        inline void unbind(Input input) {
             std::lock_guard lock(m_mutex);
-            m_binds.erase(key);
+            m_binds.erase(input);
         }
     };
 }

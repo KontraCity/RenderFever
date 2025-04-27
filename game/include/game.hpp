@@ -1,19 +1,22 @@
 #pragma once
 
-#include <rf/input/action.hpp>
+#include <rf/input/event.hpp>
 
 class Game {
-private:
-    bool m_stop = false;
-
 public:
     Game();
 
 private:
-    void closeWindow(rf::Input::Action action);
+    void onCloseWindow(const rf::Input::Event& event);
 
-    void sayHelloWorld(rf::Input::Action action);
+    void onSayHelloWorld(const rf::Input::Event& event);
+
+    void onCursorMove(const rf::Input::Event& event);
+
+    void onScroll(const rf::Input::Event& event);
+
+    void onLeftMouseButton(const rf::Input::Event& event);
 
 public:
-    void run();
+    void run() const;
 };
