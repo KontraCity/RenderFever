@@ -26,7 +26,7 @@ public:
     }
 
 public:
-    inline Error& withDetails(const std::string& details) noexcept {
+    Error& withDetails(const std::string& details) noexcept {
         try {
             m_details = details;
             if (m_details.empty())
@@ -38,19 +38,19 @@ public:
         return *this;
     }
 
-    inline const std::string& location() const noexcept {
+    const std::string& location() const noexcept {
         return m_location;
     }
 
-    inline const std::string& message() const noexcept {
+    const std::string& message() const noexcept {
         return m_message;
     }
 
-    inline const std::string& details() const noexcept {
+    const std::string& details() const noexcept {
         return m_details;
     }
 
-    inline const char* what() const noexcept override {
+    const char* what() const noexcept override {
         return m_what.c_str();
     }
 };

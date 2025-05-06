@@ -90,20 +90,20 @@ public:
     Dispatcher& operator=(Dispatcher&& other) = delete;
 
 private:
-    inline void unsubscribe(CallbackId callbackId) {
+    void unsubscribe(CallbackId callbackId) {
         std::lock_guard lock(m_mutex);
         m_callbacks.erase(callbackId);
     }
 
 public:
-    inline void broadcast(Arguments... parameters) const {
+    void broadcast(Arguments... parameters) const {
         std::lock_guard lock(m_mutex);
         for (const auto& entry : m_callbacks)
             entry.second(parameters...);
     }
 
     [[nodiscard("Dispatcher handle must be stored while callback is in use!")]]
-    inline Handle subscribe(const Callback& callback) {
+    Handle subscribe(const Callback& callback) {
         std::lock_guard lock(m_mutex);
         m_callbacks.emplace(m_nextCallbackId, callback);
         return { this->weak_from_this(), m_nextCallbackId++};

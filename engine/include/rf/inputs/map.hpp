@@ -18,7 +18,7 @@ namespace Inputs {
         Binding::Handle m_nextBindingHandle = 1;
 
     private:
-        inline void broadcast(Input input, const Event& event) const {
+        void broadcast(Input input, const Event& event) const {
             const auto bindEntry = m_binds.find(input);
             if (bindEntry == m_binds.end()) {
                 // This input is not bound. Broadcast not needed.
@@ -34,7 +34,7 @@ namespace Inputs {
         }
 
     public:
-        inline void broadcastKeyEvent(int glfwKey, int glfwAction) const {
+        void broadcastKeyEvent(int glfwKey, int glfwAction) const {
             std::lock_guard lock(m_mutex);
             Input input = GlfwMacroToInput(glfwKey);
             if (input == Input::None || IsSpecialInput(input)) {
@@ -50,31 +50,31 @@ namespace Inputs {
             broadcast(input, { event });
         }
 
-        inline void broadcastCursorMoveEvent(double xPosition, double yPosition) const {
+        void broadcastCursorMoveEvent(double xPosition, double yPosition) const {
             std::lock_guard lock(m_mutex);
             broadcast(Input::Special_CursorMove, CursorMoveEvent{ xPosition, yPosition });
         }
 
-        inline void broadcastScrollEvent(double xOffset, double yOffset) const {
+        void broadcastScrollEvent(double xOffset, double yOffset) const {
             std::lock_guard lock(m_mutex);
             broadcast(Input::Special_Scroll, ScrollEvent{ xOffset, yOffset });
         }
 
         template <typename Id>
-        inline Binding& createBinding(Id id, const std::string& name) {
+        Binding& createBinding(Id id, const std::string& name) {
             std::lock_guard lock(m_mutex);
             Binding::Handle handle = m_nextBindingHandle++;
             return m_bindings.try_emplace(handle, handle, name, static_cast<Binding::Id>(id)).first->second;
         }
 
-        inline const Binding* getBinding(Binding::Handle handle) const {
+        const Binding* getBinding(Binding::Handle handle) const {
             std::lock_guard lock(m_mutex);
             const auto entry = m_bindings.find(handle);
             return entry == m_bindings.end() ? nullptr : &entry->second;
         }
 
         template <typename Id>
-        inline const Binding* getBinding(Id id) const {
+        const Binding* getBinding(Id id) const {
             std::lock_guard lock(m_mutex);
             Binding::Id bindingId = static_cast<Binding::Id>(id);
             const auto entry = std::find_if(
@@ -84,7 +84,7 @@ namespace Inputs {
             return entry == m_bindings.end() ? nullptr : &entry->second;
         }
 
-        inline void removeBinding(Binding::Handle handle) {
+        void removeBinding(Binding::Handle handle) {
             std::lock_guard lock(m_mutex);
             m_bindings.erase(handle);
 
@@ -101,13 +101,13 @@ namespace Inputs {
             }
         }
 
-        inline void bind(Input input, Binding::Handle handle) {
+        void bind(Input input, Binding::Handle handle) {
             std::lock_guard lock(m_mutex);
             if (m_bindings.contains(handle))
                 m_binds[input] = handle;
         }
 
-        inline void unbind(Input input) {
+        void unbind(Input input) {
             std::lock_guard lock(m_mutex);
             m_binds.erase(input);
         }
