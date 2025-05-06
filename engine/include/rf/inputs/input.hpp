@@ -2,7 +2,7 @@
 
 namespace rf {
 
-namespace Input {
+namespace Inputs {
     enum class Input {
         None,
 

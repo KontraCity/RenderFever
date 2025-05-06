@@ -14,7 +14,11 @@ namespace Graphics {
             GLsizei width = 0;
             GLsizei height = 0;
 
-            inline bool operator==(const Dimensions& other) {
+            float ratio() const {
+                return static_cast<float>(width) / height;
+            }
+
+            bool operator==(const Dimensions& other) const {
                 return width == other.width && height == other.height;
             }
         };
@@ -23,7 +27,7 @@ namespace Graphics {
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
     private:
-        GLFWwindow* m_window = nullptr;
+        GLFWwindow* m_handle = nullptr;
         std::string m_title;
         Dimensions m_dimensions;
 
@@ -37,40 +41,44 @@ namespace Graphics {
         ~Window();
 
     public:
-        inline void update() {
-            glfwSwapBuffers(m_window);
+        void update() {
+            glfwSwapBuffers(m_handle);
             glfwPollEvents();
         }
 
-        inline void rename(const std::string& title) {
+        void rename(const std::string& title) {
             if (title == m_title)
                 return;
             m_title = title;
-            glfwSetWindowTitle(m_window, title.c_str());
+            glfwSetWindowTitle(m_handle, title.c_str());
         }
 
-        inline void resize(const Dimensions& dimensions) {
+        void resize(const Dimensions& dimensions) {
             if (dimensions == m_dimensions)
                 return;
             m_dimensions = dimensions;
-            glfwSetWindowSize(m_window, dimensions.width, dimensions.height);
+            glfwSetWindowSize(m_handle, dimensions.width, dimensions.height);
         }
 
-        inline void setShouldClose() {
-            glfwSetWindowShouldClose(m_window, true);
+        void setShouldClose() {
+            glfwSetWindowShouldClose(m_handle, true);
         }
 
     public:
-        inline const std::string& title() const {
+        GLFWwindow* handle() {
+            return m_handle;
+        }
+
+        const std::string& title() const {
             return m_title;
         }
         
-        inline const Dimensions& dimensions() const {
+        const Dimensions& dimensions() const {
             return m_dimensions;
         }
 
-        inline bool shouldClose() const {
-            return glfwWindowShouldClose(m_window);
+        bool shouldClose() const {
+            return glfwWindowShouldClose(m_handle);
         }
     };
 }

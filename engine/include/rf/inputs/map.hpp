@@ -3,13 +3,13 @@
 #include <mutex>
 #include <map>
 
-#include "rf/input/binding.hpp"
-#include "rf/input/event.hpp"
-#include "rf/input/input.hpp"
+#include "rf/inputs/binding.hpp"
+#include "rf/inputs/event.hpp"
+#include "rf/inputs/input.hpp"
 
 namespace rf {
 
-namespace Input {
+namespace Inputs {
     class Map {
     private:
         mutable std::mutex m_mutex;
@@ -30,7 +30,7 @@ namespace Input {
                 // There is a bind but no binding?? Can't broadcast!
                 return;
             }
-            bindingEntry->second.dispatcher.broadcast({ event });
+            bindingEntry->second.dispatcher->broadcast({ event });
         }
 
     public:

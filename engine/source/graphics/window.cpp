@@ -6,22 +6,22 @@
 namespace rf {
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Input::Map& map = Engine::InputMap();
+    Inputs::Map& map = Engine::InputMap();
     map.broadcastKeyEvent(key, action);
 }
 
 static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    Input::Map& map = Engine::InputMap();
+    Inputs::Map& map = Engine::InputMap();
     map.broadcastKeyEvent(button, action);
 }
 
 static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
-    Input::Map& map = Engine::InputMap();
+    Inputs::Map& map = Engine::InputMap();
     map.broadcastCursorMoveEvent(xPosition, yPosition);
 }
 
 static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
-    Input::Map& map = Engine::InputMap();
+    Inputs::Map& map = Engine::InputMap();
     map.broadcastScrollEvent(xOffset, yOffset);
 }
 
@@ -41,18 +41,19 @@ Graphics::Window::Window(const std::string& title, const Dimensions& dimensions)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window = glfwCreateWindow(m_dimensions.width, m_dimensions.height, title.c_str(), NULL, NULL);
-    if (!m_window) {
+    m_handle = glfwCreateWindow(m_dimensions.width, m_dimensions.height, title.c_str(), NULL, NULL);
+    if (!m_handle) {
         glfwTerminate();
         throw RF_LOCATED_ERROR("Couldn't create GLFW window");
     }
-    glfwMakeContextCurrent(m_window);
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetKeyCallback(m_window, &KeyCallback);
-    glfwSetMouseButtonCallback(m_window, &MouseButtonCallback);
-    glfwSetCursorPosCallback(m_window, &CursorMoveCallback);
-    glfwSetScrollCallback(m_window, &ScrollCallback);
-    glfwSetFramebufferSizeCallback(m_window, &Window::FrameBufferSizeCallback);
+    glfwMakeContextCurrent(m_handle);
+    glfwSetWindowUserPointer(m_handle, this);
+    glfwSetInputMode(m_handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetKeyCallback(m_handle, &KeyCallback);
+    glfwSetMouseButtonCallback(m_handle, &MouseButtonCallback);
+    glfwSetCursorPosCallback(m_handle, &CursorMoveCallback);
+    glfwSetScrollCallback(m_handle, &ScrollCallback);
+    glfwSetFramebufferSizeCallback(m_handle, &Window::FrameBufferSizeCallback);
 
     GLenum result = glewInit();
     if (result != GLEW_OK) {

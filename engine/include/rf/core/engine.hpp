@@ -1,34 +1,36 @@
 #pragma once
 
+#include <memory>
+
+#include "rf/graphics/renderer.hpp"
 #include "rf/graphics/window.hpp"
-#include "rf/input/map.hpp"
+#include "rf/inputs/map.hpp"
 
 namespace rf {
 
 class Engine {
 private:
-    Graphics::Window m_window;
-    Input::Map m_inputMap;
+    static std::unique_ptr<Engine> Instance;
 
 private:
-    Engine()
-        : m_window("RenderFever Engine", { 1280, 720 })
-    {}
+    Graphics::Window m_window;
+    Graphics::Renderer m_renderer;
+    Inputs::Map m_inputMap;
 
-    static inline Engine& Instance() {
-        static Engine instance;
-        return instance;
-    }
+private:
+    Engine();
 
 public:
-    static inline Graphics::Window& Window() {
-        Engine& engine = Instance();
-        return engine.m_window;
+    static Graphics::Window& Window() {
+        return Instance->m_window;
+    }
+    
+    static Graphics::Renderer& Renderer() {
+        return Instance->m_renderer;
     }
 
-    static inline Input::Map& InputMap() {
-        Engine& engine = Instance();
-        return engine.m_inputMap;
+    static Inputs::Map& InputMap() {
+        return Instance->m_inputMap;
     }
 };
 

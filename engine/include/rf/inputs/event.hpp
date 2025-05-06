@@ -2,9 +2,11 @@
 
 #include <variant>
 
+#include "rf/inputs/input.hpp"
+
 namespace rf {
 
-namespace Input {
+namespace Inputs {
     enum class KeyEvent {
         None,
         Press,
@@ -17,6 +19,8 @@ namespace Input {
     KeyEvent GlfwMacroToKeyEvent(int event);
 
     int KeyEventToGlfwMacro(KeyEvent event);
+
+    bool KeyPressed(Input input);
 
     struct CursorMoveEvent {
         double xPosition;
@@ -40,7 +44,7 @@ namespace Input {
         using variant::variant;
 
     public:
-        inline Type type() const {
+        Type type() const {
             return static_cast<Type>(index());
         }
     };

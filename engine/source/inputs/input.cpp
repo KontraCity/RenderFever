@@ -1,20 +1,15 @@
-#include "rf/input/input.hpp"
+#include "rf/inputs/input.hpp"
 
 #include <GLFW/glfw3.h>
 
 namespace rf {
     
-bool Input::IsSpecialInput(Input input) {
-    switch (input) {
-        case Input::Special_CursorMove:
-        case Input::Special_Scroll:
-            return true;
-        default:
-            return false;
-    }
+bool Inputs::IsSpecialInput(Input input) {
+    return input == Input::Special_CursorMove
+        || input == Input::Special_Scroll;
 }
 
-const char* Input::InputName(Input input) {
+const char* Inputs::InputName(Input input) {
     switch (input) {
         // Keyboard
         case Input::Key_F1:                return "F1";
@@ -150,7 +145,7 @@ const char* Input::InputName(Input input) {
     }
 }
 
-Input::Input Input::GlfwMacroToInput(int input) {
+Inputs::Input Inputs::GlfwMacroToInput(int input) {
     switch (input) {
         // Keyboard
         case GLFW_KEY_F1:               return Input::Key_F1;
@@ -286,7 +281,7 @@ Input::Input Input::GlfwMacroToInput(int input) {
     }
 }
 
-int Input::InputToGlfwMacro(Input input) {
+int Inputs::InputToGlfwMacro(Input input) {
     switch (input) {
         // Keyboard
         case Input::Key_F1:                return GLFW_KEY_F1;

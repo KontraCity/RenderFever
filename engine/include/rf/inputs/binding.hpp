@@ -4,11 +4,11 @@
 #include <cstdint>
 
 #include "rf/core/dispatcher.hpp"
-#include "rf/input/event.hpp"
+#include "rf/inputs/event.hpp"
 
 namespace rf {
 
-namespace Input {
+namespace Inputs {
     struct Binding {
         using Handle = int64_t;
         using Id = uint64_t;
@@ -17,7 +17,7 @@ namespace Input {
         Handle handle;
         std::string name;
         Id id;
-        Dispatcher dispatcher;
+        Dispatcher::Pointer dispatcher;
     };
 }
 
