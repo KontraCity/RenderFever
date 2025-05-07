@@ -14,3 +14,4 @@ set(Dependencies fmt::fmt ${OPENGL_LIBRARY} GLEW::GLEW glfw glm::glm)
 
 add_subdirectory("engine/")
 add_subdirectory("game/")
+add_subdirectory("resources/")

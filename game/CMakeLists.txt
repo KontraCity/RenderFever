@@ -6,3 +6,4 @@ add_executable(Game
 )
 target_include_directories(Game PRIVATE "include/")
 target_link_libraries(Game PRIVATE RenderFever ${Dependencies})
+add_dependencies(Game Resources)
