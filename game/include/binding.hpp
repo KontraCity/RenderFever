@@ -8,6 +8,8 @@ namespace Game {
 class Binding {
 public:
     enum class Type {
+        None,
+
         MoveForward,
         MoveBackward,
         MoveLeft,
@@ -17,16 +19,19 @@ public:
         MoveSlowly,
         MoveQuickly,
 
-        CloseWindow,
+        Action,
+        Escape,
         CursorMove,
         Scroll,
         ResetPlayer,
     };
 
 public:
-    static const char* TypeToName(Type type);
+    static const char* TypeToDescription(Type type);
 
     static rf::Inputs::Input TypeToInput(Type type);
+
+    static void PrintBindings();
 
 private:
     rf::Inputs::Binding::Dispatcher::Handle m_handle;

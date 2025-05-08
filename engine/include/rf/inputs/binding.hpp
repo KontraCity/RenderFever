@@ -15,7 +15,7 @@ namespace Inputs {
         using Dispatcher = Dispatcher<const Event&>;
 
         Handle handle;
-        std::string name;
+        std::string description;
         Id id;
         Dispatcher::Pointer dispatcher;
     };

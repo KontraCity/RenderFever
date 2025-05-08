@@ -22,15 +22,12 @@ void Player::onCursorMove(const rf::Inputs::Event& event) {
         return;
     const auto& cursorMoveEvent = std::get<rf::Inputs::CursorMoveEvent>(event);
 
-    float x = cursorMoveEvent.xPosition;
-    float y = cursorMoveEvent.yPosition;
-    static float lastX = x, lastY = y;
-    float xOffset = x - lastX;
-    float yOffset = lastY - y;
-    lastX = x; lastY = y;
+    // Don't move the camera if cursor is not disabled!
+    if (rf::Engine::Window().cursorMode() != rf::Graphics::Window::CursorMode::Disabled)
+        return;
 
-    m_camera.yaw() += xOffset * Sensitivity::Look;
-    m_camera.pitch()  += yOffset / m_camera.zoom() * Sensitivity::Look;
+    m_camera.yaw() += cursorMoveEvent.xOffset * Sensitivity::Look;
+    m_camera.pitch()  += cursorMoveEvent.yOffset / m_camera.zoom() * Sensitivity::Look;
     Utility::Limit(m_camera.pitch(), -89.9f, 89.9f);
 }
 
@@ -65,9 +62,9 @@ void Player::onUpdate(float deltaTime) {
     bool moveLeft = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveLeft));
     bool moveRight = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveRight));
     if (!moveLeft && moveRight)
-        m_camera.position() += deltaTime * speed * glm::normalize(glm::cross(direction, rf::Graphics::CameraConst::Up));
+        m_camera.position() += deltaTime * speed * m_camera.evaluateRight();
     else if (moveLeft && !moveRight)
-        m_camera.position() -= deltaTime * speed * glm::normalize(glm::cross(direction, rf::Graphics::CameraConst::Up));
+        m_camera.position() -= deltaTime * speed * m_camera.evaluateRight();
 
     bool moveDown = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveDown));
     bool moveUp = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveUp));

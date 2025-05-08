@@ -13,6 +13,7 @@ namespace Inputs {
     class Map {
     private:
         mutable std::mutex m_mutex;
+        mutable bool m_resetLastCursorPosition = false;
         std::map<Input, Binding::Handle> m_binds;
         std::map<Binding::Handle, Binding> m_bindings;
         Binding::Handle m_nextBindingHandle = 1;
@@ -51,8 +52,21 @@ namespace Inputs {
         }
 
         void broadcastCursorMoveEvent(double xPosition, double yPosition) const {
+            static float lastXPosition = xPosition;
+            static float lastYPosition = yPosition;
+
             std::lock_guard lock(m_mutex);
-            broadcast(Input::Special_CursorMove, CursorMoveEvent{ xPosition, yPosition });
+            if (m_resetLastCursorPosition) {
+                lastXPosition = xPosition;
+                lastYPosition = yPosition;
+                m_resetLastCursorPosition = false;
+            }
+
+            float xOffset = xPosition - lastXPosition;
+            float yOffset = lastYPosition - yPosition;
+            lastXPosition = xPosition;
+            lastYPosition = yPosition;
+            broadcast(Input::Special_CursorMove, CursorMoveEvent{ xOffset, yOffset });
         }
 
         void broadcastScrollEvent(double xOffset, double yOffset) const {
@@ -110,6 +124,15 @@ namespace Inputs {
         void unbind(Input input) {
             std::lock_guard lock(m_mutex);
             m_binds.erase(input);
+        }
+
+        void resetLastCursorPosition() {
+            m_resetLastCursorPosition = true;
+        }
+
+        std::map<Input, Binding::Handle> binds() const {
+            std::lock_guard lock(m_mutex);
+            return m_binds;
         }
     };
 }

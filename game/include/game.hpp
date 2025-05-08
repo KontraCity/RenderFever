@@ -12,7 +12,8 @@ namespace Game {
 
 class Game {
 private:
-    Binding m_closeWindowBinding;
+    Binding m_actionBinding;
+    Binding m_escapeBinding;
     Entity m_cube;
     Entity m_plane;
     Player m_player;
@@ -25,7 +26,9 @@ public:
 private:
     void onUpdate(float deltaTime);
 
-    void onCloseWindow(const rf::Inputs::Event& event);
+    void onAction(const rf::Inputs::Event& event);
+
+    void onEscape(const rf::Inputs::Event& event);
 };
 
 } // namespace Game

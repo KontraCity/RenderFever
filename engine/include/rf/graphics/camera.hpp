@@ -38,6 +38,12 @@ namespace Graphics {
             return glm::normalize(result);
         }
 
+        glm::vec3 evaluateRight() const {
+            glm::vec3 direction = evaluateDirection();
+            glm::vec3 result = glm::cross(direction, rf::Graphics::CameraConst::Up);
+            return glm::normalize(result);
+        }
+
     public:
         const glm::vec3& position() const {
             return m_position;

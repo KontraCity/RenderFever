@@ -23,8 +23,8 @@ namespace Inputs {
     bool KeyPressed(Input input);
 
     struct CursorMoveEvent {
-        double xPosition;
-        double yPosition;
+        double xOffset;
+        double yOffset;
     };
 
     struct ScrollEvent {

@@ -1,11 +1,17 @@
-#include "binding.hpp"
+﻿#include "binding.hpp"
+
+#include <string>
+#include <vector>
+#include <algorithm>
+
+#include <fmt/format.h>
 
 #include <rf/core/engine.hpp>
 #include <rf/inputs/map.hpp>
 
 namespace Game {
 
-const char* Binding::TypeToName(Type type) {
+const char* Binding::TypeToDescription(Type type) {
     switch (type) {
         case Binding::Type::MoveForward:    return "Move forward";
         case Binding::Type::MoveBackward:   return "Move backward";
@@ -15,7 +21,8 @@ const char* Binding::TypeToName(Type type) {
         case Binding::Type::MoveDown:       return "Move down";
         case Binding::Type::MoveSlowly:     return "Move slowly";
         case Binding::Type::MoveQuickly:    return "Move quickly";
-        case Binding::Type::CloseWindow:    return "Close game window";
+        case Binding::Type::Action:         return "Make an action";
+        case Binding::Type::Escape:         return "Get cursor or close game window";
         case Binding::Type::CursorMove:     return "Mouse cursor move";
         case Binding::Type::Scroll:         return "Mouse scroll";
         case Binding::Type::ResetPlayer:    return "Reset player";
@@ -33,7 +40,8 @@ rf::Inputs::Input Binding::TypeToInput(Type type) {
         case Binding::Type::MoveDown:       return rf::Inputs::Input::Key_LeftControl;
         case Binding::Type::MoveSlowly:     return rf::Inputs::Input::Key_LeftAlt;
         case Binding::Type::MoveQuickly:    return rf::Inputs::Input::Key_LeftShift;
-        case Binding::Type::CloseWindow:    return rf::Inputs::Input::Key_Escape;
+        case Binding::Type::Action:         return rf::Inputs::Input::Mouse_Button1;
+        case Binding::Type::Escape:         return rf::Inputs::Input::Key_Escape;
         case Binding::Type::CursorMove:     return rf::Inputs::Input::Special_CursorMove;
         case Binding::Type::Scroll:         return rf::Inputs::Input::Special_Scroll;
         case Binding::Type::ResetPlayer:    return rf::Inputs::Input::Key_R;
@@ -41,9 +49,44 @@ rf::Inputs::Input Binding::TypeToInput(Type type) {
     }
 }
 
+void Binding::PrintBindings() {
+    struct Row {
+        std::string key;
+        std::string description;
+    };
+    std::vector<Row> rows;
+
+    const rf::Inputs::Map& inputMap = rf::Engine::InputMap();
+    for (const auto& bind : inputMap.binds()) {
+        if (rf::Inputs::IsSpecialInput(bind.first))
+            continue;
+        rows.emplace_back(rf::Inputs::InputName(bind.first), inputMap.getBinding(bind.second)->description);
+    }
+    std::sort(rows.begin(), rows.end(), [](const Row& left, const Row& right) { return left.key < right.key; });
+
+    size_t longestKeyLength = std::max_element(
+        rows.begin(),
+        rows.end(),
+        [](const Row& left, const Row& right) { return left.key.length() < right.key.length(); }
+    )->key.length();
+    size_t longestDescriptionLength = std::max_element(
+        rows.begin(),
+        rows.end(),
+        [](const Row& left, const Row& right) { return left.description.length() < right.description.length(); }
+    )->description.length();
+
+    fmt::print("{:^{}}\n", "Available bindings:", 3 + longestKeyLength + 2 + longestDescriptionLength + 2);
+    fmt::print("┌{:─^{}}┬{:─^{}}┐\n", "", longestKeyLength + 2, "", longestDescriptionLength + 2);
+    fmt::print("│ {:^{}} │ {:^{}} │\n", "Key", longestKeyLength, "Description", longestDescriptionLength);
+    fmt::print("├{:─^{}}┼{:─^{}}┤\n", "", longestKeyLength + 2, "", longestDescriptionLength + 2);
+    for (const Row& row : rows)
+        fmt::print("│ {:<{}} │ {:<{}} │\n", row.key, longestKeyLength, row.description, longestDescriptionLength);
+    fmt::print("└{:─^{}}┴{:─^{}}┘\n", "", longestKeyLength + 2, "", longestDescriptionLength + 2);
+}
+
 Binding::Binding(Type type, const rf::Inputs::Binding::Dispatcher::Callback& callback) {
     rf::Inputs::Map& inputMap = rf::Engine::InputMap();
-    rf::Inputs::Binding& binding = inputMap.createBinding(type, TypeToName(type));
+    rf::Inputs::Binding& binding = inputMap.createBinding(type, TypeToDescription(type));
     inputMap.bind(TypeToInput(type), binding.handle);
     m_handle = binding.dispatcher->subscribe(callback);
 }

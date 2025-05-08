@@ -10,26 +10,64 @@ namespace rf {
 namespace Graphics {
     class Window {
     public:
-        struct Dimensions {
-            GLsizei width = 0;
-            GLsizei height = 0;
+        class Dimensions {
+        private:
+            GLsizei m_width = 0;
+            GLsizei m_height = 0;
 
-            float ratio() const {
-                return static_cast<float>(width) / height;
-            }
+        public:
+            Dimensions() = default;
 
+            Dimensions(GLsizei width, GLsizei height)
+                : m_width(width)
+                , m_height(height)
+            {}
+
+        public:
             bool operator==(const Dimensions& other) const {
-                return width == other.width && height == other.height;
+                return m_width == other.m_width && m_height == other.m_height;
             }
+
+        public:
+            float evaluateRatio() const {
+                return static_cast<float>(m_width) / m_height;
+            }
+
+        public:
+            GLsizei width() const {
+                return m_width;
+            }
+
+            GLsizei& width() {
+                return m_width;
+            }
+
+            GLsizei height() const {
+                return m_height;
+            }
+
+            GLsizei& height() {
+                return m_height;
+            }
+        };
+
+        enum class CursorMode {
+            Normal,     // Cursor hovers over the window, can escape borders
+            Hidden,     // The same as Normal, but invisible while in borders
+            Captured,   // The same as Normal, but can't escape borders
+            Disabled,   // There is no cursor and all mouse movements are captured
         };
 
     private:
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
+        static int CursorModeToGlfwMacro(CursorMode cursorMode);
+
     private:
         GLFWwindow* m_handle = nullptr;
         std::string m_title;
         Dimensions m_dimensions;
+        CursorMode m_cursorMode = CursorMode::Normal;
 
     public:
         Window(const std::string& title, const Dimensions& dimensions);
@@ -41,28 +79,15 @@ namespace Graphics {
         ~Window();
 
     public:
-        void update() {
-            glfwSwapBuffers(m_handle);
-            glfwPollEvents();
-        }
+        void update();
 
-        void rename(const std::string& title) {
-            if (title == m_title)
-                return;
-            m_title = title;
-            glfwSetWindowTitle(m_handle, title.c_str());
-        }
+        void rename(const std::string& title);
 
-        void resize(const Dimensions& dimensions) {
-            if (dimensions == m_dimensions)
-                return;
-            m_dimensions = dimensions;
-            glfwSetWindowSize(m_handle, dimensions.width, dimensions.height);
-        }
+        void resize(const Dimensions& dimensions);
 
-        void setShouldClose() {
-            glfwSetWindowShouldClose(m_handle, true);
-        }
+        void setShouldClose(bool shouldClose);
+
+        void setCursorMode(CursorMode cursorMode);
 
     public:
         GLFWwindow* handle() {
@@ -79,6 +104,10 @@ namespace Graphics {
 
         bool shouldClose() const {
             return glfwWindowShouldClose(m_handle);
+        }
+
+        CursorMode cursorMode() const {
+            return m_cursorMode;
         }
     };
 }
