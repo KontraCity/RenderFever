@@ -8,20 +8,15 @@
 
 namespace rf {
 
-template <typename... Arguments>
-struct Binding {
+struct KeyBinding {
     using Id = uint64_t;
     using Handle = int64_t;
-    using Dispatcher = Dispatcher<Arguments...>;
+    using Dispatcher = Dispatcher<KeyAction>;
 
     Id id;
     Handle handle;
     std::string description;
     Dispatcher::Pointer dispatcher;
 };
-
-using KeyBinding = Binding<KeyAction>;
-using CursorMoveBinding = Binding<CursorMoveAction>;
-using ScrollBinding = Binding<ScrollAction>;
 
 } // namespace rf

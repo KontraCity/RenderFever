@@ -65,7 +65,7 @@ struct CursorMoveAction {
     double yOffset;
 };
 
-struct ScrollAction {
+struct CursorScrollAction {
     double xOffset;
     double yOffset;
 };

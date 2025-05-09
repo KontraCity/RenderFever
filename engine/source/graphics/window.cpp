@@ -20,9 +20,9 @@ static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPos
     inputMap.broadcastCursorMoveEvent(xPosition, yPosition);
 }
 
-static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+static void CursorScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
     InputMap& inputMap = Engine::InputMap();
-    inputMap.broadcastScrollEvent(xOffset, yOffset);
+    inputMap.broadcastCursorScrollEvent(xOffset, yOffset);
 }
 
 void Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -61,7 +61,7 @@ Window::Window(const std::string& title, const Dimensions& dimensions)
     glfwSetKeyCallback(m_handle, &KeyCallback);
     glfwSetMouseButtonCallback(m_handle, &MouseButtonCallback);
     glfwSetCursorPosCallback(m_handle, &CursorMoveCallback);
-    glfwSetScrollCallback(m_handle, &ScrollCallback);
+    glfwSetScrollCallback(m_handle, &CursorScrollCallback);
     glfwSetFramebufferSizeCallback(m_handle, &Window::FrameBufferSizeCallback);
 
     GLenum result = glewInit();

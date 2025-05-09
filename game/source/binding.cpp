@@ -21,8 +21,8 @@ void ShowBindings() {
 
     const rf::InputMap& inputInputMap = rf::Engine::InputMap();
     for (const auto& bind : inputInputMap.binds()) {
-        const rf::KeyBinding* binding = inputInputMap.getKeyBinding(bind.second.bindingHandle);
-        rows.emplace_back(static_cast<Binding>(binding->id), rf::GetKeyEntry(bind.first).name, binding->description);
+        rf::InputMap::ConstHandle handle = inputInputMap.getKeyBinding(bind.second.bindingHandle);
+        rows.emplace_back(static_cast<Binding>(handle.binding->id), rf::GetKeyEntry(bind.first).name, handle.binding->description);
     }
     std::sort(
         rows.begin(), rows.end(),
@@ -56,9 +56,9 @@ rf::KeyBinding::Dispatcher::Handle Bind(Binding binding, rf::KeyAction action, c
     rf::InputMap& inputInputMap = rf::Engine::InputMap();
     BindingEntry entry = GetBindingEntry(binding);
 
-    rf::KeyBinding& keyBinding = inputInputMap.createKeyBinding(binding, entry.name);
-    inputInputMap.bind(entry.key, action, keyBinding.handle);
-    return keyBinding.dispatcher->subscribe(callback);
+    rf::InputMap::Handle handle = inputInputMap.createKeyBinding(binding, entry.name);
+    inputInputMap.bindKey(entry.key, action, handle.binding->handle);
+    return handle.binding->dispatcher->subscribe(callback);
 }
 
 } // namespace Game

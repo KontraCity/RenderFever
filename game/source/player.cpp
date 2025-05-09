@@ -10,7 +10,7 @@ using namespace Game::Settings;
 namespace Game {
 
 Player::Player() {
-    m_cursorMoveBinding = rf::Engine::InputMap().cursorMoveBinding().dispatcher->subscribe([this](const rf::CursorMoveAction& action) {
+    m_cursorMoveHandle = rf::Engine::InputMap().cursorMoveDispatcher()->subscribe([this](const rf::CursorMoveAction& action) {
         // Only move the camera if the cursor is disabled!
         if (rf::Engine::Window().cursorMode() == rf::Window::CursorMode::Disabled) {
             m_camera.yaw() += action.xOffset * Sensitivity::Look;
@@ -19,56 +19,56 @@ Player::Player() {
         }
     });
 
-    m_scrollBinding = rf::Engine::InputMap().scrollBinding().dispatcher->subscribe([this](const rf::ScrollAction& action) {
+    m_scrollHandle = rf::Engine::InputMap().scrollDispatcher()->subscribe([this](const rf::CursorScrollAction& action) {
         m_camera.zoom() += action.yOffset * Sensitivity::Zoom;
         Utility::Limit(m_camera.zoom(), CameraZoom::Min, CameraZoom::Max);
     });
 
-    m_moveForwardBinding = Bind(Binding::MoveForward, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveForwardHandle = Bind(Binding::MoveForward, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() += deltaTime * movementSpeed() * m_camera.evaluateDirection(); 
     });
 
-    m_moveBackwardBinding = Bind(Binding::MoveBackward, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveBackwardHandle = Bind(Binding::MoveBackward, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() -= deltaTime * movementSpeed() * m_camera.evaluateDirection();
     });
 
-    m_moveLeftBinding = Bind(Binding::MoveLeft, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveLeftHandle = Bind(Binding::MoveLeft, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() -= deltaTime * movementSpeed() * m_camera.evaluateRight();
     });
 
-    m_moveRightBinding = Bind(Binding::MoveRight, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveRightHandle = Bind(Binding::MoveRight, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() += deltaTime * movementSpeed() * m_camera.evaluateRight();
     });
 
-    m_moveUpBinding = Bind(Binding::MoveUp, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveUpHandle = Bind(Binding::MoveUp, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() += deltaTime * movementSpeed() * rf::CameraConst::Up;
     });
 
-    m_moveDownBinding = Bind(Binding::MoveDown, rf::KeyAction::Hold, [this](rf::KeyAction) {
+    m_moveDownHandle = Bind(Binding::MoveDown, rf::KeyAction::Hold, [this](rf::KeyAction) {
         float deltaTime = rf::Engine::Renderer().deltaTime();
         m_camera.position() -= deltaTime * movementSpeed() * rf::CameraConst::Up;
     });
 
-    m_moveQuicklyBinding = Bind(Binding::MoveQuickly, rf::KeyAction::Press | rf::KeyAction::Release, [this](rf::KeyAction action) {
+    m_moveQuicklyHandle = Bind(Binding::MoveQuickly, rf::KeyAction::Press | rf::KeyAction::Release, [this](rf::KeyAction action) {
         if (action == rf::KeyAction::Press)
             m_moveQuickly = true;
         else if (action == rf::KeyAction::Release)
             m_moveQuickly = false;
     });
 
-    m_moveSlowlyBinding = Bind(Binding::MoveSlowly, rf::KeyAction::Press | rf::KeyAction::Release, [this](rf::KeyAction action) {
+    m_moveSlowlyHandle = Bind(Binding::MoveSlowly, rf::KeyAction::Press | rf::KeyAction::Release, [this](rf::KeyAction action) {
         if (action == rf::KeyAction::Press)
             m_moveSlowly = true;
         else if (action == rf::KeyAction::Release)
             m_moveSlowly = false;
     });
 
-    m_resetBinding = Bind(Binding::ResetPlayer, rf::KeyAction::Press, std::bind(&Player::reset, this));
+    m_resetHandle = Bind(Binding::ResetPlayer, rf::KeyAction::Press, std::bind(&Player::reset, this));
     reset();
 }
 

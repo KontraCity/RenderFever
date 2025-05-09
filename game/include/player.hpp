@@ -3,6 +3,7 @@
 #include <rf/graphics/camera.hpp>
 #include <rf/graphics/renderer.hpp>
 #include <rf/inputs/actions.hpp>
+#include <rf/inputs/input_map.hpp>
 
 #include "binding.hpp"
 
@@ -14,19 +15,18 @@ private:
     bool m_moveQuickly = false;
     bool m_moveSlowly = false;
 
-    rf::CursorMoveBinding::Dispatcher::Handle m_cursorMoveBinding;
-    rf::ScrollBinding::Dispatcher::Handle m_scrollBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveForwardBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveBackwardBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveLeftBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveRightBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveUpBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveDownBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveQuicklyBinding;
-    rf::KeyBinding::Dispatcher::Handle m_moveSlowlyBinding;
-    rf::KeyBinding::Dispatcher::Handle m_resetBinding;
+    rf::InputMap::CursorMoveDispatcher::Handle m_cursorMoveHandle;
+    rf::InputMap::CursorScrollDispatcher::Handle m_scrollHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveForwardHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveBackwardHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveLeftHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveRightHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveUpHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveDownHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveQuicklyHandle;
+    rf::KeyBinding::Dispatcher::Handle m_moveSlowlyHandle;
+    rf::KeyBinding::Dispatcher::Handle m_resetHandle;
     
-
 public:
     Player();
 
