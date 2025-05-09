@@ -6,23 +6,23 @@
 namespace rf {
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Map& map = Engine::InputMap();
-    map.broadcastKeyEvent(key, action);
+    InputMap& inputMap = Engine::InputMap();
+    inputMap.broadcastKeyEvent(key, action);
 }
 
 static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    Map& map = Engine::InputMap();
-    map.broadcastKeyEvent(button, action);
+    InputMap& inputMap = Engine::InputMap();
+    inputMap.broadcastKeyEvent(button, action);
 }
 
 static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
-    Map& map = Engine::InputMap();
-    map.broadcastCursorMoveEvent(xPosition, yPosition);
+    InputMap& inputMap = Engine::InputMap();
+    inputMap.broadcastCursorMoveEvent(xPosition, yPosition);
 }
 
 static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
-    Map& map = Engine::InputMap();
-    map.broadcastScrollEvent(xOffset, yOffset);
+    InputMap& inputMap = Engine::InputMap();
+    inputMap.broadcastScrollEvent(xOffset, yOffset);
 }
 
 void Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {

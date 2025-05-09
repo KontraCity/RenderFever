@@ -20,7 +20,7 @@ public:
 
 public:
     glm::mat4 evaluateModel() const {
-        // TODO: Transform around one axis rather than three
+        // TODO: Transform around one axis rather than three.
         glm::mat4 result(1.0f);
         result = glm::translate(result, m_position);
         result = glm::rotate(result, glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));

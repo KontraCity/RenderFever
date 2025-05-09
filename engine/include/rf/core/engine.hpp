@@ -4,7 +4,7 @@
 
 #include "rf/graphics/renderer.hpp"
 #include "rf/graphics/window.hpp"
-#include "rf/inputs/map.hpp"
+#include "rf/inputs/input_map.hpp"
 
 namespace rf {
 
@@ -15,7 +15,7 @@ private:
 private:
     Window m_window;
     Renderer m_renderer;
-    Map m_inputMap;
+    InputMap m_inputMap;
 
 private:
     Engine();
@@ -29,7 +29,7 @@ public:
         return Instance->m_renderer;
     }
 
-    static Map& InputMap() {
+    static InputMap& InputMap() {
         return Instance->m_inputMap;
     }
 };

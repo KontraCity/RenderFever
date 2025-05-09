@@ -2,7 +2,7 @@
 
 #include <rf/graphics/camera.hpp>
 #include <rf/graphics/renderer.hpp>
-#include <rf/inputs/event.hpp>
+#include <rf/inputs/actions.hpp>
 
 #include "binding.hpp"
 
@@ -10,33 +10,34 @@ namespace Game {
 
 class Player {
 private:
-    Binding m_cursorMoveBinding;
-    Binding m_scrollBinding;
-    Binding m_resetBinding;
     rf::Camera m_camera;
-    rf::Renderer::UpdateDispatcher::Handle m_updateHandle;
+    bool m_moveQuickly = false;
+    bool m_moveSlowly = false;
+
+    rf::CursorMoveBinding::Dispatcher::Handle m_cursorMoveBinding;
+    rf::ScrollBinding::Dispatcher::Handle m_scrollBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveForwardBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveBackwardBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveLeftBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveRightBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveUpBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveDownBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveQuicklyBinding;
+    rf::KeyBinding::Dispatcher::Handle m_moveSlowlyBinding;
+    rf::KeyBinding::Dispatcher::Handle m_resetBinding;
+    
 
 public:
     Player();
 
 private:
-    void onUpdate(float deltaTime);
-
-    void onCursorMove(const rf::Event& event);
-
-    void onScroll(const rf::Event& event);
-
-    void onReset(const rf::Event& event);
+    float movementSpeed() const;
 
 public:
     void reset();
 
 public:
     const rf::Camera& camera() const {
-        return m_camera;
-    }
-
-    rf::Camera& camera() {
         return m_camera;
     }
 };

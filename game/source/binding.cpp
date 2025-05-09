@@ -7,62 +7,30 @@
 #include <fmt/format.h>
 
 #include <rf/core/engine.hpp>
-#include <rf/inputs/map.hpp>
+#include <rf/inputs/input_map.hpp>
 
 namespace Game {
 
-const char* Binding::TypeToDescription(Type type) {
-    switch (type) {
-        case Binding::Type::MoveForward:    return "Move forward";
-        case Binding::Type::MoveBackward:   return "Move backward";
-        case Binding::Type::MoveLeft:       return "Move left";
-        case Binding::Type::MoveRight:      return "Move right";
-        case Binding::Type::MoveUp:         return "Move up";
-        case Binding::Type::MoveDown:       return "Move down";
-        case Binding::Type::MoveSlowly:     return "Move slowly";
-        case Binding::Type::MoveQuickly:    return "Move quickly";
-        case Binding::Type::Action:         return "Make an action";
-        case Binding::Type::Escape:         return "Get cursor or close game window";
-        case Binding::Type::CursorMove:     return "Mouse cursor move";
-        case Binding::Type::Scroll:         return "Mouse scroll";
-        case Binding::Type::ResetPlayer:    return "Reset player";
-        default:                            return "[Unknown binding type]";
-    }
-}
-
-rf::Input Binding::TypeToInput(Type type) {
-    switch (type) {
-        case Binding::Type::MoveForward:    return rf::Input::Key_W;
-        case Binding::Type::MoveBackward:   return rf::Input::Key_S;
-        case Binding::Type::MoveLeft:       return rf::Input::Key_A;
-        case Binding::Type::MoveRight:      return rf::Input::Key_D;
-        case Binding::Type::MoveUp:         return rf::Input::Key_Space;
-        case Binding::Type::MoveDown:       return rf::Input::Key_LeftControl;
-        case Binding::Type::MoveSlowly:     return rf::Input::Key_LeftAlt;
-        case Binding::Type::MoveQuickly:    return rf::Input::Key_LeftShift;
-        case Binding::Type::Action:         return rf::Input::Mouse_Button1;
-        case Binding::Type::Escape:         return rf::Input::Key_Escape;
-        case Binding::Type::CursorMove:     return rf::Input::Special_CursorMove;
-        case Binding::Type::Scroll:         return rf::Input::Special_Scroll;
-        case Binding::Type::ResetPlayer:    return rf::Input::Key_R;
-        default:                            return rf::Input::None;
-    }
-}
-
-void Binding::PrintBindings() {
+void ShowBindings() {
     struct Row {
+        Binding binding;
         std::string key;
         std::string description;
     };
     std::vector<Row> rows;
 
-    const rf::Map& inputMap = rf::Engine::InputMap();
-    for (const auto& bind : inputMap.binds()) {
-        if (rf::IsSpecialInput(bind.first))
-            continue;
-        rows.emplace_back(rf::InputName(bind.first), inputMap.getBinding(bind.second)->description);
+    const rf::InputMap& inputInputMap = rf::Engine::InputMap();
+    for (const auto& bind : inputInputMap.binds()) {
+        const rf::KeyBinding* binding = inputInputMap.getKeyBinding(bind.second.bindingHandle);
+        rows.emplace_back(static_cast<Binding>(binding->id), rf::GetKeyEntry(bind.first).name, binding->description);
     }
-    std::sort(rows.begin(), rows.end(), [](const Row& left, const Row& right) { return left.key < right.key; });
+    std::sort(
+        rows.begin(), rows.end(),
+        [](const Row& left, const Row& right) {
+            using BindingInteger = std::underlying_type<Binding>::type;
+            return static_cast<BindingInteger>(left.binding) < static_cast<BindingInteger>(right.binding);
+        }
+    );
 
     size_t longestKeyLength = std::max_element(
         rows.begin(),
@@ -80,15 +48,17 @@ void Binding::PrintBindings() {
     fmt::print("│ {:^{}} │ {:^{}} │\n", "Key", longestKeyLength, "Description", longestDescriptionLength);
     fmt::print("├{:─^{}}┼{:─^{}}┤\n", "", longestKeyLength + 2, "", longestDescriptionLength + 2);
     for (const Row& row : rows)
-        fmt::print("│ {:<{}} │ {:<{}} │\n", row.key, longestKeyLength, row.description, longestDescriptionLength);
+        fmt::print("│ {:^{}} │ {:<{}} │\n", row.key, longestKeyLength, row.description, longestDescriptionLength);
     fmt::print("└{:─^{}}┴{:─^{}}┘\n", "", longestKeyLength + 2, "", longestDescriptionLength + 2);
 }
 
-Binding::Binding(Type type, const rf::Binding::Dispatcher::Callback& callback) {
-    rf::Map& inputMap = rf::Engine::InputMap();
-    rf::Binding& binding = inputMap.createBinding(type, TypeToDescription(type));
-    inputMap.bind(TypeToInput(type), binding.handle);
-    m_handle = binding.dispatcher->subscribe(callback);
+rf::KeyBinding::Dispatcher::Handle Bind(Binding binding, rf::KeyAction action, const rf::KeyBinding::Dispatcher::Callback& callback) {
+    rf::InputMap& inputInputMap = rf::Engine::InputMap();
+    BindingEntry entry = GetBindingEntry(binding);
+
+    rf::KeyBinding& keyBinding = inputInputMap.createKeyBinding(binding, entry.name);
+    inputInputMap.bind(entry.key, action, keyBinding.handle);
+    return keyBinding.dispatcher->subscribe(callback);
 }
 
 } // namespace Game

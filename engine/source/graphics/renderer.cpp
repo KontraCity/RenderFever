@@ -6,12 +6,11 @@
 
 namespace rf {
 
-float Renderer::evaluateDeltaTime() const {
-    float time = glfwGetTime();
-    static float lastTime = time;
-    float deltaTime = time - lastTime;
-    lastTime = time;
-    return deltaTime;
+void Renderer::evaluateTimes() const {
+    m_time = glfwGetTime();
+    static float lastTime = m_time;
+    m_deltaTime = m_time - lastTime;
+    lastTime = m_time;
 }
 
 void Renderer::clearBuffers() const {
@@ -22,8 +21,11 @@ void Renderer::clearBuffers() const {
 void Renderer::run() {
     Window& window = Engine::Window();
     while (!window.shouldClose()) {
+        evaluateTimes();
         clearBuffers();
-        m_updateDispatcher->broadcast(evaluateDeltaTime());
+
+        m_updateDispatcher->broadcast(m_deltaTime);
+        Engine::InputMap().update();
         window.update();
     }
 }

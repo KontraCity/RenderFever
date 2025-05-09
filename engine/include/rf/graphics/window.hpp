@@ -89,10 +89,6 @@ public:
     void setCursorMode(CursorMode cursorMode);
 
 public:
-    GLFWwindow* handle() {
-        return m_handle;
-    }
-
     const std::string& title() const {
         return m_title;
     }
