@@ -35,7 +35,6 @@ private:
     std::map<Key, bool> m_keysDown;
     std::map<Key, KeyBind> m_keyBinds;
     std::map<KeyBinding::Handle, KeyBinding> m_keyBindings;
-    KeyBinding::Handle m_nextKeyBindingHandle = 1;
 
     CursorMoveDispatcher::Pointer m_cursorMoveDispatcher;
     CursorScrollDispatcher::Pointer m_scrollDispatcher;
@@ -112,9 +111,12 @@ public:
 
     template <typename Id>
     Handle createKeyBinding(Id id, const std::string& description) {
+        static KeyBinding::Handle nextKeyBindingHandle = 1;
+        KeyBinding::Handle keyBindingHandle = nextKeyBindingHandle++;
+
         std::unique_lock lock(m_mutex);
-        KeyBinding::Handle handle = m_nextKeyBindingHandle++;
-        return { std::move(lock), &m_keyBindings.try_emplace(handle, static_cast<KeyBinding::Id>(id), handle, description).first->second };
+        auto entry = m_keyBindings.try_emplace(keyBindingHandle, static_cast<KeyBinding::Id>(id), keyBindingHandle, description);
+        return { std::move(lock), &entry.first->second };
     }
 
     template <typename Id>

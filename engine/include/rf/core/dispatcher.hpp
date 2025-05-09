@@ -70,7 +70,6 @@ public:
 
 private:
     mutable std::mutex m_mutex;
-    CallbackId m_nextCallbackId = 1;
     std::map<CallbackId, Callback> m_callbacks;
 
 private:
@@ -104,9 +103,12 @@ public:
 
     [[nodiscard("Dispatcher handle must be stored while callback is in use!")]]
     Handle subscribe(const Callback& callback) {
+        static CallbackId nextCallbackid = 1;
+        CallbackId callbackId = nextCallbackid++;
+
         std::lock_guard lock(m_mutex);
-        m_callbacks.emplace(m_nextCallbackId, callback);
-        return { this->weak_from_this(), m_nextCallbackId++};
+        m_callbacks.emplace(callbackId, callback);
+        return { this->weak_from_this(), callbackId };
     }
 };
 
