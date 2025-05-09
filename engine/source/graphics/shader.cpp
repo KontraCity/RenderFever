@@ -58,7 +58,7 @@ static GLuint LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader, GLui
     throw RF_LOCATED_ERROR("Couldn't link shader program").withDetails(error);
 }
 
-Graphics::Shader::Shader(const std::string& vertexSourceFilename, const std::string& fragmentSourceFilename, const std::string& geometrySourceFilename) {
+Shader::Shader(const std::string& vertexSourceFilename, const std::string& fragmentSourceFilename, const std::string& geometrySourceFilename) {
     try {
         std::string source = IO::ReadFile(vertexSourceFilename);
         m_vertexShader = CompileShader(source.c_str(), GL_VERTEX_SHADER);
@@ -80,11 +80,11 @@ Graphics::Shader::Shader(const std::string& vertexSourceFilename, const std::str
     }
 }
 
-Graphics::Shader::~Shader() {
+Shader::~Shader() {
     free();
 }
 
-void Graphics::Shader::free(bool onlyFreeShaders) {
+void Shader::free(bool onlyFreeShaders) {
     if (m_vertexShader) {
         glDeleteShader(m_vertexShader);
         m_vertexShader = 0;
@@ -106,48 +106,48 @@ void Graphics::Shader::free(bool onlyFreeShaders) {
     }
 }
 
-void Graphics::Shader::set(const std::string& name, bool boolean) const {
+void Shader::set(const std::string& name, bool boolean) const {
     Handle shaderHandle = handle();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, static_cast<int>(boolean));
 }
 
-void Graphics::Shader::set(const std::string& name, int integer) const {
+void Shader::set(const std::string& name, int integer) const {
     Handle shaderHandle = handle();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, integer);
 }
 
-void Graphics::Shader::set(const std::string& name, float real) const {
+void Shader::set(const std::string& name, float real) const {
     Handle shaderHandle = handle();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1f(location, real);
 }
 
-void Graphics::Shader::set(const std::string& name, const glm::vec3& vector) const {
+void Shader::set(const std::string& name, const glm::vec3& vector) const {
     Handle shaderHandle = handle();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform3fv(location, 1, glm::value_ptr(vector));
 }
 
-void Graphics::Shader::set(const std::string& name, const glm::mat4& matrix) const {
+void Shader::set(const std::string& name, const glm::mat4& matrix) const {
     Handle shaderHandle = handle();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Graphics::Shader::capture(const Camera& camera) const {
+void Shader::capture(const Camera& camera) const {
     const Window::Dimensions& dimensions = Engine::Window().dimensions();
     set("View", glm::lookAt(camera.position(), camera.position() + camera.evaluateDirection(), CameraConst::Up));
     set("Projection", glm::perspective(glm::radians(45.0f / camera.zoom()), dimensions.evaluateRatio(), CameraConst::NearPlane, CameraConst::FarPlane));
 }
 
-void Graphics::Shader::transform(const Transform& transform) const {
+void Shader::transform(const Transform& transform) const {
     glm::mat4 model = transform.evaluateModel();
     set("Model", model);
 }
 
-void Graphics::Shader::draw(const Mesh& mesh) const {
+void Shader::draw(const Mesh& mesh) const {
     Handle shaderHandle = handle();
     glBindVertexArray(mesh.vertexArray());
     glDrawElements(GL_TRIANGLES, mesh.indicesCount(), GL_UNSIGNED_INT, 0);

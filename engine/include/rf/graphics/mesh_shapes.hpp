@@ -4,18 +4,16 @@
 
 namespace rf {
 
-namespace Graphics {
-    class PlaneMesh : public Mesh {
-    public:
-        PlaneMesh();
-        using Mesh::Mesh;
-    };
+class PlaneMesh : public Mesh {
+public:
+    PlaneMesh();
+    using Mesh::Mesh;
+};
 
-    class CubeMesh : public Mesh {
-    public:
-        CubeMesh();
-        using Mesh::Mesh;
-    };
-}
+class CubeMesh : public Mesh {
+public:
+    CubeMesh();
+    using Mesh::Mesh;
+};
 
 } // namespace rf

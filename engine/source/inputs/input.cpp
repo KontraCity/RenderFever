@@ -4,12 +4,12 @@
 
 namespace rf {
     
-bool Inputs::IsSpecialInput(Input input) {
+bool IsSpecialInput(Input input) {
     return input == Input::Special_CursorMove
         || input == Input::Special_Scroll;
 }
 
-const char* Inputs::InputName(Input input) {
+const char* InputName(Input input) {
     switch (input) {
         // Keyboard
         case Input::Key_F1:                return "F1";
@@ -145,7 +145,7 @@ const char* Inputs::InputName(Input input) {
     }
 }
 
-Inputs::Input Inputs::GlfwMacroToInput(int input) {
+Input GlfwMacroToInput(int input) {
     switch (input) {
         // Keyboard
         case GLFW_KEY_F1:               return Input::Key_F1;
@@ -281,7 +281,7 @@ Inputs::Input Inputs::GlfwMacroToInput(int input) {
     }
 }
 
-int Inputs::InputToGlfwMacro(Input input) {
+int InputToGlfwMacro(Input input) {
     switch (input) {
         // Keyboard
         case Input::Key_F1:                return GLFW_KEY_F1;

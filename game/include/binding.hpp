@@ -29,17 +29,17 @@ public:
 public:
     static const char* TypeToDescription(Type type);
 
-    static rf::Inputs::Input TypeToInput(Type type);
+    static rf::Input TypeToInput(Type type);
 
     static void PrintBindings();
 
 private:
-    rf::Inputs::Binding::Dispatcher::Handle m_handle;
+    rf::Binding::Dispatcher::Handle m_handle;
 
 public:
     Binding() = default;
 
-    Binding(Type type, const rf::Inputs::Binding::Dispatcher::Callback& callback);
+    Binding(Type type, const rf::Binding::Dispatcher::Callback& callback);
 };
 
 } // namespace Game

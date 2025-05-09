@@ -6,7 +6,7 @@
 
 namespace rf {
 
-float Graphics::Renderer::evaluateDeltaTime() const {
+float Renderer::evaluateDeltaTime() const {
     float time = glfwGetTime();
     static float lastTime = time;
     float deltaTime = time - lastTime;
@@ -14,13 +14,13 @@ float Graphics::Renderer::evaluateDeltaTime() const {
     return deltaTime;
 }
 
-void Graphics::Renderer::clearBuffers() const {
+void Renderer::clearBuffers() const {
     glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Graphics::Renderer::run() {
-    Graphics::Window& window = Engine::Window();
+void Renderer::run() {
+    Window& window = Engine::Window();
     while (!window.shouldClose()) {
         clearBuffers();
         m_updateDispatcher->broadcast(evaluateDeltaTime());

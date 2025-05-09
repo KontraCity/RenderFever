@@ -7,7 +7,7 @@
 
 namespace rf {
 
-const char* Inputs::KeyEventName(KeyEvent event) {
+const char* KeyEventName(KeyEvent event) {
     switch (event) {
         case KeyEvent::Press:   return "Press";
         case KeyEvent::Release: return "Release";
@@ -16,7 +16,7 @@ const char* Inputs::KeyEventName(KeyEvent event) {
     }
 }
 
-Inputs::KeyEvent Inputs::GlfwMacroToKeyEvent(int event) {
+KeyEvent GlfwMacroToKeyEvent(int event) {
     switch (event) {
         case GLFW_PRESS:    return KeyEvent::Press;
         case GLFW_RELEASE:  return KeyEvent::Release;
@@ -25,7 +25,7 @@ Inputs::KeyEvent Inputs::GlfwMacroToKeyEvent(int event) {
     }
 }
 
-int Inputs::KeyEventToGlfwMacro(KeyEvent event) {
+int KeyEventToGlfwMacro(KeyEvent event) {
     switch (event) {
         case KeyEvent::Press:   return GLFW_PRESS;
         case KeyEvent::Release: return GLFW_RELEASE;
@@ -34,7 +34,7 @@ int Inputs::KeyEventToGlfwMacro(KeyEvent event) {
     }
 }
 
-bool Inputs::KeyPressed(Input input) {
+bool KeyPressed(Input input) {
     if (input == Input::None || IsSpecialInput(input)) {
         // Unknown or special inputs can't be pressed
         return false;

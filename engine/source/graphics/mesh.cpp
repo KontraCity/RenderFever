@@ -2,7 +2,7 @@
 
 namespace rf {
 
-Graphics::Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices)
+Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices)
     : m_indicesCount(indices.size()) {
     glGenVertexArrays(1, &m_vertexArray);
     glBindVertexArray(m_vertexArray);
@@ -25,7 +25,7 @@ Graphics::Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Ind
     glBindVertexArray(0);
 }
 
-Graphics::Mesh::Mesh(Mesh&& other) noexcept
+Mesh::Mesh(Mesh&& other) noexcept
     : m_vertexArray(other.m_vertexArray)
     , m_vertexBuffer(other.m_vertexBuffer)
     , m_elementBuffer(other.m_elementBuffer)
@@ -33,7 +33,7 @@ Graphics::Mesh::Mesh(Mesh&& other) noexcept
     other.reset();
 }
 
-Graphics::Mesh::~Mesh() {
+Mesh::~Mesh() {
     if (m_elementBuffer)
         glDeleteBuffers(1, &m_elementBuffer);
     if (m_vertexBuffer)
@@ -42,7 +42,7 @@ Graphics::Mesh::~Mesh() {
         glDeleteVertexArrays(1, &m_vertexArray);
 }
 
-Graphics::Mesh& Graphics::Mesh::operator=(Mesh&& other) noexcept {
+Mesh& Mesh::operator=(Mesh&& other) noexcept {
     m_vertexArray = other.m_vertexArray;
     m_vertexBuffer = other.m_vertexBuffer;
     m_elementBuffer = other.m_elementBuffer;
@@ -51,7 +51,7 @@ Graphics::Mesh& Graphics::Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-void Graphics::Mesh::reset() {
+void Mesh::reset() {
     m_vertexArray = 0;
     m_vertexBuffer = 0;
     m_elementBuffer = 0;

@@ -10,20 +10,20 @@ namespace Game {
 
 class Entity {
 public:
-    using MeshInstance = std::unique_ptr<rf::Graphics::Mesh>;
+    using MeshInstance = std::unique_ptr<rf::Mesh>;
 
 private:
     MeshInstance m_mesh;
-    rf::Graphics::Transform m_transform;
+    rf::Transform m_transform;
 
 public:
-    Entity(MeshInstance&& mesh, const rf::Graphics::Transform& transform)
+    Entity(MeshInstance&& mesh, const rf::Transform& transform)
         : m_mesh(std::move(mesh))
         , m_transform(transform)
     {}
 
 public:
-    void draw(const rf::Graphics::Shader& shader) const {
+    void draw(const rf::Shader& shader) const {
         shader.transform(m_transform);
         shader.draw(*m_mesh);
     }
@@ -36,11 +36,11 @@ public:
         return m_mesh;
     }
 
-    const rf::Graphics::Transform& transform() const {
+    const rf::Transform& transform() const {
         return m_transform;
     }
 
-    rf::Graphics::Transform& transform() {
+    rf::Transform& transform() {
         return m_transform;
     }
 };

@@ -8,17 +8,15 @@
 
 namespace rf {
 
-namespace Inputs {
-    struct Binding {
-        using Handle = int64_t;
-        using Id = uint64_t;
-        using Dispatcher = Dispatcher<const Event&>;
+struct Binding {
+    using Handle = int64_t;
+    using Id = uint64_t;
+    using Dispatcher = Dispatcher<const Event&>;
 
-        Handle handle;
-        std::string description;
-        Id id;
-        Dispatcher::Pointer dispatcher;
-    };
-}
+    Handle handle;
+    std::string description;
+    Id id;
+    Dispatcher::Pointer dispatcher;
+};
 
 } // namespace rf

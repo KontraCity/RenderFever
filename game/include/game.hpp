@@ -17,8 +17,8 @@ private:
     Entity m_cube;
     Entity m_plane;
     Player m_player;
-    rf::Graphics::Shader m_shader;
-    rf::Graphics::Renderer::UpdateDispatcher::Handle m_updateHandle;
+    rf::Shader m_shader;
+    rf::Renderer::UpdateDispatcher::Handle m_updateHandle;
 
 public:
     Game();
@@ -26,9 +26,9 @@ public:
 private:
     void onUpdate(float deltaTime);
 
-    void onAction(const rf::Inputs::Event& event);
+    void onAction(const rf::Event& event);
 
-    void onEscape(const rf::Inputs::Event& event);
+    void onEscape(const rf::Event& event);
 };
 
 } // namespace Game

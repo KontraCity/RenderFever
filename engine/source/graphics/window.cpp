@@ -6,33 +6,33 @@
 namespace rf {
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Inputs::Map& map = Engine::InputMap();
+    Map& map = Engine::InputMap();
     map.broadcastKeyEvent(key, action);
 }
 
 static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    Inputs::Map& map = Engine::InputMap();
+    Map& map = Engine::InputMap();
     map.broadcastKeyEvent(button, action);
 }
 
 static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
-    Inputs::Map& map = Engine::InputMap();
+    Map& map = Engine::InputMap();
     map.broadcastCursorMoveEvent(xPosition, yPosition);
 }
 
 static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
-    Inputs::Map& map = Engine::InputMap();
+    Map& map = Engine::InputMap();
     map.broadcastScrollEvent(xOffset, yOffset);
 }
 
-void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
+void Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
     Window* root = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     root->m_dimensions.width() = static_cast<GLsizei>(width);
     root->m_dimensions.height() = static_cast<GLsizei>(height);
     glViewport(0, 0, root->m_dimensions.width(), root->m_dimensions.height());
 }
 
-int Graphics::Window::CursorModeToGlfwMacro(CursorMode cursorMode) {
+int Window::CursorModeToGlfwMacro(CursorMode cursorMode) {
     switch (cursorMode) {
         case CursorMode::Normal:    return GLFW_CURSOR_NORMAL;
         case CursorMode::Hidden:    return GLFW_CURSOR_HIDDEN;
@@ -42,7 +42,7 @@ int Graphics::Window::CursorModeToGlfwMacro(CursorMode cursorMode) {
     }
 }
 
-Graphics::Window::Window(const std::string& title, const Dimensions& dimensions)
+Window::Window(const std::string& title, const Dimensions& dimensions)
     : m_title(title)
     , m_dimensions(dimensions) {
     if (glfwInit() != GLFW_TRUE)
@@ -74,34 +74,34 @@ Graphics::Window::Window(const std::string& title, const Dimensions& dimensions)
     glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
 }
 
-Graphics::Window::~Window() {
+Window::~Window() {
     glfwTerminate();
 }
 
-void Graphics::Window::update() {
+void Window::update() {
     glfwSwapBuffers(m_handle);
     glfwPollEvents();
 }
 
-void Graphics::Window::rename(const std::string& title) {
+void Window::rename(const std::string& title) {
     if (title == m_title)
         return;
     m_title = title;
     glfwSetWindowTitle(m_handle, title.c_str());
 }
 
-void Graphics::Window::resize(const Dimensions& dimensions) {
+void Window::resize(const Dimensions& dimensions) {
     if (dimensions == m_dimensions)
         return;
     m_dimensions = dimensions;
     glfwSetWindowSize(m_handle, dimensions.width(), dimensions.height());
 }
 
-void Graphics::Window::setShouldClose(bool shouldClose) {
+void Window::setShouldClose(bool shouldClose) {
     glfwSetWindowShouldClose(m_handle, shouldClose);
 }
 
-void Graphics::Window::setCursorMode(CursorMode cursorMode) {
+void Window::setCursorMode(CursorMode cursorMode) {
     if (m_cursorMode == cursorMode)
         return;
     m_cursorMode = cursorMode;

@@ -17,13 +17,13 @@ Player::Player()
     reset();
 }
 
-void Player::onCursorMove(const rf::Inputs::Event& event) {
-    if (event.type() != rf::Inputs::Event::Type::CursorMoveEvent)
+void Player::onCursorMove(const rf::Event& event) {
+    if (event.type() != rf::Event::Type::CursorMoveEvent)
         return;
-    const auto& cursorMoveEvent = std::get<rf::Inputs::CursorMoveEvent>(event);
+    const auto& cursorMoveEvent = std::get<rf::CursorMoveEvent>(event);
 
     // Don't move the camera if cursor is not disabled!
-    if (rf::Engine::Window().cursorMode() != rf::Graphics::Window::CursorMode::Disabled)
+    if (rf::Engine::Window().cursorMode() != rf::Window::CursorMode::Disabled)
         return;
 
     m_camera.yaw() += cursorMoveEvent.xOffset * Sensitivity::Look;
@@ -31,18 +31,18 @@ void Player::onCursorMove(const rf::Inputs::Event& event) {
     Utility::Limit(m_camera.pitch(), -89.9f, 89.9f);
 }
 
-void Player::onScroll(const rf::Inputs::Event& event) {
-    if (event.type() != rf::Inputs::Event::Type::ScrollEvent)
+void Player::onScroll(const rf::Event& event) {
+    if (event.type() != rf::Event::Type::ScrollEvent)
         return;
-    const auto& scrollEvent = std::get<rf::Inputs::ScrollEvent>(event);
+    const auto& scrollEvent = std::get<rf::ScrollEvent>(event);
 
     m_camera.zoom() += scrollEvent.yOffset * Sensitivity::Zoom;
     Utility::Limit(m_camera.zoom(), CameraZoom::Min, CameraZoom::Max);
 }
 
 void Player::onUpdate(float deltaTime) {
-    bool moveSlowly = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveSlowly));
-    bool moveQuickly = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveQuickly));
+    bool moveSlowly = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveSlowly));
+    bool moveQuickly = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveQuickly));
     float speed = 0.0f;
     if (moveSlowly && !moveQuickly)
         speed = Settings::MovementSpeed::Slow;
@@ -51,35 +51,35 @@ void Player::onUpdate(float deltaTime) {
     else
         speed = Settings::MovementSpeed::Normal;
 
-    bool moveBackward = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveBackward));
-    bool moveForward = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveForward));
+    bool moveBackward = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveBackward));
+    bool moveForward = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveForward));
     glm::vec3 direction = m_camera.evaluateDirection();
     if (!moveBackward && moveForward)
         m_camera.position() += deltaTime * speed * direction;
     else if (moveBackward && !moveForward)
         m_camera.position() -= deltaTime * speed * direction;
 
-    bool moveLeft = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveLeft));
-    bool moveRight = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveRight));
+    bool moveLeft = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveLeft));
+    bool moveRight = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveRight));
     if (!moveLeft && moveRight)
         m_camera.position() += deltaTime * speed * m_camera.evaluateRight();
     else if (moveLeft && !moveRight)
         m_camera.position() -= deltaTime * speed * m_camera.evaluateRight();
 
-    bool moveDown = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveDown));
-    bool moveUp = rf::Inputs::KeyPressed(Binding::TypeToInput(Binding::Type::MoveUp));
+    bool moveDown = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveDown));
+    bool moveUp = rf::KeyPressed(Binding::TypeToInput(Binding::Type::MoveUp));
     if (!moveDown && moveUp)
-        m_camera.position() += deltaTime * speed * rf::Graphics::CameraConst::Up;
+        m_camera.position() += deltaTime * speed * rf::CameraConst::Up;
     else if (moveDown && !moveUp)
-        m_camera.position() -= deltaTime * speed * rf::Graphics::CameraConst::Up;
+        m_camera.position() -= deltaTime * speed * rf::CameraConst::Up;
 }
 
-void Player::onReset(const rf::Inputs::Event& event) {
-    if (event.type() != rf::Inputs::Event::Type::KeyEvent)
+void Player::onReset(const rf::Event& event) {
+    if (event.type() != rf::Event::Type::KeyEvent)
         return;
-    const auto& keyEvent = std::get<rf::Inputs::KeyEvent>(event);
+    const auto& keyEvent = std::get<rf::KeyEvent>(event);
     
-    if (keyEvent == rf::Inputs::KeyEvent::Press)
+    if (keyEvent == rf::KeyEvent::Press)
         reset();
 }
 
