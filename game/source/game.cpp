@@ -8,7 +8,7 @@ namespace Game {
 Game::Game()
     : m_actionBinding(Binding::Type::Action, std::bind(&Game::onAction, this, _1))
     , m_escapeBinding(Binding::Type::Escape, std::bind(&Game::onEscape, this, _1))
-    , m_shader("shaders/vertex/main.vert", "shaders/fragment/main.frag")
+    , m_shader("resources/shaders/vertex/main.vert", "resources/shaders/fragment/main.frag")
     , m_cube(std::make_unique<rf::Graphics::CubeMesh>(), { glm::vec3(0.0f, -0.3f, 0.0f ) })
     , m_plane(std::make_unique<rf::Graphics::PlaneMesh>(), { glm::vec3(0.0f, 0.7f, 0.0f), glm::vec3(0.0f, 0.0f, 150.0f) })
     , m_updateHandle(rf::Engine::Renderer().updateDispatcher()->subscribe(std::bind(&Game::onUpdate, this, _1))) {
