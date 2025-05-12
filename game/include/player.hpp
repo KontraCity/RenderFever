@@ -26,6 +26,7 @@ private:
     rf::KeyBinding::Dispatcher::Handle m_moveQuicklyHandle;
     rf::KeyBinding::Dispatcher::Handle m_moveSlowlyHandle;
     rf::KeyBinding::Dispatcher::Handle m_resetHandle;
+    rf::KeyBinding::Dispatcher::Handle m_switchProjectionModeHandle;
     
 public:
     Player();

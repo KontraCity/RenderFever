@@ -68,8 +68,24 @@ Player::Player() {
             m_moveSlowly = false;
     });
 
-    m_resetHandle = Bind(Binding::ResetPlayer, rf::KeyAction::Press, std::bind(&Player::reset, this));
+    m_resetHandle = Bind(Binding::ResetPlayer, rf::KeyAction::Press | rf::KeyAction::Repeat, [this](rf::KeyAction action) {
+        if (action == rf::KeyAction::Press)
+            m_camera.zoom() = 1.0f;
+        else if (action == rf::KeyAction::Repeat)
+            reset();
+    });
     reset();
+
+    m_switchProjectionModeHandle = Bind(Binding::SwitchProjectionMode, rf::KeyAction::Press, [this](rf::KeyAction) {
+        switch (m_camera.projectionMode()) {
+            case rf::ProjectionMode::Perspective:
+                m_camera.projectionMode() = rf::ProjectionMode::Orthographic;
+                return;
+            case rf::ProjectionMode::Orthographic:
+                m_camera.projectionMode() = rf::ProjectionMode::Perspective;
+                return;
+        }
+    });
 }
 
 float Player::movementSpeed() const {
@@ -81,7 +97,7 @@ float Player::movementSpeed() const {
 }
 
 void Player::reset() {
-    m_camera.position() = { -3.0f, 0.0f, 0.0f };
+    m_camera.position() = { 0.0f, 0.0f, 3.0f };
     m_camera.yaw() = 0.0f;
     m_camera.pitch() = 0.0f;
     m_camera.zoom() = 1.0f;

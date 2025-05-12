@@ -1,7 +1,8 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace rf {
 
@@ -20,14 +21,10 @@ public:
 
 public:
     glm::mat4 evaluateModel() const {
-        // TODO: Transform around one axis rather than three.
-        glm::mat4 result(1.0f);
-        result = glm::translate(result, m_position);
-        result = glm::rotate(result, glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-        result = glm::rotate(result, glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-        result = glm::rotate(result, glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-        result = glm::scale(result, m_scale);
-        return result;
+        glm::mat4 translation = glm::translate(glm::mat4(1.0f), m_position);
+        glm::mat4 rotation = glm::toMat4(glm::quat(glm::radians(m_rotation)));
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scale);
+        return translation * rotation * scale;
     }
 
 public:

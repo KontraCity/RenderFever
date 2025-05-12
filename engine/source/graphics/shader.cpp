@@ -137,9 +137,12 @@ void Shader::set(const std::string& name, const glm::mat4& matrix) const {
 }
 
 void Shader::capture(const Camera& camera) const {
-    const Window::Dimensions& dimensions = Engine::Window().dimensions();
-    set("View", glm::lookAt(camera.position(), camera.position() + camera.evaluateDirection(), CameraConst::Up));
-    set("Projection", glm::perspective(glm::radians(45.0f / camera.zoom()), dimensions.evaluateRatio(), CameraConst::NearPlane, CameraConst::FarPlane));
+    glm::mat4 view = camera.evaluateView();
+    set("View", view);
+
+    float aspectRatio = Engine::Window().dimensions().evaluateRatio();
+    glm::mat4 projection = camera.evaluateProjection(aspectRatio);
+    set("Projection", projection);
 }
 
 void Shader::transform(const Transform& transform) const {

@@ -23,6 +23,7 @@ enum class Binding {
     Action,
     Escape,
     ResetPlayer,
+    SwitchProjectionMode,
 };
 
 struct BindingEntry {
@@ -32,18 +33,19 @@ struct BindingEntry {
 };
 
 constexpr auto BindingRecords = std::to_array<BindingEntry>({
-    { Binding::None,            rf::Key::None,              "None"                                  },
-    { Binding::MoveForward,     rf::Key::Key_W,             "Move forward"                          },
-    { Binding::MoveBackward,    rf::Key::Key_S,             "Move backward"                         },
-    { Binding::MoveLeft,        rf::Key::Key_A,             "Move left"                             },
-    { Binding::MoveRight,       rf::Key::Key_D,             "Move right"                            },
-    { Binding::MoveUp,          rf::Key::Key_Space,         "Move up"                               },
-    { Binding::MoveDown,        rf::Key::Key_LeftControl,   "Move down"                             },
-    { Binding::MoveQuickly,     rf::Key::Key_LeftShift,     "Move quickly"                          },
-    { Binding::MoveSlowly,      rf::Key::Key_LeftAlt,       "Move slowly"                           },
-    { Binding::Action,          rf::Key::Mouse_Button1,     "Capture cursor"                        },
-    { Binding::Escape,          rf::Key::Key_Escape,        "Release cursor / close game window"    },
-    { Binding::ResetPlayer,     rf::Key::Key_R,             "Reset player"                          },
+    { Binding::None,                    rf::Key::None,              "None"                                  },
+    { Binding::MoveForward,             rf::Key::Key_W,             "Move forward"                          },
+    { Binding::MoveBackward,            rf::Key::Key_S,             "Move backward"                         },
+    { Binding::MoveLeft,                rf::Key::Key_A,             "Move left"                             },
+    { Binding::MoveRight,               rf::Key::Key_D,             "Move right"                            },
+    { Binding::MoveUp,                  rf::Key::Key_Space,         "Move up"                               },
+    { Binding::MoveDown,                rf::Key::Key_LeftControl,   "Move down"                             },
+    { Binding::MoveQuickly,             rf::Key::Key_LeftShift,     "Move quickly"                          },
+    { Binding::MoveSlowly,              rf::Key::Key_LeftAlt,       "Move slowly"                           },
+    { Binding::Action,                  rf::Key::Mouse_Button1,     "Capture cursor"                        },
+    { Binding::Escape,                  rf::Key::Key_Escape,        "Release cursor / close game window"    },
+    { Binding::ResetPlayer,             rf::Key::Key_R,             "Reset player"                          },
+    { Binding::SwitchProjectionMode,    rf::Key::Key_P,             "Switch camera projection mode"         },
 });
 
 inline BindingEntry GetBindingEntry(Binding binding) {
