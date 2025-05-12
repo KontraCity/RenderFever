@@ -69,8 +69,9 @@ public:
     }
 
     glm::mat4 evaluateView() const {
+        glm::vec3 up = evaluateUp();
         glm::vec3 direction = evaluateDirection();
-        return glm::lookAt(m_position, m_position + direction, CameraConst::Up);
+        return glm::lookAt(m_position, m_position + direction, up);
     }
 
     glm::mat4 evaluateProjection(float aspectRatio) const {

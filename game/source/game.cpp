@@ -32,6 +32,8 @@ Game::Game()
     m_updateHandle = rf::Engine::Renderer().updateDispatcher()->subscribe([this](float deltaTime) {
         float degrees = deltaTime * 90.0f;
         m_cube.transform().rotation().x += degrees;
+        m_cube.transform().rotation().y += degrees;
+        m_cube.transform().rotation().z += degrees;
 
         m_shader.capture(m_player.camera());
         m_cube.draw(m_shader);

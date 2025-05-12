@@ -15,7 +15,6 @@ Player::Player() {
         if (rf::Engine::Window().cursorMode() == rf::Window::CursorMode::Disabled) {
             m_camera.yaw() += action.xOffset * Sensitivity::Look;
             m_camera.pitch() += action.yOffset / m_camera.zoom() * Sensitivity::Look;
-            Utility::Limit(m_camera.pitch(), -89.9f, 89.9f);
         }
     });
 
