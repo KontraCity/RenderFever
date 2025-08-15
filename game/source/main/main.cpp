@@ -3,7 +3,7 @@
 #include <rf/core/engine.hpp>
 #include <rf/core/error.hpp>
 
-#include "game.hpp"
+#include "core/game.hpp"
 
 int main() {
     try {

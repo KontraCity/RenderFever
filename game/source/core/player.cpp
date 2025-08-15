@@ -4,7 +4,7 @@
 #include <rf/inputs/input_map.hpp>
 
 #include "settings.hpp"
-#include "utility.hpp"
+#include "utility/values.hpp"
 using namespace Game::Settings;
 
 namespace Game {

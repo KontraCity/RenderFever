@@ -1,4 +1,4 @@
-#include "rf/graphics/window.hpp"
+#include "window.hpp"
 
 #include "rf/core/engine.hpp"
 #include "rf/core/error.hpp"

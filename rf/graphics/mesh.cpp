@@ -1,4 +1,4 @@
-#include "rf/graphics/mesh.hpp"
+#include "mesh.hpp"
 
 namespace rf {
 

@@ -6,7 +6,7 @@
 namespace Game {
 
 Game::Game()
-    : m_shader("resources/shaders/vertex/main.vert", "resources/shaders/fragment/main.frag")
+    : m_shader("resources/shaders/main.vert", "resources/shaders/main.frag")
     , m_cube(std::make_unique<rf::CubeMesh>(), { glm::vec3(0.0f, -0.3f, 0.0f ) })
     , m_plane(std::make_unique<rf::PlaneMesh>(), { glm::vec3(0.0f, 0.7f, 0.0f), glm::vec3(150.0f, 0.0f, 0.0f) }) {
     rf::Window& window = rf::Engine::Window();

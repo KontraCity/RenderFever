@@ -1,4 +1,4 @@
-#include "rf/graphics/renderer.hpp"
+#include "renderer.hpp"
 
 #include <GL/glew.h>
 
