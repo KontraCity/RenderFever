@@ -5,9 +5,9 @@
 
 #include "settings.hpp"
 #include "utility/values.hpp"
-using namespace Game::Settings;
+using namespace Undefined::Settings;
 
-namespace Game {
+namespace Undefined {
 
 Player::Player() {
     m_cursorMoveHandle = rf::Engine::InputMap().cursorMoveDispatcher()->subscribe([this](const rf::CursorMoveAction& action) {
@@ -102,4 +102,4 @@ void Player::reset() {
     m_camera.zoom() = 1.0f;
 }
 
-} // namespace Game
+} // namespace Undefined

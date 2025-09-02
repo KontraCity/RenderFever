@@ -7,7 +7,7 @@
 #include "entity.hpp"
 #include "player.hpp"
 
-namespace Game {
+namespace Undefined {
 
 class Game {
 private:
@@ -24,4 +24,4 @@ public:
     Game();
 };
 
-} // namespace Game
+} // namespace Undefined

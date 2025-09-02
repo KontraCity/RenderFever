@@ -7,7 +7,7 @@
 
 int main() {
     try {
-        Game::Game game;
+        Undefined::Game game;
         rf::Engine::Renderer().run();
         return 0;
     }

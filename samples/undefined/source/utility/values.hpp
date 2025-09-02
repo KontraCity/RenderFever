@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Game {
+namespace Undefined {
 
 namespace Utility {
     template <typename Type>
@@ -18,4 +18,4 @@ namespace Utility {
     }
 }
 
-} // namespace Game
+} // namespace Undefined

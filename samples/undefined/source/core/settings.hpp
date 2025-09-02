@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Game {
+namespace Undefined {
 
 namespace Settings {
     namespace MovementSpeed {
@@ -20,4 +20,4 @@ namespace Settings {
     }
 }
 
-} // namespace Game
+} // namespace Undefined

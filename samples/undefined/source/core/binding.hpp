@@ -8,7 +8,7 @@
 #include <rf/inputs/bindings.hpp>
 #include <rf/inputs/keys.hpp>
 
-namespace Game {
+namespace Undefined {
 
 enum class Binding {
     None,
@@ -62,4 +62,4 @@ void ShowBindings();
 
 rf::KeyBinding::Dispatcher::Handle Bind(Binding binding, rf::KeyAction action, const rf::KeyBinding::Dispatcher::Callback& callback);
 
-} // namespace Game
+} // namespace Undefined

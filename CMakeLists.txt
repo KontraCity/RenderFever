@@ -13,5 +13,5 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 set(Dependencies fmt::fmt frozen::frozen-headers ${OPENGL_LIBRARY} GLEW::GLEW glfw glm::glm)
 
-add_subdirectory("game/")
 add_subdirectory("rf/")
+add_subdirectory("samples/")

@@ -9,7 +9,7 @@
 #include <rf/core/engine.hpp>
 #include <rf/inputs/input_map.hpp>
 
-namespace Game {
+namespace Undefined {
 
 void ShowBindings() {
     struct Row {
@@ -61,4 +61,4 @@ rf::KeyBinding::Dispatcher::Handle Bind(Binding binding, rf::KeyAction action, c
     return handle.binding->dispatcher->subscribe(callback);
 }
 
-} // namespace Game
+} // namespace Undefined

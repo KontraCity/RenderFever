@@ -6,7 +6,7 @@
 #include <rf/graphics/mesh.hpp>
 #include <rf/graphics/shader.hpp>
 
-namespace Game {
+namespace Undefined {
 
 class Entity {
 public:
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace Game
+} // namespace Undefined

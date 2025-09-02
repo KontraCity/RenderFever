@@ -7,7 +7,7 @@
 
 #include "binding.hpp"
 
-namespace Game {
+namespace Undefined {
 
 class Player {
 private:
@@ -43,4 +43,4 @@ public:
     }
 };
 
-} // namespace Game
+} // namespace Undefined
