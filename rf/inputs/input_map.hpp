@@ -3,6 +3,8 @@
 #include <mutex>
 #include <map>
 
+#include <GL/glew.h>
+
 #include "rf/core/dispatcher.hpp"
 #include "rf/inputs/actions.hpp"
 #include "rf/inputs/bindings.hpp"
@@ -49,6 +51,10 @@ public:
 
 public:
     void update() {
+        // Make rf::Window call broadcast callbacks and fill out m_keysDown map
+        glfwPollEvents();
+
+        // We'll check the "Hold" action here
         for (const auto& keyBind : m_keyBinds) {
             if (!m_keysDown[keyBind.first] || !(keyBind.second.action & rf::KeyAction::Hold))
                 continue;

@@ -140,7 +140,7 @@ void Shader::capture(const Camera& camera) const {
     glm::mat4 view = camera.evaluateView();
     set("View", view);
 
-    float aspectRatio = Engine::Window().dimensions().evaluateRatio();
+    float aspectRatio = Engine::Window().getDimensions().evaluateRatio();
     glm::mat4 projection = camera.evaluateProjection(aspectRatio);
     set("Projection", projection);
 }
@@ -151,10 +151,12 @@ void Shader::transform(const Transform& transform) const {
 }
 
 void Shader::draw(const Mesh& mesh) const {
-    Handle shaderHandle = handle();
-    glBindVertexArray(mesh.vertexArray());
-    glDrawElements(GL_TRIANGLES, mesh.indicesCount(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    if (mesh) {
+        Handle shaderHandle = handle();
+        glBindVertexArray(mesh.vertexArray());
+        glDrawElements(GL_TRIANGLES, mesh.indicesCount(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
 
 } // namespace rf

@@ -11,7 +11,7 @@ namespace Undefined {
 
 class Player {
 private:
-    rf::Camera m_camera;
+    std::shared_ptr<rf::Camera> m_camera;
     bool m_moveQuickly = false;
     bool m_moveSlowly = false;
 
@@ -26,6 +26,7 @@ private:
     rf::KeyBinding::Dispatcher::Handle m_moveQuicklyHandle;
     rf::KeyBinding::Dispatcher::Handle m_moveSlowlyHandle;
     rf::KeyBinding::Dispatcher::Handle m_resetHandle;
+    rf::KeyBinding::Dispatcher::Handle m_toggleVSyncHandle;
     rf::KeyBinding::Dispatcher::Handle m_switchProjectionModeHandle;
     
 public:
@@ -38,7 +39,7 @@ public:
     void reset();
 
 public:
-    const rf::Camera& camera() const {
+    const std::shared_ptr<rf::Camera>& camera() const {
         return m_camera;
     }
 };

@@ -23,6 +23,8 @@ private:
     size_t m_indicesCount = 0;
 
 public:
+    Mesh() = default;
+
     Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices);
 
     Mesh(const Mesh& other) = delete;
@@ -46,6 +48,11 @@ public:
 
     size_t indicesCount() const {
         return m_indicesCount;
+    }
+
+public:
+    operator bool() const {
+        return m_indicesCount != 0;
     }
 };
 

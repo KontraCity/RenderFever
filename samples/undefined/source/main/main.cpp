@@ -7,8 +7,7 @@
 
 int main() {
     try {
-        Undefined::Game game;
-        rf::Engine::Renderer().run();
+        Undefined::Game().start();
         return 0;
     }
     catch (const rf::Error& error) {

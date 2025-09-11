@@ -1,32 +1,21 @@
 #include "renderer.hpp"
 
-#include <GL/glew.h>
-
 #include "rf/core/engine.hpp"
+#include "rf/graphics/mesh.hpp"
+#include "rf/graphics/transform.hpp"
 
 namespace rf {
 
-void Renderer::evaluateTimes() const {
-    m_time = glfwGetTime();
-    static float lastTime = m_time;
-    m_deltaTime = m_time - lastTime;
-    lastTime = m_time;
-}
+void Renderer::render() {
+    if (m_camera && m_shader) {
+        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-void Renderer::clearBuffers() const {
-    glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void Renderer::run() {
-    Window& window = Engine::Window();
-    while (!window.shouldClose()) {
-        evaluateTimes();
-        clearBuffers();
-
-        m_updateDispatcher->broadcast(m_deltaTime);
-        Engine::InputMap().update();
-        window.update();
+        m_shader->capture(*m_camera);
+        Engine::Scene().world().each([this](const rf::Transform& transform, const rf::Mesh& mesh) {
+            m_shader->transform(transform);
+            m_shader->draw(mesh);
+        });
     }
 }
 

@@ -64,6 +64,7 @@ private:
 
 private:
     GLFWwindow* m_handle = nullptr;
+    bool m_vSync = true;
     std::string m_title;
     Dimensions m_dimensions;
     CursorMode m_cursorMode = CursorMode::Normal;
@@ -78,30 +79,37 @@ public:
     ~Window();
 
 public:
-    void update();
+    void swapBuffers();
 
-    void rename(const std::string& title);
+public:
+    void setTitle(const std::string& title);
 
-    void resize(const Dimensions& dimensions);
+    void setDimensions(const Dimensions& dimensions);
+
+    void setVSync(bool vSync);
 
     void setShouldClose(bool shouldClose);
 
     void setCursorMode(CursorMode cursorMode);
 
 public:
-    const std::string& title() const {
+    const std::string& getTitle() const {
         return m_title;
     }
         
-    const Dimensions& dimensions() const {
+    const Dimensions& getDimensions() const {
         return m_dimensions;
     }
 
-    bool shouldClose() const {
+    bool getVSync() const {
+        return m_vSync;
+    }
+
+    bool getShouldClose() const {
         return glfwWindowShouldClose(m_handle);
     }
 
-    CursorMode cursorMode() const {
+    CursorMode getCursorMode() const {
         return m_cursorMode;
     }
 };

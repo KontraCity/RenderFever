@@ -1,41 +1,32 @@
 #pragma once
 
+#include <memory>
+
 #include "rf/core/dispatcher.hpp"
+#include "rf/graphics/camera.hpp"
+#include "rf/graphics/shader.hpp"
 
 namespace rf {
 
 class Renderer {
-public:
-    using UpdateDispatcher = Dispatcher<float>;
-
 private:
-    UpdateDispatcher::Pointer m_updateDispatcher;
-    mutable float m_deltaTime = 0.0f;
-    mutable float m_time = 0.0f;
+    std::shared_ptr<Camera> m_camera;
+    std::unique_ptr<Shader> m_shader;
 
 public:
     Renderer() = default;
 
-private:
-    void evaluateTimes() const;
-
-    void clearBuffers() const;
-
 public:
-    void run();
-
-public:
-    UpdateDispatcher::Pointer& updateDispatcher() {
-        return m_updateDispatcher;
+    void useCamera(const std::shared_ptr<Camera> camera) {
+        m_camera = camera;
     }
 
-    float deltaTime() const {
-        return m_deltaTime;
+    template<typename... Arguments>
+    void useShader(Arguments&&... arguments) {
+        m_shader = std::make_unique<Shader>(std::forward<Arguments>(arguments)...);
     }
 
-    float time() const {
-        return m_time;
-    }
+    void render();
 };
 
 } // namespace rf

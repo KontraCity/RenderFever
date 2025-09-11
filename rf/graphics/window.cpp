@@ -78,23 +78,29 @@ Window::~Window() {
     glfwTerminate();
 }
 
-void Window::update() {
+void Window::swapBuffers() {
     glfwSwapBuffers(m_handle);
-    glfwPollEvents();
 }
 
-void Window::rename(const std::string& title) {
-    if (title == m_title)
-        return;
-    m_title = title;
-    glfwSetWindowTitle(m_handle, title.c_str());
+void Window::setTitle(const std::string& title) {
+    if (title != m_title) {
+        m_title = title;
+        glfwSetWindowTitle(m_handle, title.c_str());
+    }
 }
 
-void Window::resize(const Dimensions& dimensions) {
-    if (dimensions == m_dimensions)
-        return;
-    m_dimensions = dimensions;
-    glfwSetWindowSize(m_handle, dimensions.width(), dimensions.height());
+void Window::setDimensions(const Dimensions& dimensions) {
+    if (dimensions != m_dimensions) {
+        m_dimensions = dimensions;
+        glfwSetWindowSize(m_handle, dimensions.width(), dimensions.height());
+    }
+}
+
+void Window::setVSync(bool vSync) {
+    if (m_vSync != vSync) {
+        m_vSync = vSync;
+        glfwSwapInterval(vSync ? 1 : 0);
+    }
 }
 
 void Window::setShouldClose(bool shouldClose) {
@@ -102,11 +108,11 @@ void Window::setShouldClose(bool shouldClose) {
 }
 
 void Window::setCursorMode(CursorMode cursorMode) {
-    if (m_cursorMode == cursorMode)
-        return;
-    m_cursorMode = cursorMode;
-    glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(cursorMode));
-    Engine::InputMap().resetLastCursorPosition();
+    if (m_cursorMode != cursorMode) {
+        m_cursorMode = cursorMode;
+        glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(cursorMode));
+        Engine::InputMap().resetLastCursorPosition();
+    }
 }
 
 } // namespace rf

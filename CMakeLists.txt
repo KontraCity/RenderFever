@@ -11,7 +11,16 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-set(Dependencies fmt::fmt frozen::frozen-headers ${OPENGL_LIBRARY} GLEW::GLEW glfw glm::glm)
+find_package(flecs CONFIG REQUIRED)
+set(Dependencies
+    fmt::fmt
+    frozen::frozen-headers
+    ${OPENGL_LIBRARY}
+    GLEW::GLEW
+    glfw
+    glm::glm
+    flecs::flecs_static
+)
 
 add_subdirectory("rf/")
 add_subdirectory("samples/")
