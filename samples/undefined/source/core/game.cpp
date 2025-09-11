@@ -3,7 +3,7 @@
 #include <rf/core/engine.hpp>
 #include <rf/graphics/mesh_shapes.hpp>
 
-namespace Game {
+namespace Undefined {
 
 Game::Game()
     : m_shader("resources/shaders/main.vert", "resources/shaders/main.frag")
@@ -43,4 +43,4 @@ Game::Game()
     ShowBindings();
 }
 
-} // namespace Game
+} // namespace Undefined
