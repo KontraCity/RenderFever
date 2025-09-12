@@ -116,9 +116,9 @@ float Player::movementSpeed() const {
 
 void Player::reset() {
     auto camera = rf::Engine::Scene().get<rf::Camera>();
-    camera->position() = { 0.0f, 0.0f, 3.0f };
-    camera->yaw() = 0.0f;
-    camera->pitch() = 0.0f;
+    camera->position() = { -10.0f, 10.0f, -10.0f };
+    camera->yaw() = 135.0f;
+    camera->pitch() = -37.5f;
     camera->zoom() = 1.0f;
 }
 

@@ -106,37 +106,42 @@ void Shader::free(bool onlyFreeShaders) {
     }
 }
 
-void Shader::set(const std::string& name, bool boolean) const {
-    Handle shaderHandle = handle();
+void Shader::set(const std::string& name, bool boolean) {
+    use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, static_cast<int>(boolean));
 }
 
-void Shader::set(const std::string& name, int integer) const {
-    Handle shaderHandle = handle();
+void Shader::set(const std::string& name, int integer) {
+    use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, integer);
 }
 
-void Shader::set(const std::string& name, float real) const {
-    Handle shaderHandle = handle();
+void Shader::set(const std::string& name, float real) {
+    use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1f(location, real);
 }
 
-void Shader::set(const std::string& name, const glm::vec3& vector) const {
-    Handle shaderHandle = handle();
+void Shader::set(const std::string& name, const glm::vec3& vector) {
+    use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform3fv(location, 1, glm::value_ptr(vector));
 }
 
-void Shader::set(const std::string& name, const glm::mat4& matrix) const {
-    Handle shaderHandle = handle();
+void Shader::set(const std::string& name, const glm::mat4& matrix) {
+    use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::capture(const Camera& camera) const {
+void Shader::set(const std::string& name, const Texture& texture, int id) {
+    texture.bind(id);
+    set(name, id);
+}
+
+void Shader::capture(const Camera& camera) {
     glm::mat4 view = camera.evaluateView();
     set("View", view);
 
@@ -145,14 +150,22 @@ void Shader::capture(const Camera& camera) const {
     set("Projection", projection);
 }
 
-void Shader::transform(const Transform& transform) const {
+void Shader::transform(const Transform& transform) {
     glm::mat4 model = transform.evaluateModel();
     set("Model", model);
 }
 
+void Shader::material(const Material& material) {
+    if (material.texture)
+        set("Material.texture", *material.texture, 0);
+    if (material.specular)
+        set("Material.specular", *material.specular, 1);
+    set("Material.shininess", material.shininess);
+}
+
 void Shader::draw(const Mesh& mesh) const {
     if (mesh) {
-        Handle shaderHandle = handle();
+        use();
         glBindVertexArray(mesh.vertexArray());
         glDrawElements(GL_TRIANGLES, mesh.indicesCount(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

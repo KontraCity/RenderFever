@@ -23,9 +23,9 @@ private:
     size_t m_indicesCount = 0;
 
 public:
-    Mesh() = default;
-
     Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices);
+
+    Mesh() = default;
 
     Mesh(const Mesh& other) = delete;
 

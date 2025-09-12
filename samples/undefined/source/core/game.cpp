@@ -1,7 +1,10 @@
 #include "game.hpp"
 
 #include <rf/core/engine.hpp>
+#include <rf/graphics/material.hpp>
 #include <rf/graphics/meshes.hpp>
+
+#include "utility/random.hpp"
 
 namespace Undefined {
 
@@ -20,19 +23,27 @@ static void OnEscape(rf::KeyAction) {
 }
 
 static void SceneSetup(rf::Scene& scene) {
-    for (int x = 0; x < 100; x += 10) {
-        for (int z = 0; z < 100; z += 10) {
-            rf::Entity& cube = scene.newEntity();
-            cube.setComponent<rf::DrawComponent>({ { glm::vec3(x, 0.0f, z) }, rf::Meshes::Cube() });
-            cube.setComponent<rf::UpdateComponent>({ [](rf::Entity& entity, float deltaTime) {
-                auto component = entity.getComponent<rf::DrawComponent>();
-                if (component) {
-                    float degrees = deltaTime * 90.0f;
-                    component->transform.rotation().x += degrees;
-                    component->transform.rotation().y += degrees;
-                    component->transform.rotation().z += degrees;
-                }
-            } });
+    rf::Material material = {};
+    material.texture = std::make_shared<rf::Texture>("resources/textures/container/texture.png", rf::Texture::Type::Texture);
+    material.specular = std::make_shared<rf::Texture>("resources/textures/container/specular.png", rf::Texture::Type::Specular);
+    material.shininess = 32.0f;
+
+    const float scale = 1.25f;
+    for (int x = 0; x < 10; x += 1) {
+        for (int y = 0; y < 10; y += 1) {
+            for (int z = 0; z < 10; z += 1) {
+                rf::Entity& cube = scene.newEntity();
+                cube.setComponent<rf::DrawComponent>({ { glm::vec3(x * scale, -y * scale, z * scale) }, material, rf::Meshes::Cube() });
+                cube.setComponent<rf::UpdateComponent>({ [](rf::Entity& entity, float deltaTime) {
+                    auto component = entity.getComponent<rf::DrawComponent>();
+                    if (component) {
+                        float degrees = deltaTime * 90.0f * Utility::Random(0.0f, 2.0f);
+                        component->transform.rotation().x += degrees * Utility::Random(0.0f, 2.0f);
+                        component->transform.rotation().y += degrees * Utility::Random(0.0f, 2.0f);
+                        component->transform.rotation().z += degrees * Utility::Random(0.0f, 2.0f);
+                    }
+                } });
+            }
         }
     }
 }

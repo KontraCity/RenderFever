@@ -5,24 +5,14 @@
 #include <GL/glew.h>
 
 #include "rf/graphics/camera.hpp"
+#include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
+#include "rf/graphics/texture.hpp"
 #include "rf/graphics/transform.hpp"
 
 namespace rf {
 
 class Shader {
-public:
-    class Handle {
-    public:
-        Handle(GLuint shaderProgram) {
-            glUseProgram(shaderProgram);
-        }
-
-        ~Handle() {
-            glUseProgram(0);
-        }
-    };
-
 private:
     GLuint m_vertexShader = 0;
     GLuint m_fragmentShader = 0;
@@ -41,26 +31,30 @@ public:
 private:
     void free(bool onlyFreeShaders = false);
 
-    void set(const std::string& name, bool boolean) const;
+    void set(const std::string& name, bool boolean);
 
-    void set(const std::string& name, int integer) const;
+    void set(const std::string& name, int integer);
 
-    void set(const std::string& name, float real) const;
+    void set(const std::string& name, float real);
 
-    void set(const std::string& name, const glm::vec3& vector) const;
+    void set(const std::string& name, const glm::vec3& vector);
 
-    void set(const std::string& name, const glm::mat4& matrix) const;
+    void set(const std::string& name, const glm::mat4& matrix);
+
+    void set(const std::string& name, const Texture& texture, int id = 0);
 
 public:
-    void capture(const Camera& camera) const;
+    void capture(const Camera& camera);
 
-    void transform(const Transform& transform) const;
+    void transform(const Transform& transform);
+
+    void material(const Material& material);
 
     void draw(const Mesh& mesh) const;
-
+     
 public:
-    Handle handle() const {
-        return { m_shaderProgram };
+    void use() const {
+        glUseProgram(m_shaderProgram);
     }
 };
 

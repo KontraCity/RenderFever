@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include "rf/core/engine.hpp"
+#include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
 #include "rf/graphics/transform.hpp"
 #include "rf/world/entity.hpp"
@@ -16,6 +17,7 @@ void Renderer::render() {
         m_shader->capture(*scene.get<Camera>().get());
         scene.each([this](const DrawComponent& draw) {
             m_shader->transform(draw.transform);
+            m_shader->material(draw.material);
             m_shader->draw(draw.mesh);
         });
     }

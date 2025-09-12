@@ -3,6 +3,7 @@
 #include <flecs.h>
 
 #include "rf/graphics/camera.hpp"
+#include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
 #include "rf/graphics/transform.hpp"
 
@@ -70,6 +71,7 @@ struct CameraComponent {
 
 struct DrawComponent {
     Transform transform;
+    Material material;
     Mesh mesh;
 };
 
