@@ -5,6 +5,8 @@
 
 #include "core/game.hpp"
 
+#include <rf/graphics/lighting.hpp>
+
 int main() {
     try {
         Undefined::Game().start();

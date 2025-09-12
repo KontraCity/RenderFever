@@ -47,6 +47,11 @@ public:
     }
 
     template <typename ComponentType>
+    void set(ComponentType&& value) {
+        m_world.set<ComponentType>(std::forward<ComponentType>(value));
+    }
+
+    template <typename ComponentType>
     const ComponentType* get() const {
         return m_world.singleton<ComponentType>().get<ComponentType>();
     }

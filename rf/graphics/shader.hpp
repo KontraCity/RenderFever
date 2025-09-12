@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 
 #include "rf/graphics/camera.hpp"
+#include "rf/graphics/lighting.hpp"
 #include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
 #include "rf/graphics/texture.hpp"
@@ -43,12 +44,26 @@ private:
 
     void set(const std::string& name, const Texture& texture, int id = 0);
 
+    void set(const std::string& name, const Lighting::Color& color);
+
+    void set(const std::string& name, const Lighting::Properties& properties);
+
+    void set(const std::string& name, const Lighting::Attenuation& attenuation);
+
+    void set(const std::string& name, const Lighting::Cutoff& cutoff);
+
 public:
     void capture(const Camera& camera);
 
     void transform(const Transform& transform);
 
     void material(const Material& material);
+
+    void illuminate(const PointLight& light);
+
+    void illuminate(const DirectionalLight& light);
+    
+    void illuminate(const SpotLight& light);
 
     void draw(const Mesh& mesh) const;
      

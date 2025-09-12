@@ -23,6 +23,10 @@ static void OnEscape(rf::KeyAction) {
 }
 
 static void SceneSetup(rf::Scene& scene) {
+    rf::PointLight light = {};
+    light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    scene.set(light);
+
     rf::Material material = {};
     material.texture = std::make_shared<rf::Texture>("resources/textures/container/texture.png", rf::Texture::Type::Texture);
     material.specular = std::make_shared<rf::Texture>("resources/textures/container/specular.png", rf::Texture::Type::Specular);

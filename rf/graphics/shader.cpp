@@ -141,6 +141,30 @@ void Shader::set(const std::string& name, const Texture& texture, int id) {
     set(name, id);
 }
 
+void Shader::set(const std::string& name, const Lighting::Color& color) {
+    float red = color.red / 255.0f;
+    float green = color.green / 255.0f;
+    float blue = color.blue / 255.0f;
+    set(name, glm::vec3{ red, green, blue });
+}
+
+void Shader::set(const std::string& name, const Lighting::Properties& properties) {
+    set(name + ".ambient", properties.ambient);
+    set(name + ".diffuse", properties.diffuse);
+    set(name + ".specular", properties.specular);
+}
+
+void Shader::set(const std::string& name, const Lighting::Attenuation& attenuation) {
+    set(name + ".constant", attenuation.constant);
+    set(name + ".linear", attenuation.linear);
+    set(name + ".quadratic", attenuation.quadratic);
+}
+
+void Shader::set(const std::string& name, const Lighting::Cutoff& cutoff) {
+    set(name + ".inner", glm::cos(glm::radians(cutoff.inner)));
+    set(name + ".outer", glm::cos(glm::radians(cutoff.outer)));
+}
+
 void Shader::capture(const Camera& camera) {
     glm::mat4 view = camera.evaluateView();
     set("View", view);
@@ -161,6 +185,28 @@ void Shader::material(const Material& material) {
     if (material.specular)
         set("Material.specular", *material.specular, 1);
     set("Material.shininess", material.shininess);
+}
+
+void Shader::illuminate(const PointLight& light) {
+    set("PointLight.position", light.position);
+    set("PointLight.color", light.color);
+    set("PointLight.properties", light.properties);
+    set("PointLight.attenuation", light.attenuation);
+}
+
+void Shader::illuminate(const DirectionalLight& light) {
+    set("DirectionalLight.direction", light.direction);
+    set("DirectionalLight.color", light.color);
+    set("DirectionalLight.properties", light.properties);
+}
+
+void Shader::illuminate(const SpotLight& light) {
+    set("SpotLight.position", light.position);
+    set("SpotLight.direction", light.direction);
+    set("SpotLight.color", light.color);
+    set("SpotLight.properties", light.properties);
+    set("SpotLight.attenuation", light.attenuation);
+    set("SpotLight.cutoff", light.cutoff);
 }
 
 void Shader::draw(const Mesh& mesh) const {
