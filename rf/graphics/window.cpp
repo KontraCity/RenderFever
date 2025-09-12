@@ -103,6 +103,13 @@ void Window::setVSync(bool vSync) {
     }
 }
 
+void Window::setWireframeMode(bool wireframeMode) {
+    if (m_wireframeMode != wireframeMode) {
+        m_wireframeMode = wireframeMode;
+        glPolygonMode(GL_FRONT_AND_BACK, wireframeMode ? GL_LINE : GL_FILL);
+    }
+}
+
 void Window::setShouldClose(bool shouldClose) {
     glfwSetWindowShouldClose(m_handle, shouldClose);
 }

@@ -65,6 +65,7 @@ private:
 private:
     GLFWwindow* m_handle = nullptr;
     bool m_vSync = true;
+    bool m_wireframeMode = false;
     std::string m_title;
     Dimensions m_dimensions;
     CursorMode m_cursorMode = CursorMode::Normal;
@@ -88,6 +89,8 @@ public:
 
     void setVSync(bool vSync);
 
+    void setWireframeMode(bool wireframeMode);
+
     void setShouldClose(bool shouldClose);
 
     void setCursorMode(CursorMode cursorMode);
@@ -103,6 +106,10 @@ public:
 
     bool getVSync() const {
         return m_vSync;
+    }
+
+    bool getWireframeMode() const {
+        return m_wireframeMode;
     }
 
     bool getShouldClose() const {

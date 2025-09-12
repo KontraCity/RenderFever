@@ -52,13 +52,14 @@ static void UpdateDeltaTimeDisplay(float time, float deltaTime, Window& window) 
 std::unique_ptr<Engine> Engine::Instance(new Engine);
 
 void Engine::run() {
+    m_scene.start();
     for (size_t frame = 0; !m_window.getShouldClose(); ++frame) {
         float time = glfwGetTime();
         m_deltaTime = EvaluateDeltaTime(time);
         UpdateDeltaTimeDisplay(time, m_deltaTime, m_window);
 
         m_inputMap.update();
-        m_scene.update();
+        m_scene.update(m_deltaTime);
         m_renderer.render();
         m_window.swapBuffers();
     }

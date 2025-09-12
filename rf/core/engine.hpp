@@ -2,10 +2,10 @@
 
 #include <memory>
 
-#include "rf/core/scene.hpp"
 #include "rf/graphics/renderer.hpp"
 #include "rf/graphics/window.hpp"
 #include "rf/inputs/input_map.hpp"
+#include "rf/world/scene.hpp"
 
 namespace rf {
 

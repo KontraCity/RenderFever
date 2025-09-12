@@ -6,5 +6,5 @@ add_library(RenderFever STATIC
     "graphics/renderer.cpp"
     "graphics/shader.cpp"
     "graphics/window.cpp"
-)
+  )
 target_link_libraries(RenderFever PRIVATE ${Dependencies})

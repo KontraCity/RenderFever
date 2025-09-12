@@ -24,6 +24,7 @@ enum class Binding {
     Escape,
     ResetPlayer,
     ToggleVSync,
+    ToggleWireframeMode,
     SwitchProjectionMode,
 };
 
@@ -46,7 +47,8 @@ constexpr auto BindingRecords = std::to_array<BindingEntry>({
     { Binding::Action,                  rf::Key::Mouse_Button1,     "Capture cursor"                        },
     { Binding::Escape,                  rf::Key::Key_Escape,        "Release cursor / close game window"    },
     { Binding::ResetPlayer,             rf::Key::Key_R,             "Reset player"                          },
-    { Binding::ToggleVSync,             rf::Key::Key_U,             "Toggle vertical synchronization"       },
+    { Binding::ToggleVSync,             rf::Key::Key_I,             "Toggle vertical synchronization"       },
+    { Binding::ToggleWireframeMode,     rf::Key::Key_O,             "Toggle wireframe mode"                 },
     { Binding::SwitchProjectionMode,    rf::Key::Key_P,             "Switch camera projection mode"         },
 });
 

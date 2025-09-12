@@ -20,13 +20,21 @@ static void OnEscape(rf::KeyAction) {
 }
 
 static void SceneSetup(rf::Scene& scene) {
-    auto cube = scene.world().entity();
-    cube.set<rf::Mesh>(rf::Meshes::Cube());
-    cube.set<rf::Transform>({ glm::vec3(0.0f, -0.3f, 0.0f) });
-
-    auto plane = scene.world().entity();
-    plane.set<rf::Mesh>(rf::Meshes::Plane());
-    plane.set<rf::Transform>({ glm::vec3(0.0f, 0.7f, 0.0f), glm::vec3(150.0f, 0.0f, 0.0f) });
+    for (int x = 0; x < 100; x += 10) {
+        for (int z = 0; z < 100; z += 10) {
+            rf::Entity& cube = scene.newEntity();
+            cube.setComponent<rf::DrawComponent>({ { glm::vec3(x, 0.0f, z) }, rf::Meshes::Cube() });
+            cube.setComponent<rf::UpdateComponent>({ [](rf::Entity& entity, float deltaTime) {
+                auto component = entity.getComponent<rf::DrawComponent>();
+                if (component) {
+                    float degrees = deltaTime * 90.0f;
+                    component->transform.rotation().x += degrees;
+                    component->transform.rotation().y += degrees;
+                    component->transform.rotation().z += degrees;
+                }
+            } });
+        }
+    }
 }
 
 Game::Game()
@@ -36,7 +44,6 @@ Game::Game()
     SceneSetup(scene);
 
     rf::Renderer& renderer = rf::Engine::Renderer();
-    renderer.useCamera(m_player.camera());
     renderer.useShader("resources/shaders/main.vert", "resources/shaders/main.frag");
 
     rf::Window& window = rf::Engine::Window();

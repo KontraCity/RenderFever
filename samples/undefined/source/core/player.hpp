@@ -1,7 +1,5 @@
 #pragma once
 
-#include <rf/graphics/camera.hpp>
-#include <rf/graphics/renderer.hpp>
 #include <rf/inputs/actions.hpp>
 #include <rf/inputs/input_map.hpp>
 
@@ -11,7 +9,6 @@ namespace Undefined {
 
 class Player {
 private:
-    std::shared_ptr<rf::Camera> m_camera;
     bool m_moveQuickly = false;
     bool m_moveSlowly = false;
 
@@ -27,6 +24,7 @@ private:
     rf::KeyBinding::Dispatcher::Handle m_moveSlowlyHandle;
     rf::KeyBinding::Dispatcher::Handle m_resetHandle;
     rf::KeyBinding::Dispatcher::Handle m_toggleVSyncHandle;
+    rf::KeyBinding::Dispatcher::Handle m_toggleWireframeModeHandle;
     rf::KeyBinding::Dispatcher::Handle m_switchProjectionModeHandle;
     
 public:
@@ -37,11 +35,6 @@ private:
 
 public:
     void reset();
-
-public:
-    const std::shared_ptr<rf::Camera>& camera() const {
-        return m_camera;
-    }
 };
 
 } // namespace Undefined
