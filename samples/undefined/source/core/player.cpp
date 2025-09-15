@@ -1,6 +1,7 @@
 #include "player.hpp"
 
 #include <rf/core/engine.hpp>
+#include <rf/graphics/meshes.hpp>
 #include <rf/inputs/input_map.hpp>
 
 #include "settings.hpp"
@@ -83,6 +84,30 @@ Player::Player() {
     });
     reset();
 
+    m_toggleVSyncHandle = Bind(Binding::SpawnLight, rf::KeyAction::Press, [this](rf::KeyAction) {
+        rf::Scene& scene = rf::Engine::Scene();
+        auto camera = scene.get<rf::Camera>();
+
+        rf::Light lightComponent = {};
+        lightComponent.type = rf::LightType::SpotLight;
+        lightComponent.position = camera->position();
+        lightComponent.direction = camera->evaluateDirection();
+        lightComponent.spotInnerCutoff = 7.0f;
+        lightComponent.spotOuterCutoff = 10.0f;
+
+        rf::Entity& light = scene.newEntity();
+        light.setComponent<rf::Light>(std::move(lightComponent));
+
+
+        rf::Transform transform;
+        transform.position() = camera->position();
+        transform.rotation() = { camera->pitch(), -camera->yaw(), 0.0f };
+        transform.scale() = { 0.1f, 0.1f, 0.4f };
+
+        rf::Entity& cube = scene.newEntity();
+        cube.setComponent<rf::DrawComponent>({ rf::Shader::Type::Light, transform, {}, rf::Meshes::Cube()});
+    });
+
     m_toggleVSyncHandle = Bind(Binding::ToggleVSync, rf::KeyAction::Press, [this](rf::KeyAction) {
         rf::Window& window = rf::Engine::Window();
         window.setVSync(!window.getVSync());
@@ -116,8 +141,8 @@ float Player::movementSpeed() const {
 
 void Player::reset() {
     auto camera = rf::Engine::Scene().get<rf::Camera>();
-    camera->position() = { -10.0f, 10.0f, -10.0f };
-    camera->yaw() = 135.0f;
+    camera->position() = { -2.0f, 2.0f, 2.0f };
+    camera->yaw() = 45.0f;
     camera->pitch() = -37.5f;
     camera->zoom() = 1.0f;
 }

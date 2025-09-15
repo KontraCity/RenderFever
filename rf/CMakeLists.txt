@@ -7,7 +7,8 @@ add_library(RenderFever STATIC
     "graphics/meshes.cpp"
     "graphics/renderer.cpp"
     "graphics/shader.cpp"
+    "graphics/storage.cpp"
     "graphics/texture.cpp" 
     "graphics/window.cpp"
- )
+)
 target_link_libraries(RenderFever PRIVATE ${Dependencies})

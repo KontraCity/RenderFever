@@ -31,8 +31,6 @@ public:
     Image& operator=(Image&& other) noexcept;
 
 private:
-    void reset();
-
     void free();
 
 public:

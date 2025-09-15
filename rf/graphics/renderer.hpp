@@ -5,21 +5,38 @@
 #include "rf/core/dispatcher.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/shader.hpp"
+#include "rf/graphics/storage.hpp"
 
 namespace rf {
 
 class Renderer {
+public:
+    struct Config {
+        Shader::Config mainShaderConfig;
+        Shader::Config lightShaderConfig;
+        size_t lightSourcesReserve = 1000;
+    };
+
 private:
-    std::unique_ptr<Shader> m_shader;
+    bool m_init = false;
+    std::unique_ptr<Shader> m_mainShader;
+    std::unique_ptr<Shader> m_lightShader;
+    std::unique_ptr<Storage> m_lightStorage;
 
 public:
     Renderer() = default;
 
+private:
+    void clear();
+
+    void capture();
+
+    void illuminate();
+
+    void draw();
+
 public:
-    template<typename... Arguments>
-    void useShader(Arguments&&... arguments) {
-        m_shader = std::make_unique<Shader>(std::forward<Arguments>(arguments)...);
-    }
+    void init(const Config& config);
 
     void render();
 };

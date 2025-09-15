@@ -38,7 +38,7 @@ public:
     Texture& operator=(Texture&& other) noexcept;
 
 private:
-    void reset();
+    void free();
 
 public:
     void setFiltering(int direction, int mode);

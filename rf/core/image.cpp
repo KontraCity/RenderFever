@@ -18,7 +18,10 @@ Image::Image(Image&& other) noexcept
     , m_width(other.m_width)
     , m_height(other.m_height)
     , m_channels(other.m_channels) {
-    other.reset();
+    other.m_data = nullptr;
+    other.m_width = 0;
+    other.m_height = 0;
+    other.m_channels = 0;
 }
 
 Image::~Image() {
@@ -26,19 +29,19 @@ Image::~Image() {
 }
 
 Image& Image::operator=(Image&& other) noexcept {
+    free();
+    
     m_data = other.m_data;
     m_width = other.m_width;
     m_height = other.m_height;
     m_channels = other.m_channels;
-    other.reset();
-    return *this;
-}
 
-void Image::reset() {
-    m_data = nullptr;
-    m_width = 0;
-    m_height = 0;
-    m_channels = 0;
+    other.m_data = nullptr;
+    other.m_width = 0;
+    other.m_height = 0;
+    other.m_channels = 0;
+
+    return *this;
 }
 
 void Image::free() {

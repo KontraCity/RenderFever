@@ -39,7 +39,7 @@ public:
     Mesh& operator=(Mesh&& other) noexcept;
 
 private:
-    void reset();
+    void free();
 
 public:
     GLuint vertexArray() const {

@@ -23,6 +23,7 @@ private:
     rf::KeyBinding::Dispatcher::Handle m_moveQuicklyHandle;
     rf::KeyBinding::Dispatcher::Handle m_moveSlowlyHandle;
     rf::KeyBinding::Dispatcher::Handle m_resetHandle;
+    rf::KeyBinding::Dispatcher::Handle m_spawnLightHandle;
     rf::KeyBinding::Dispatcher::Handle m_toggleVSyncHandle;
     rf::KeyBinding::Dispatcher::Handle m_toggleWireframeModeHandle;
     rf::KeyBinding::Dispatcher::Handle m_switchProjectionModeHandle;

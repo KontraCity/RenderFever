@@ -5,6 +5,7 @@
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
+#include "rf/graphics/shader.hpp"
 #include "rf/graphics/transform.hpp"
 
 namespace rf {
@@ -70,6 +71,7 @@ struct CameraComponent {
 };
 
 struct DrawComponent {
+    Shader::Type shaderType;
     Transform transform;
     Material material;
     Mesh mesh;

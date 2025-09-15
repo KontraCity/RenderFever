@@ -2,55 +2,47 @@
 
 #include <cstdint>
 
+#include <GL/glew.h>
+
 #include <glm/glm.hpp>
 
 namespace rf {
 
-namespace Lighting {
-    struct Color {
-        uint8_t red = 255;
-        uint8_t green = 255;
-        uint8_t blue = 255;
-    };
-
-    struct Properties {
-        float ambient = 0.2f;
-        float diffuse = 0.5f;
-        float specular = 1.0f;
-    };
-
-    struct Attenuation {
-        float constant = 0.2f;
-        float linear = 0.09f;
-        float quadratic = 0.032f;
-    };
-
-    struct Cutoff {
-        float inner = 10.0f;
-        float outer = 12.0f;
+static glm::vec3 VectorColor(uint8_t red, uint8_t green, uint8_t blue) {
+    return {
+        red   / 255.0f,
+        green / 255.0f,
+        blue  / 255.0f,
     };
 }
 
-struct PointLight {
-    glm::vec3 position = {};
-    Lighting::Color color = {};
-    Lighting::Properties properties = {};
-    Lighting::Attenuation attenuation = {};
+enum class LightType : GLint {
+    DirectionalLight = 0,
+    PointLight       = 1,
+    SpotLight        = 2,
 };
 
-struct DirectionalLight {
-    glm::vec3 direction = {};
-    Lighting::Color color = {};
-    Lighting::Properties properties = {};
-};
+struct Light {
+    glm::vec3 position  = { 0.0f, 0.0f, 0.0f };     // Point and spot lights only
+    float _padding1;                                // [Padding, unused]
+    glm::vec3 direction = { 1.0f, 0.0f, 0.0f };     // Directional and spot lights only
+    float _padding2;                                // [Padding, unused]
+    glm::vec3 color     = { 1.0f, 1.0f, 1.0f };
+    LightType type = LightType::DirectionalLight;
 
-struct SpotLight {
-    glm::vec3 position = {};
-    glm::vec3 direction = {};
-    Lighting::Color color = {};
-    Lighting::Properties properties = {};
-    Lighting::Attenuation attenuation = {};
-    Lighting::Cutoff cutoff = {};
+    // Properties
+    float ambientProperty  = 0.2f;
+    float diffuseProperty  = 0.5f;
+    float specularProperty = 1.0f;
+
+    // Attenuation
+    float constantAttenuation  = 0.2f;              // Point and spot lights only
+    float linearAttenuation    = 0.09f;             // Point and spot lights only
+    float quadraticAttenuation = 0.032f;            // Point and spot lights only
+
+    // Cutoff
+    float spotInnerCutoff = 10.0f;                  // Spot light only
+    float spotOuterCutoff = 12.0f;                  // Spot light only
 };
 
 } // namespace rf

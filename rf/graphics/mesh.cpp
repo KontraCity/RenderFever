@@ -30,31 +30,48 @@ Mesh::Mesh(Mesh&& other) noexcept
     , m_vertexBuffer(other.m_vertexBuffer)
     , m_elementBuffer(other.m_elementBuffer)
     , m_indicesCount(other.m_indicesCount) {
-    other.reset();
+    other.m_vertexArray = 0;
+    other.m_vertexBuffer = 0;
+    other.m_elementBuffer = 0;
+    other.m_indicesCount = 0;
 }
 
 Mesh::~Mesh() {
-    if (m_elementBuffer)
-        glDeleteBuffers(1, &m_elementBuffer);
-    if (m_vertexBuffer)
-        glDeleteBuffers(1, &m_vertexBuffer);
-    if (m_vertexArray)
-        glDeleteVertexArrays(1, &m_vertexArray);
+    free();
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
+    free();
+
     m_vertexArray = other.m_vertexArray;
     m_vertexBuffer = other.m_vertexBuffer;
     m_elementBuffer = other.m_elementBuffer;
     m_indicesCount = other.m_indicesCount;
-    other.reset();
+
+    other.m_vertexArray = 0;
+    other.m_vertexBuffer = 0;
+    other.m_elementBuffer = 0;
+    other.m_indicesCount = 0;
+
     return *this;
 }
 
-void Mesh::reset() {
-    m_vertexArray = 0;
-    m_vertexBuffer = 0;
-    m_elementBuffer = 0;
+void Mesh::free() {
+    if (m_elementBuffer) {
+        glDeleteBuffers(1, &m_elementBuffer);
+        m_elementBuffer = 0;
+    }
+
+    if (m_vertexBuffer) {
+        glDeleteBuffers(1, &m_vertexBuffer);
+        m_vertexBuffer = 0;
+    }
+
+    if (m_vertexArray) {
+        glDeleteVertexArrays(1, &m_vertexArray);
+        m_vertexArray = 0;
+    }
+
     m_indicesCount = 0;
 }
 

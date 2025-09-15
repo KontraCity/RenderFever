@@ -82,44 +82,49 @@ void Window::swapBuffers() {
     glfwSwapBuffers(m_handle);
 }
 
-void Window::setTitle(const std::string& title) {
-    if (title != m_title) {
-        m_title = title;
-        glfwSetWindowTitle(m_handle, title.c_str());
-    }
+void Window::setTitle(const std::string& newTitle) {
+    if (newTitle == m_title)
+        return;
+
+    m_title = newTitle;
+    glfwSetWindowTitle(m_handle, newTitle.c_str());
 }
 
-void Window::setDimensions(const Dimensions& dimensions) {
-    if (dimensions != m_dimensions) {
-        m_dimensions = dimensions;
-        glfwSetWindowSize(m_handle, dimensions.width(), dimensions.height());
-    }
+void Window::setDimensions(const Dimensions& newDimensions) {
+    if (newDimensions == m_dimensions)
+        return;
+
+    m_dimensions = newDimensions;
+    glfwSetWindowSize(m_handle, newDimensions.width(), newDimensions.height());
 }
 
-void Window::setVSync(bool vSync) {
-    if (m_vSync != vSync) {
-        m_vSync = vSync;
-        glfwSwapInterval(vSync ? 1 : 0);
-    }
+void Window::setVSync(bool newVSync) {
+    if (newVSync == m_vSync)
+        return;
+
+    m_vSync = newVSync;
+    glfwSwapInterval(newVSync ? 1 : 0);
 }
 
-void Window::setWireframeMode(bool wireframeMode) {
-    if (m_wireframeMode != wireframeMode) {
-        m_wireframeMode = wireframeMode;
-        glPolygonMode(GL_FRONT_AND_BACK, wireframeMode ? GL_LINE : GL_FILL);
-    }
+void Window::setWireframeMode(bool newWireframeMode) {
+    if (newWireframeMode == m_wireframeMode)
+        return;
+
+    m_wireframeMode = newWireframeMode;
+    glPolygonMode(GL_FRONT_AND_BACK, newWireframeMode ? GL_LINE : GL_FILL);
 }
 
-void Window::setShouldClose(bool shouldClose) {
-    glfwSetWindowShouldClose(m_handle, shouldClose);
+void Window::setShouldClose(bool newShouldClose) {
+    glfwSetWindowShouldClose(m_handle, newShouldClose);
 }
 
-void Window::setCursorMode(CursorMode cursorMode) {
-    if (m_cursorMode != cursorMode) {
-        m_cursorMode = cursorMode;
-        glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(cursorMode));
-        Engine::InputMap().resetLastCursorPosition();
-    }
+void Window::setCursorMode(CursorMode newCursorMode) {
+    if (newCursorMode == m_cursorMode)
+        return;
+
+    m_cursorMode = newCursorMode;
+    glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(newCursorMode));
+    Engine::InputMap().resetLastCursorPosition();
 }
 
 } // namespace rf

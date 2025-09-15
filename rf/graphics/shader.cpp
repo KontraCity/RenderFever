@@ -1,5 +1,11 @@
 #include "shader.hpp"
 
+#include <vector>
+#include <regex>
+#include <algorithm>
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,6 +15,30 @@
 #include "rf/core/io.hpp"
 
 namespace rf {
+
+static std::string ReadSource(fs::path path, std::vector<fs::path>& included) {
+    path = fs::canonical(path);
+    included.push_back(fs::canonical(path));
+
+    std::string source = IO::ReadFile(path.string());
+    while (true) {
+        std::smatch matches;
+        std::regex regex(R"(^[ \t]*#include[ \t]*["<](.+)[">][ \t]*$)");
+        if (!std::regex_search(source, matches, regex))
+            return source;
+
+        std::string includeSource;
+        fs::path includePath = fs::canonical(path.parent_path() / matches.str(1));
+        if (std::find(included.begin(), included.end(), includePath) == included.end())
+            includeSource = ReadSource(path.parent_path() / matches.str(1), included);
+        source.replace(matches.position(), matches.length(), includeSource);
+    }
+}
+
+static std::string ReadSource(const fs::path& path) {
+    std::vector<fs::path> included;
+    return ReadSource(path, included);
+}
 
 static std::string MakeUniformName(const std::string& name) {
     return 'u' + name;
@@ -58,16 +88,16 @@ static GLuint LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader, GLui
     throw RF_LOCATED_ERROR("Couldn't link shader program").withDetails(error);
 }
 
-Shader::Shader(const std::string& vertexSourceFilename, const std::string& fragmentSourceFilename, const std::string& geometrySourceFilename) {
+Shader::Shader(const Config& config) {
     try {
-        std::string source = IO::ReadFile(vertexSourceFilename);
+        std::string source = ReadSource(config.vertexSourceFilename);
         m_vertexShader = CompileShader(source.c_str(), GL_VERTEX_SHADER);
 
-        source = IO::ReadFile(fragmentSourceFilename);
+        source = ReadSource(config.fragmentSourceFilename);
         m_fragmentShader = CompileShader(source.c_str(), GL_FRAGMENT_SHADER);
 
-        if (!geometrySourceFilename.empty()) {
-            source = IO::ReadFile(geometrySourceFilename);
+        if (!config.geometrySourceFilename.empty()) {
+            source = ReadSource(config.geometrySourceFilename);
             m_geometryShader = CompileShader(source.c_str(), GL_GEOMETRY_SHADER);
         }
         
@@ -80,8 +110,35 @@ Shader::Shader(const std::string& vertexSourceFilename, const std::string& fragm
     }
 }
 
+Shader::Shader(Shader&& other) noexcept
+    : m_vertexShader(0)
+    , m_geometryShader(0)
+    , m_fragmentShader(0)
+    , m_shaderProgram(0) {
+    other.m_vertexShader = 0;
+    other.m_geometryShader = 0;
+    other.m_fragmentShader = 0;
+    other.m_shaderProgram = 0;
+}
+
 Shader::~Shader() {
     free();
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+    free();
+
+    m_vertexShader = other.m_vertexShader;
+    m_geometryShader = other.m_geometryShader;
+    m_fragmentShader = other.m_fragmentShader;
+    m_shaderProgram = other.m_shaderProgram;
+
+    other.m_vertexShader = 0;
+    other.m_geometryShader = 0;
+    other.m_fragmentShader = 0;
+    other.m_shaderProgram = 0;
+
+    return *this;
 }
 
 void Shader::free(bool onlyFreeShaders) {
@@ -141,30 +198,6 @@ void Shader::set(const std::string& name, const Texture& texture, int id) {
     set(name, id);
 }
 
-void Shader::set(const std::string& name, const Lighting::Color& color) {
-    float red = color.red / 255.0f;
-    float green = color.green / 255.0f;
-    float blue = color.blue / 255.0f;
-    set(name, glm::vec3{ red, green, blue });
-}
-
-void Shader::set(const std::string& name, const Lighting::Properties& properties) {
-    set(name + ".ambient", properties.ambient);
-    set(name + ".diffuse", properties.diffuse);
-    set(name + ".specular", properties.specular);
-}
-
-void Shader::set(const std::string& name, const Lighting::Attenuation& attenuation) {
-    set(name + ".constant", attenuation.constant);
-    set(name + ".linear", attenuation.linear);
-    set(name + ".quadratic", attenuation.quadratic);
-}
-
-void Shader::set(const std::string& name, const Lighting::Cutoff& cutoff) {
-    set(name + ".inner", glm::cos(glm::radians(cutoff.inner)));
-    set(name + ".outer", glm::cos(glm::radians(cutoff.outer)));
-}
-
 void Shader::capture(const Camera& camera) {
     glm::mat4 view = camera.evaluateView();
     set("View", view);
@@ -187,26 +220,22 @@ void Shader::material(const Material& material) {
     set("Material.shininess", material.shininess);
 }
 
-void Shader::illuminate(const PointLight& light) {
-    set("PointLight.position", light.position);
-    set("PointLight.color", light.color);
-    set("PointLight.properties", light.properties);
-    set("PointLight.attenuation", light.attenuation);
-}
+void Shader::illuminate(const Light& light) {
+    set("Light.position", light.position);
+    set("Light.direction", light.direction);
+    set("Light.color", light.color);
 
-void Shader::illuminate(const DirectionalLight& light) {
-    set("DirectionalLight.direction", light.direction);
-    set("DirectionalLight.color", light.color);
-    set("DirectionalLight.properties", light.properties);
-}
+    set("Light.type", static_cast<int32_t>(light.type));
+    set("Light.ambientProperty", light.ambientProperty);
+    set("Light.diffuseProperty", light.diffuseProperty);
+    set("Light.specularProperty", light.specularProperty);
+    
+    set("Light.constantAttenuation", light.constantAttenuation);
+    set("Light.linearAttenuation", light.linearAttenuation);
+    set("Light.quadraticAttenuation", light.quadraticAttenuation);
 
-void Shader::illuminate(const SpotLight& light) {
-    set("SpotLight.position", light.position);
-    set("SpotLight.direction", light.direction);
-    set("SpotLight.color", light.color);
-    set("SpotLight.properties", light.properties);
-    set("SpotLight.attenuation", light.attenuation);
-    set("SpotLight.cutoff", light.cutoff);
+    set("Light.spotInnerCutoff", light.spotInnerCutoff);
+    set("Light.spotOuterCutoff", light.spotOuterCutoff);
 }
 
 void Shader::draw(const Mesh& mesh) const {

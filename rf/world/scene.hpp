@@ -41,24 +41,29 @@ public:
         return m_entities.emplace(entity.getId(), std::move(entity)).first->second;
     }
 
-    template <typename ComponentType>
+    template <typename Component>
     void add() {
-        m_world.add<ComponentType>();
+        m_world.add<Component>();
     }
 
-    template <typename ComponentType>
-    void set(ComponentType&& value) {
-        m_world.set<ComponentType>(std::forward<ComponentType>(value));
+    template <typename Component>
+    void set(Component&& value) {
+        m_world.set<Component>(std::forward<Component>(value));
     }
 
-    template <typename ComponentType>
-    const ComponentType* get() const {
-        return m_world.singleton<ComponentType>().get<ComponentType>();
+    template <typename Component>
+    const Component* get() const {
+        return m_world.singleton<Component>().get<Component>();
     }
 
-    template <typename ComponentType>
-    flecs::ref<ComponentType> get() {
-        return m_world.singleton<ComponentType>().get_ref<ComponentType>();
+    template <typename Component>
+    flecs::ref<Component> get() {
+        return m_world.singleton<Component>().get_ref<Component>();
+    }
+
+    template <typename... Components>
+    flecs::query<Components...> query() {
+        return m_world.query<Components...>();
     }
 
     template <typename Function>

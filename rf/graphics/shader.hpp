@@ -14,6 +14,19 @@
 namespace rf {
 
 class Shader {
+public:
+    enum class Type {
+        Main,
+        Light,
+    };
+
+public:
+    struct Config {
+        std::string vertexSourceFilename;
+        std::string geometrySourceFilename;
+        std::string fragmentSourceFilename;
+    };
+
 private:
     GLuint m_vertexShader = 0;
     GLuint m_fragmentShader = 0;
@@ -21,13 +34,18 @@ private:
     GLuint m_shaderProgram = 0;
 
 public:
-    Shader(const std::string& vertexSourceFilename, const std::string& fragmentSourceFilename, const std::string& geometrySourceFilename = {});
+    Shader(const Config& config);
 
     Shader(const Shader& other) = delete;
 
-    Shader(Shader&& other) = delete;
+    Shader(Shader&& other) noexcept;
 
     ~Shader();
+
+public:
+    Shader& operator=(const Shader& other) = delete;
+
+    Shader& operator=(Shader&& other) noexcept;
 
 private:
     void free(bool onlyFreeShaders = false);
@@ -44,14 +62,6 @@ private:
 
     void set(const std::string& name, const Texture& texture, int id = 0);
 
-    void set(const std::string& name, const Lighting::Color& color);
-
-    void set(const std::string& name, const Lighting::Properties& properties);
-
-    void set(const std::string& name, const Lighting::Attenuation& attenuation);
-
-    void set(const std::string& name, const Lighting::Cutoff& cutoff);
-
 public:
     void capture(const Camera& camera);
 
@@ -59,11 +69,7 @@ public:
 
     void material(const Material& material);
 
-    void illuminate(const PointLight& light);
-
-    void illuminate(const DirectionalLight& light);
-    
-    void illuminate(const SpotLight& light);
+    void illuminate(const Light& light);
 
     void draw(const Mesh& mesh) const;
      

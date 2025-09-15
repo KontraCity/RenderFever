@@ -30,23 +30,31 @@ Texture::Texture(const uint8_t* data, size_t length, Type type)
 Texture::Texture(Texture&& other) noexcept
     : m_texture(other.m_texture)
     , m_type(other.m_type) {
-    other.reset();
+    other.m_texture = 0;
+    other.m_type = Type::None;
 }
 
 Texture::~Texture() {
-    if (m_texture)
-        glDeleteTextures(1, &m_texture);
+    free();
 }
 
 Texture& Texture::operator=(Texture&& other) noexcept {
+    free();
+
     m_texture = other.m_texture;
     m_type = other.m_type;
-    other.reset();
+
+    other.m_texture = 0;
+    other.m_type = Type::None;
+
     return *this;
 }
 
-void Texture::reset() {
-    m_texture = 0;
+void Texture::free() {
+    if (m_texture) {
+        glDeleteTextures(1, &m_texture);
+        m_texture = 0;
+    }
     m_type = Type::None;
 }
 
