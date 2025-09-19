@@ -5,8 +5,8 @@
 
 namespace rf {
 
-Image::Image(const std::string& imageFilePath, bool verticalFlip) {
-    load(imageFilePath, verticalFlip);
+Image::Image(const fs::path& filePath, bool verticalFlip) {
+    load(filePath, verticalFlip);
 }
 
 Image::Image(const uint8_t* data, size_t length, bool verticalFlip) {
@@ -51,12 +51,12 @@ void Image::free() {
     }
 }
 
-void Image::load(const std::string& filename, bool verticalFlip) {
+void Image::load(const fs::path& filePath, bool verticalFlip) {
     free(); // avoid memory leaks if load() was called already
     stbi_set_flip_vertically_on_load(verticalFlip);
-    m_data = stbi_load(filename.c_str(), &m_width, &m_height, &m_channels, 4);
+    m_data = stbi_load(filePath.string().c_str(), &m_width, &m_height, &m_channels, 4);
     if (!m_data)
-        throw RF_LOCATED_ERROR("Couldn't read \"{}\" file to load image", filename);
+        throw RF_LOCATED_ERROR("Couldn't read \"{}\" file to load image", filePath.string().c_str());
 }
 
 void Image::load(const uint8_t* data, size_t length, bool verticalFlip) {

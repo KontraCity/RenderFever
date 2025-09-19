@@ -1,12 +1,12 @@
 #pragma once
 
-#include "rf/graphics/texture.hpp"
+#include "rf/core/assets.hpp"
 
 namespace rf {
 
 struct Material {
-    Texture::Pointer texture;
-    Texture::Pointer specular;
+    Assets::Texture texture;
+    Assets::Texture specular;
     float shininess = 32.0f;
 };
 

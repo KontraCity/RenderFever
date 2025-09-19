@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "rf/core/assets.hpp"
 #include "rf/graphics/renderer.hpp"
 #include "rf/graphics/window.hpp"
 #include "rf/inputs/input_map.hpp"
@@ -15,6 +16,7 @@ private:
 
 private:
     float m_deltaTime = 0.0f;
+    Assets m_assets;
     Scene m_scene;
     Window m_window;
     Renderer m_renderer;
@@ -33,6 +35,10 @@ public:
 
     static float DeltaTime() {
         return Instance->m_deltaTime;
+    }
+
+    static Assets& Assets() {
+        return Instance->m_assets;
     }
 
     static Scene& Scene() {

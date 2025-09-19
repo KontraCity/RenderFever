@@ -105,7 +105,7 @@ Player::Player() {
         transform.scale() = { 0.1f, 0.1f, 0.4f };
 
         rf::Entity& cube = scene.newEntity();
-        cube.setComponent<rf::DrawComponent>({ rf::Shader::Type::Light, transform, {}, rf::Meshes::Cube()});
+        cube.setComponent<rf::DrawComponent>({ rf::Engine::Renderer().shaders().light, transform, {}, rf::Meshes::Cube()});
     });
 
     m_toggleVSyncHandle = Bind(Binding::ToggleVSync, rf::KeyAction::Press, [this](rf::KeyAction) {

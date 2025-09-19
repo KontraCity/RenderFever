@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <GL/glew.h>
 
@@ -11,20 +13,24 @@ class Texture {
 public:
     using Pointer = std::shared_ptr<Texture>;
 
-    enum class Type {
-        None,       // No texture
-        Texture,    // Base texture (Diffuse)
-        Specular,   // Specular map
+    enum Type : GLenum {
+        TextureType = GL_TEXTURE0,
+        SpecularType = GL_TEXTURE1,
     };
+
+public:
+    static void Unbind(Type type) {
+        glActiveTexture(type);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
 private:
     GLuint m_texture = 0;
-    Type m_type = Type::None;
 
 public:
-    Texture(const std::string& filename, Type type);
+    Texture(const fs::path& filePath);
 
-    Texture(const uint8_t* data, size_t length, Type type);
+    Texture(const uint8_t* data, size_t length);
 
     Texture(const Texture& other) = delete;
 
@@ -41,26 +47,18 @@ private:
     void free();
 
 public:
-    void setFiltering(int direction, int mode);
+    void setFiltering(int direction, int mode) const;
 
-    void setFiltering(int mode);
+    void setFiltering(int mode) const;
 
-    void setWrapping(int direction, int mode);
+    void setWrapping(int direction, int mode) const;
 
-    void setWrapping(int mode);
+    void setWrapping(int mode) const;
 
 public:
-    void bind(int id = 0) const {
-        glActiveTexture(GL_TEXTURE0 + id);
+    void bind(Type type) const {
+        glActiveTexture(type);
         glBindTexture(GL_TEXTURE_2D, m_texture);
-    }
-
-    Type type() const {
-        return m_type;
-    }
-
-    Type& type() {
-        return m_type;
     }
 };
 

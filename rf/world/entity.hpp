@@ -2,6 +2,7 @@
 
 #include <flecs.h>
 
+#include "rf/core/assets.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/material.hpp"
 #include "rf/graphics/mesh.hpp"
@@ -71,7 +72,7 @@ struct CameraComponent {
 };
 
 struct DrawComponent {
-    Shader::Type shaderType;
+    Assets::Shader shader;
     Transform transform;
     Material material;
     Mesh mesh;

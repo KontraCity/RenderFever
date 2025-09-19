@@ -22,8 +22,8 @@ void Renderer::clear() {
 
 void Renderer::capture() {
     const Camera& camera = *Engine::Scene().get<Camera>().get();
-    m_mainShader->capture(camera);
-    m_lightShader->capture(camera);
+    m_shaders.main->capture(camera);
+    m_shaders.light->capture(camera);
 }
 
 void Renderer::illuminate() {
@@ -61,10 +61,10 @@ void Renderer::illuminate() {
 
 void Renderer::draw() {
     Engine::Scene().each([this](const DrawComponent& draw) {
-        Shader& shader = draw.shaderType == Shader::Type::Main ? *m_mainShader : *m_lightShader;
-        shader.transform(draw.transform);
-        shader.material(draw.material);
-        shader.draw(draw.mesh);
+        const Shader* shader = draw.shader.get();
+        shader->transform(draw.transform);
+        shader->material(draw.material);
+        shader->draw(draw.mesh);
     });
 }
 
@@ -73,9 +73,9 @@ void Renderer::init(const Config& config) {
         return;
     
     Stopwatch stopwatch;
-    m_mainShader = std::make_unique<Shader>(config.mainShaderConfig);
-    m_lightShader = std::make_unique<Shader>(config.lightShaderConfig);
-    m_lightStorage = std::make_unique<Storage>(0, sizeof(GLint) * 4 + sizeof(Light) * config.lightSourcesReserve);
+    m_shaders.main = Engine::Assets().loadShader(config.mainShaderPath);
+    m_shaders.light = Engine::Assets().loadShader(config.lightShaderPath);
+    m_lightStorage = std::make_unique<Storage>(Storage::LightingType, sizeof(GLint) * 4 + sizeof(Light) * config.lightSourcesReserve);
     SetStorageSize(*m_lightStorage, 0);
     fmt::print("Renderer initialized in {} ms\n", stopwatch.milliseconds());
 

@@ -5,13 +5,19 @@
 namespace rf {
 
 class Storage {
+public:
+    enum Type : GLuint {
+        NoneType = GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS,
+        LightingType = 0,
+    };
+
 private:
     GLuint m_storage = 0;
     size_t m_size = 0;
-    GLuint m_index = 0;
+    Type m_type = NoneType;
 
 public:
-    Storage(GLuint index = 0, size_t size = 0, const void* data = nullptr);
+    Storage(Type type, size_t size = 0, const void* data = nullptr);
 
     Storage(const Storage& other) = delete;
 
@@ -34,7 +40,7 @@ public:
 
 public:
     void bind() const {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_index, m_storage);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_type, m_storage);
     }
 
     size_t size() const {

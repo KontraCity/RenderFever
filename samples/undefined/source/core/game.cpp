@@ -24,12 +24,12 @@ static void OnEscape(rf::KeyAction) {
 
 static void SceneSetup(rf::Scene& scene) {
     rf::Material material = {};
-    material.texture = std::make_shared<rf::Texture>("resources/textures/container/texture.png", rf::Texture::Type::Texture);
-    material.specular = std::make_shared<rf::Texture>("resources/textures/container/specular.png", rf::Texture::Type::Specular);
+    material.texture = rf::Engine::Assets().loadTexture("container/texture.png");
+    material.specular = rf::Engine::Assets().loadTexture("container/specular.png");
     material.shininess = 32.0f;
 
     rf::Entity& cube = scene.newEntity();
-    cube.setComponent<rf::DrawComponent>({ rf::Shader::Type::Main, { glm::vec3(0.0f) }, material, rf::Meshes::Cube() });
+    cube.setComponent<rf::DrawComponent>({ rf::Engine::Renderer().shaders().main, { glm::vec3(0.0f) }, material, rf::Meshes::Cube()});
     
 
     rf::Light lightComponent = {};
@@ -44,17 +44,8 @@ static void SceneSetup(rf::Scene& scene) {
 Game::Game()
     : m_actionHandle(Bind(Binding::Action, rf::KeyAction::Press, &OnAction))
     , m_escapeHandle(Bind(Binding::Escape, rf::KeyAction::Press | rf::KeyAction::Repeat, &OnEscape)) {
-    rf::Renderer::Config config;
-    config.mainShaderConfig.vertexSourceFilename = "resources/shaders/main/main.vert";
-    config.mainShaderConfig.fragmentSourceFilename = "resources/shaders/main/main.frag";
-    config.lightShaderConfig.vertexSourceFilename = "resources/shaders/light/light.vert";
-    config.lightShaderConfig.fragmentSourceFilename = "resources/shaders/light/light.frag";
-
-    rf::Renderer& renderer = rf::Engine::Renderer();
-    renderer.init(config);
-
-    rf::Scene& scene = rf::Engine::Scene();
-    SceneSetup(scene);
+    rf::Engine::Renderer().init({ "main", "light" });
+    SceneSetup(rf::Engine::Scene());
 
     rf::Window& window = rf::Engine::Window();
     window.setTitle("Undefined");

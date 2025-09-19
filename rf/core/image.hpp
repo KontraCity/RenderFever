@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace rf {
 
@@ -13,7 +15,7 @@ private:
     int m_channels = 0;
 
 public:
-    Image(const std::string& filename, bool verticalFlip = false);
+    Image(const fs::path& filePath, bool verticalFlip = false);
 
     Image(const uint8_t* data, size_t length, bool verticalFlip = false);
 
@@ -34,7 +36,7 @@ private:
     void free();
 
 public:
-    void load(const std::string& imageFilePath, bool verticalFlip = false);
+    void load(const fs::path& filePath, bool verticalFlip = false);
 
     void load(const uint8_t* data, size_t length, bool verticalFlip = false);
 

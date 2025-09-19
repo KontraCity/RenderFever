@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <GL/glew.h>
 
+#include "rf/core/assets.hpp"
 #include "rf/graphics/camera.hpp"
 #include "rf/graphics/lighting.hpp"
 #include "rf/graphics/material.hpp"
@@ -14,27 +17,15 @@
 namespace rf {
 
 class Shader {
-public:
-    enum class Type {
-        Main,
-        Light,
-    };
-
-public:
-    struct Config {
-        std::string vertexSourceFilename;
-        std::string geometrySourceFilename;
-        std::string fragmentSourceFilename;
-    };
-
 private:
     GLuint m_vertexShader = 0;
     GLuint m_fragmentShader = 0;
     GLuint m_geometryShader = 0;
     GLuint m_shaderProgram = 0;
+    std::string m_name;
 
 public:
-    Shader(const Config& config);
+    Shader(const fs::path& directoryPath);
 
     Shader(const Shader& other) = delete;
 
@@ -50,26 +41,26 @@ public:
 private:
     void free(bool onlyFreeShaders = false);
 
-    void set(const std::string& name, bool boolean);
+    void set(const std::string& name, bool boolean) const;
 
-    void set(const std::string& name, int integer);
+    void set(const std::string& name, int integer) const;
 
-    void set(const std::string& name, float real);
+    void set(const std::string& name, float real) const;
 
-    void set(const std::string& name, const glm::vec3& vector);
+    void set(const std::string& name, const glm::vec3& vector) const;
 
-    void set(const std::string& name, const glm::mat4& matrix);
+    void set(const std::string& name, const glm::mat4& matrix) const;
 
-    void set(const std::string& name, const Texture& texture, int id = 0);
+    void set(const std::string& name, const Assets::Texture& texture, Texture::Type type) const;
 
 public:
-    void capture(const Camera& camera);
+    void capture(const Camera& camera) const;
 
-    void transform(const Transform& transform);
+    void transform(const Transform& transform) const;
 
-    void material(const Material& material);
+    void material(const Material& material) const;
 
-    void illuminate(const Light& light);
+    void illuminate(const Light& light) const;
 
     void draw(const Mesh& mesh) const;
      

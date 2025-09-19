@@ -67,6 +67,7 @@ void Engine::run() {
 
 Engine::Engine()
     : m_window("RenderFever Engine", { 1280, 720 })
+    , m_assets("resources")
 {}
 
 } // namespace rf
