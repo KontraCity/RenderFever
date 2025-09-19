@@ -14,13 +14,13 @@ public:
     using Pointer = std::shared_ptr<Texture>;
 
     enum Type : GLenum {
-        TextureType = GL_TEXTURE0,
-        SpecularType = GL_TEXTURE1,
+        TextureType = 0,
+        SpecularType = 1,
     };
 
 public:
     static void Unbind(Type type) {
-        glActiveTexture(type);
+        glActiveTexture(GL_TEXTURE0 + type);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -57,7 +57,7 @@ public:
 
 public:
     void bind(Type type) const {
-        glActiveTexture(type);
+        glActiveTexture(GL_TEXTURE0 + type);
         glBindTexture(GL_TEXTURE_2D, m_texture);
     }
 };

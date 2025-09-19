@@ -165,38 +165,38 @@ void Shader::free(bool onlyFreeShaders) {
     }
 }
 
-void Shader::set(const std::string& name, bool boolean) const {
+void Shader::set(const std::string& name, bool value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
-    glUniform1i(location, static_cast<int>(boolean));
+    glUniform1i(location, static_cast<int>(value));
 }
 
-void Shader::set(const std::string& name, int integer) const {
+void Shader::set(const std::string& name, int value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
-    glUniform1i(location, integer);
+    glUniform1i(location, value);
 }
 
-void Shader::set(const std::string& name, float real) const {
+void Shader::set(const std::string& name, float value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
-    glUniform1f(location, real);
+    glUniform1f(location, value);
 }
 
-void Shader::set(const std::string& name, const glm::vec3& vector) const {
+void Shader::set(const std::string& name, const glm::vec3& value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
-    glUniform3fv(location, 1, glm::value_ptr(vector));
+    glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
-void Shader::set(const std::string& name, const glm::mat4& matrix) const {
+void Shader::set(const std::string& name, const glm::mat4& value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::set(const std::string& name, const Assets::Texture& texture, Texture::Type type) const {
-    texture ? texture.get()->bind(type) : Texture::Unbind(type);
+void Shader::set(const std::string& name, const Assets::Texture& value, Texture::Type type) const {
+    value ? value.get()->bind(type) : Texture::Unbind(type);
     set(name, static_cast<int>(type));
 }
 

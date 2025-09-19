@@ -41,17 +41,17 @@ public:
 private:
     void free(bool onlyFreeShaders = false);
 
-    void set(const std::string& name, bool boolean) const;
+    void set(const std::string& name, bool value) const;
 
-    void set(const std::string& name, int integer) const;
+    void set(const std::string& name, int value) const;
 
-    void set(const std::string& name, float real) const;
+    void set(const std::string& name, float value) const;
 
-    void set(const std::string& name, const glm::vec3& vector) const;
+    void set(const std::string& name, const glm::vec3& value) const;
 
-    void set(const std::string& name, const glm::mat4& matrix) const;
+    void set(const std::string& name, const glm::mat4& value) const;
 
-    void set(const std::string& name, const Assets::Texture& texture, Texture::Type type) const;
+    void set(const std::string& name, const Assets::Texture& value, Texture::Type type) const;
 
 public:
     void capture(const Camera& camera) const;
