@@ -1,57 +1,61 @@
 #include "window.hpp"
 
-#include "rf/core/engine.hpp"
-#include "rf/core/error.hpp"
+#include <utility>
+
+#include <rf/core/engine.hpp>
+#include <rf/core/error.hpp>
 
 namespace rf {
 
+static int CursorModeToGlfwMacro(Graphics::CursorMode cursorMode) {
+    switch (cursorMode) {
+        case Graphics::CursorMode::Normal:      return GLFW_CURSOR_NORMAL;
+        case Graphics::CursorMode::Hidden:      return GLFW_CURSOR_HIDDEN;
+        case Graphics::CursorMode::Captured:    return GLFW_CURSOR_CAPTURED;
+        case Graphics::CursorMode::Disabled:    return GLFW_CURSOR_DISABLED;
+        default:                                return -1;
+    }
+}
+
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    InputMap& inputMap = Engine::InputMap();
+    Input::InputMap& inputMap = Engine::InputMap();
     inputMap.broadcastKeyEvent(key, action);
 }
 
 static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    InputMap& inputMap = Engine::InputMap();
+    Input::InputMap& inputMap = Engine::InputMap();
     inputMap.broadcastKeyEvent(button, action);
 }
 
 static void CursorMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
-    InputMap& inputMap = Engine::InputMap();
+    Input::InputMap& inputMap = Engine::InputMap();
     inputMap.broadcastCursorMoveEvent(xPosition, yPosition);
 }
 
 static void CursorScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
-    InputMap& inputMap = Engine::InputMap();
+    Input::InputMap& inputMap = Engine::InputMap();
     inputMap.broadcastCursorScrollEvent(xOffset, yOffset);
 }
 
-void Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
+void Graphics::Window::FrameBufferSizeCallback(GLFWwindow* window, int width, int height) {
     Window* root = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-    root->m_dimensions.width() = static_cast<GLsizei>(width);
-    root->m_dimensions.height() = static_cast<GLsizei>(height);
-    glViewport(0, 0, root->m_dimensions.width(), root->m_dimensions.height());
+    root->m_dimensions.width = static_cast<GLsizei>(width);
+    root->m_dimensions.height = static_cast<GLsizei>(height);
+    glViewport(0, 0, root->m_dimensions.width, root->m_dimensions.height);
 }
 
-int Window::CursorModeToGlfwMacro(CursorMode cursorMode) {
-    switch (cursorMode) {
-        case CursorMode::Normal:    return GLFW_CURSOR_NORMAL;
-        case CursorMode::Hidden:    return GLFW_CURSOR_HIDDEN;
-        case CursorMode::Captured:  return GLFW_CURSOR_CAPTURED;
-        case CursorMode::Disabled:  return GLFW_CURSOR_DISABLED;
-        default:                    return -1;
-    }
-}
-
-Window::Window(const std::string& title, const Dimensions& dimensions)
-    : m_title(title)
-    , m_dimensions(dimensions) {
+Graphics::Window::Window(const Config& config)
+    : m_title(config.title)
+    , m_dimensions(config.dimensions)
+    , m_cursorMode(config.cursorMode)
+    , m_vSync(config.vSync) {
     if (glfwInit() != GLFW_TRUE)
         throw RF_LOCATED_ERROR("Couldn't initialize GLFW");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_handle = glfwCreateWindow(m_dimensions.width(), m_dimensions.height(), title.c_str(), NULL, NULL);
+    m_handle = glfwCreateWindow(m_dimensions.width, m_dimensions.height, m_title.c_str(), NULL, NULL);
     if (!m_handle) {
         glfwTerminate();
         throw RF_LOCATED_ERROR("Couldn't create GLFW window");
@@ -69,62 +73,41 @@ Window::Window(const std::string& title, const Dimensions& dimensions)
         glfwTerminate();
         throw RF_LOCATED_ERROR("Couldn't initialize GLEW");
     }
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
+    glViewport(0, 0, m_dimensions.width, m_dimensions.height);
+
+    setCursorMode(m_cursorMode, false);
+    setVSync(m_vSync);
 }
 
-Window::~Window() {
-    glfwTerminate();
+Graphics::Window::Window(Window&& other) noexcept
+    : m_handle(std::exchange(other.m_handle, nullptr))
+    , m_title(std::move(other.m_title))
+    , m_dimensions(std::exchange(other.m_dimensions, {}))
+    , m_cursorMode(std::exchange(other.m_cursorMode, CursorMode::Normal))
+    , m_vSync(std::exchange(other.m_vSync, true))
+{}
+
+Graphics::Window& Graphics::Window::operator=(Window&& other) noexcept {
+    if (this != &other) {
+        m_handle = std::exchange(other.m_handle, nullptr);
+        m_title = std::move(other.m_title);
+        m_dimensions = std::exchange(other.m_dimensions, {});
+        m_cursorMode = std::exchange(other.m_cursorMode, CursorMode::Normal);
+        m_vSync = std::exchange(other.m_vSync, true);
+    }
+    return *this;
 }
 
-void Window::swapBuffers() {
-    glfwSwapBuffers(m_handle);
+Graphics::Window::~Window() {
+    if (m_handle)
+        glfwTerminate();
 }
 
-void Window::setTitle(const std::string& newTitle) {
-    if (newTitle == m_title)
-        return;
-
-    m_title = newTitle;
-    glfwSetWindowTitle(m_handle, newTitle.c_str());
-}
-
-void Window::setDimensions(const Dimensions& newDimensions) {
-    if (newDimensions == m_dimensions)
-        return;
-
-    m_dimensions = newDimensions;
-    glfwSetWindowSize(m_handle, newDimensions.width(), newDimensions.height());
-}
-
-void Window::setVSync(bool newVSync) {
-    if (newVSync == m_vSync)
-        return;
-
-    m_vSync = newVSync;
-    glfwSwapInterval(newVSync ? 1 : 0);
-}
-
-void Window::setWireframeMode(bool newWireframeMode) {
-    if (newWireframeMode == m_wireframeMode)
-        return;
-
-    m_wireframeMode = newWireframeMode;
-    glPolygonMode(GL_FRONT_AND_BACK, newWireframeMode ? GL_LINE : GL_FILL);
-}
-
-void Window::setShouldClose(bool newShouldClose) {
-    glfwSetWindowShouldClose(m_handle, newShouldClose);
-}
-
-void Window::setCursorMode(CursorMode newCursorMode) {
-    if (newCursorMode == m_cursorMode)
-        return;
-
-    m_cursorMode = newCursorMode;
-    glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(newCursorMode));
-    Engine::InputMap().resetLastCursorPosition();
+void Graphics::Window::setCursorMode(CursorMode cursorMode, bool resetLastCursorPosition) {
+    m_cursorMode = cursorMode;
+    glfwSetInputMode(m_handle, GLFW_CURSOR, CursorModeToGlfwMacro(cursorMode));
+    if (resetLastCursorPosition)
+        Engine::InputMap().resetLastCursorPosition();
 }
 
 } // namespace rf

@@ -3,14 +3,12 @@
 #include <vector>
 #include <regex>
 #include <algorithm>
+#include <utility>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "rf/core/engine.hpp"
-#include "rf/core/error.hpp"
-#include "rf/core/io.hpp"
+#include <rf/core/engine.hpp>
+#include <rf/core/error.hpp>
+#include <rf/core/fio.hpp>
+#include <rf/core/math.hpp>
 
 namespace rf {
 
@@ -18,7 +16,7 @@ static std::string ReadSource(fs::path path, std::vector<fs::path>& included) {
     path = fs::canonical(path);
     included.push_back(path);
 
-    std::string source = IO::ReadFile(path.string());
+    std::string source = FIO::ReadFile(path.string());
     while (true) {
         std::smatch matches;
         std::regex regex(R"(^[ \t]*#include[ \t]*["<](.+)[">][ \t]*$)");
@@ -86,7 +84,7 @@ static GLuint LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader, GLui
     throw RF_LOCATED_ERROR("Couldn't link shader program").withDetails(error);
 }
 
-Shader::Shader(const fs::path& directoryPath)
+Graphics::Shader::Shader(const fs::path& directoryPath)
     : m_name(directoryPath.stem().string()) {
     try {
         fs::path vertexFilePath = directoryPath / (m_name + ".vert");
@@ -108,42 +106,31 @@ Shader::Shader(const fs::path& directoryPath)
     }
 }
 
-Shader::Shader(Shader&& other) noexcept
-    : m_vertexShader(other.m_vertexShader)
-    , m_geometryShader(other.m_geometryShader)
-    , m_fragmentShader(other.m_fragmentShader)
-    , m_shaderProgram(other.m_shaderProgram)
-    , m_name(other.m_name) {
-    other.m_vertexShader = 0;
-    other.m_geometryShader = 0;
-    other.m_fragmentShader = 0;
-    other.m_shaderProgram = 0;
-    other.m_name.clear();
-}
+Graphics::Shader::Shader(Shader&& other) noexcept
+    : m_vertexShader(std::exchange(other.m_vertexShader, 0))
+    , m_geometryShader(std::exchange(other.m_geometryShader, 0))
+    , m_fragmentShader(std::exchange(other.m_fragmentShader, 0))
+    , m_shaderProgram(std::exchange(other.m_shaderProgram, 0))
+    , m_name(std::move(other.m_name))
+{}
 
-Shader::~Shader() {
+Graphics::Shader::~Shader() {
     free();
 }
 
-Shader& Shader::operator=(Shader&& other) noexcept {
-    free();
-
-    m_vertexShader = other.m_vertexShader;
-    m_geometryShader = other.m_geometryShader;
-    m_fragmentShader = other.m_fragmentShader;
-    m_shaderProgram = other.m_shaderProgram;
-    m_name = other.m_name;
-
-    other.m_vertexShader = 0;
-    other.m_geometryShader = 0;
-    other.m_fragmentShader = 0;
-    other.m_shaderProgram = 0;
-    other.m_name.clear();
-
+Graphics::Shader& Graphics::Shader::operator=(Shader&& other) noexcept {
+    if (this != &other) {
+        free();
+        m_vertexShader = std::exchange(other.m_vertexShader, 0);
+        m_geometryShader = std::exchange(other.m_geometryShader, 0);
+        m_fragmentShader = std::exchange(other.m_fragmentShader, 0);
+        m_shaderProgram = std::exchange(other.m_shaderProgram, 0);
+        m_name = std::move(other.m_name);
+    }
     return *this;
 }
 
-void Shader::free(bool onlyFreeShaders) {
+void Graphics::Shader::free(bool onlyFreeShaders) {
     if (m_vertexShader) {
         glDeleteShader(m_vertexShader);
         m_vertexShader = 0;
@@ -165,77 +152,57 @@ void Shader::free(bool onlyFreeShaders) {
     }
 }
 
-void Shader::set(const std::string& name, bool value) const {
+void Graphics::Shader::set(const std::string& name, bool value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, static_cast<int>(value));
 }
 
-void Shader::set(const std::string& name, int value) const {
+void Graphics::Shader::set(const std::string& name, int value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1i(location, value);
 }
 
-void Shader::set(const std::string& name, float value) const {
+void Graphics::Shader::set(const std::string& name, float value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform1f(location, value);
 }
 
-void Shader::set(const std::string& name, const glm::vec3& value) const {
+void Graphics::Shader::set(const std::string& name, const glm::vec3& value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
-void Shader::set(const std::string& name, const glm::mat4& value) const {
+void Graphics::Shader::set(const std::string& name, const glm::mat4& value) const {
     use();
     int location = glGetUniformLocation(m_shaderProgram, MakeUniformName(name).c_str());
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::set(const std::string& name, const Assets::Texture& value, Texture::Type type) const {
-    value ? value.get()->bind(type) : Texture::Unbind(type);
+void Graphics::Shader::set(const std::string& name, const Resources::Texture& value, Texture::Type type) const {
+    value ? value->bind(type) : Texture::Unbind(type);
     set(name, static_cast<int>(type));
 }
 
-void Shader::capture(const Camera& camera) const {
-    glm::mat4 view = camera.evaluateView();
-    set("View", view);
-
-    float aspectRatio = Engine::Window().getDimensions().evaluateRatio();
-    glm::mat4 projection = camera.evaluateProjection(aspectRatio);
-    set("Projection", projection);
+void Graphics::Shader::capture(const Camera& camera) const {
+    set("View", Math::EvaluateView(camera));
+    set("Projection", Math::EvaluateProjection(camera, Engine::Window().getDimensions()));
 }
 
-void Shader::transform(const Transform& transform) const {
-    glm::mat4 model = transform.evaluateModel();
-    set("Model", model);
+void Graphics::Shader::transform(const Transform& transform) const {
+    set("Model", Math::EvaluateModel(transform));
 }
 
-void Shader::material(const Material& material) const {
-    set("Material.texture", material.texture, Texture::TextureType);
-    set("Material.specular", material.specular, Texture::SpecularType);
+void Graphics::Shader::material(const Material& material) const {
+    set("Material.diffuse", material.diffuse, Texture::Type::Diffuse);
+    set("Material.specular", material.specular, Texture::Type::Specular);
     set("Material.shininess", material.shininess);
 }
 
-void Shader::illuminate(const Light& light) const {
-    set("Light.position", light.position);
-    set("Light.direction", light.direction);
-    set("Light.color", light.color);
-    set("Light.type", static_cast<int32_t>(light.type));
-    set("Light.ambientProperty", light.ambientProperty);
-    set("Light.diffuseProperty", light.diffuseProperty);
-    set("Light.specularProperty", light.specularProperty);
-    set("Light.constantAttenuation", light.constantAttenuation);
-    set("Light.linearAttenuation", light.linearAttenuation);
-    set("Light.quadraticAttenuation", light.quadraticAttenuation);
-    set("Light.spotInnerCutoff", light.spotInnerCutoff);
-    set("Light.spotOuterCutoff", light.spotOuterCutoff);
-}
-
-void Shader::draw(const Mesh& mesh) const {
+void Graphics::Shader::draw(const Mesh& mesh) const {
     if (!mesh)
         return;
 

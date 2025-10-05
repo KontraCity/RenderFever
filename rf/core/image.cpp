@@ -1,7 +1,11 @@
 #include "image.hpp"
 
-#include "rf/core/error.hpp"
-#include "rf/external/stb_image.h"
+#include <utility>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#include <rf/core/error.hpp>
 
 namespace rf {
 
@@ -14,33 +18,24 @@ Image::Image(const uint8_t* data, size_t length, bool verticalFlip) {
 }
 
 Image::Image(Image&& other) noexcept
-    : m_data(other.m_data)
-    , m_width(other.m_width)
-    , m_height(other.m_height)
-    , m_channels(other.m_channels) {
-    other.m_data = nullptr;
-    other.m_width = 0;
-    other.m_height = 0;
-    other.m_channels = 0;
-}
+    : m_data(std::exchange(other.m_data, nullptr))
+    , m_width(std::exchange(other.m_width, 0))
+    , m_height(std::exchange(other.m_height, 0))
+    , m_channels(std::exchange(other.m_channels, 0))
+{}
 
 Image::~Image() {
     free();
 }
 
 Image& Image::operator=(Image&& other) noexcept {
-    free();
-    
-    m_data = other.m_data;
-    m_width = other.m_width;
-    m_height = other.m_height;
-    m_channels = other.m_channels;
-
-    other.m_data = nullptr;
-    other.m_width = 0;
-    other.m_height = 0;
-    other.m_channels = 0;
-
+    if (this != &other) {
+        free();
+        m_data = std::exchange(other.m_data, nullptr);
+        m_width = std::exchange(other.m_width, 0);
+        m_height = std::exchange(other.m_height, 0);
+        m_channels = std::exchange(other.m_channels, 0);
+    }
     return *this;
 }
 

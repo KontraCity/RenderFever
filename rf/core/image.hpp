@@ -1,9 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
-#include <filesystem>
-namespace fs = std::filesystem;
+
+#include <rf/auxiliary/fs.hpp>
 
 namespace rf {
 

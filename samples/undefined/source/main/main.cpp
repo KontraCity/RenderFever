@@ -5,11 +5,32 @@
 
 #include "core/game.hpp"
 
-#include <rf/graphics/lighting.hpp>
+static void Run() {
+    rf::Engine::Init({
+        .renderer = {
+            .mainShaderPath = "main",
+            .lightShaderPath = "light",
+        },
+        .window = {
+            .title = "Undefined",
+            .dimensions = { 1920, 1080 },
+        },
+        .library = {
+            .resourcesPath = "resources",
+            .shadersPath = "shaders",
+            .texturesPath = "textures",
+        },
+    });
+
+    Undefined::Game game;
+    game.start();
+
+    rf::Engine::Shutdown();
+}
 
 int main() {
     try {
-        Undefined::Game().start();
+        Run();
         return 0;
     }
     catch (const rf::Error& error) {

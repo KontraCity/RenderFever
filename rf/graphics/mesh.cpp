@@ -1,8 +1,10 @@
 #include "mesh.hpp"
 
+#include <utility>
+
 namespace rf {
 
-Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices)
+Graphics::Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices)
     : m_indicesCount(indices.size()) {
     glGenVertexArrays(1, &m_vertexArray);
     glBindVertexArray(m_vertexArray);
@@ -25,38 +27,29 @@ Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indi
     glBindVertexArray(0);
 }
 
-Mesh::Mesh(Mesh&& other) noexcept
-    : m_vertexArray(other.m_vertexArray)
-    , m_vertexBuffer(other.m_vertexBuffer)
-    , m_elementBuffer(other.m_elementBuffer)
-    , m_indicesCount(other.m_indicesCount) {
-    other.m_vertexArray = 0;
-    other.m_vertexBuffer = 0;
-    other.m_elementBuffer = 0;
-    other.m_indicesCount = 0;
-}
+Graphics::Mesh::Mesh(Mesh&& other) noexcept
+    : m_vertexArray(std::exchange(other.m_vertexArray, 0))
+    , m_vertexBuffer(std::exchange(other.m_vertexBuffer, 0))
+    , m_elementBuffer(std::exchange(other.m_elementBuffer, 0))
+    , m_indicesCount(std::exchange(other.m_indicesCount, 0))
+{}
 
-Mesh::~Mesh() {
+Graphics::Mesh::~Mesh() {
     free();
 }
 
-Mesh& Mesh::operator=(Mesh&& other) noexcept {
-    free();
-
-    m_vertexArray = other.m_vertexArray;
-    m_vertexBuffer = other.m_vertexBuffer;
-    m_elementBuffer = other.m_elementBuffer;
-    m_indicesCount = other.m_indicesCount;
-
-    other.m_vertexArray = 0;
-    other.m_vertexBuffer = 0;
-    other.m_elementBuffer = 0;
-    other.m_indicesCount = 0;
-
+Graphics::Mesh& Graphics::Mesh::operator=(Mesh&& other) noexcept {
+    if (this != &other) {
+        free();
+        m_vertexArray = std::exchange(other.m_vertexArray, 0);
+        m_vertexBuffer = std::exchange(other.m_vertexBuffer, 0);
+        m_elementBuffer = std::exchange(other.m_elementBuffer, 0);
+        m_indicesCount = std::exchange(other.m_indicesCount, 0);
+    }
     return *this;
 }
 
-void Mesh::free() {
+void Graphics::Mesh::free() {
     if (m_elementBuffer) {
         glDeleteBuffers(1, &m_elementBuffer);
         m_elementBuffer = 0;

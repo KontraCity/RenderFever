@@ -5,12 +5,12 @@
 namespace Undefined {
 
 namespace Utility {
-    int Random(int min, int max) {
+    inline int Random(int min, int max) {
         static std::mt19937 generator(std::random_device{}());
         return std::uniform_int_distribution(min, max)(generator);
     }
 
-    double Random(double min, double max) {
+    inline double Random(double min, double max) {
         static std::mt19937 generator(std::random_device{}());
         return std::uniform_real_distribution(min, max)(generator);
     }

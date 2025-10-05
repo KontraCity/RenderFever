@@ -1,7 +1,7 @@
-#include "../include/version.glsl"
-#include "../include/essentials.glsl"
-#include "../include/lighting.glsl"
-#include "../include/material.glsl"
+#include "../common/version.glsl"
+#include "../common/essentials.glsl"
+#include "../common/lighting.glsl"
+#include "../common/material.glsl"
 
 in FragProperties ioFragProperties;
 uniform Material uMaterial;

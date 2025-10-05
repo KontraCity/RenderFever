@@ -2,52 +2,14 @@
 
 #include <string>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <rf/auxiliary/gl.hpp>
 
 namespace rf {
 
-class Window {
-public:
-    class Dimensions {
-    private:
-        GLsizei m_width = 0;
-        GLsizei m_height = 0;
-
-    public:
-        Dimensions() = default;
-
-        Dimensions(GLsizei width, GLsizei height)
-            : m_width(width)
-            , m_height(height)
-        {}
-
-    public:
-        bool operator==(const Dimensions& other) const {
-            return m_width == other.m_width && m_height == other.m_height;
-        }
-
-    public:
-        float evaluateRatio() const {
-            return static_cast<float>(m_width) / m_height;
-        }
-
-    public:
-        GLsizei width() const {
-            return m_width;
-        }
-
-        GLsizei& width() {
-            return m_width;
-        }
-
-        GLsizei height() const {
-            return m_height;
-        }
-
-        GLsizei& height() {
-            return m_height;
-        }
+namespace Graphics {
+    struct Dimensions {
+        GLsizei width = 0;
+        GLsizei height = 0;
     };
 
     enum class CursorMode {
@@ -57,68 +19,95 @@ public:
         Disabled,   // There is no cursor and all mouse movements are captured
     };
 
-private:
-    static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
+    class Window {
+    public:
+        struct Config {
+            std::string title     = "RenderFever Engine";
+            Dimensions dimensions = { 1280, 720 };
+            CursorMode cursorMode = CursorMode::Disabled;
+            bool vSync            = true;
+        };
 
-    static int CursorModeToGlfwMacro(CursorMode cursorMode);
+    private:
+        static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
-private:
-    GLFWwindow* m_handle = nullptr;
-    bool m_vSync = true;
-    bool m_wireframeMode = false;
-    std::string m_title;
-    Dimensions m_dimensions;
-    CursorMode m_cursorMode = CursorMode::Normal;
+    private:
+        GLFWwindow* m_handle = nullptr;
+        std::string m_title;
+        Dimensions m_dimensions = {};
+        CursorMode m_cursorMode = CursorMode::Normal;
+        bool m_vSync = true;
 
-public:
-    Window(const std::string& title, const Dimensions& dimensions);
+    public:
+        Window(const Config& config);
 
-    Window(const Window& other) = delete;
+        Window(const Window& other) = delete;
 
-    Window(Window&& other) = delete;
+        Window(Window&& other) noexcept;
 
-    ~Window();
+        ~Window();
 
-public:
-    void swapBuffers();
+    public:
+        Window& operator=(const Window& other) = delete;
 
-public:
-    void setTitle(const std::string& title);
+        Window& operator=(Window&& other) noexcept;
 
-    void setDimensions(const Dimensions& dimensions);
+    public:
+        void swapBuffers() {
+            glfwSwapBuffers(m_handle);
+        }
 
-    void setVSync(bool vSync);
+    public:
+        // TODO: The only user of this is the Engine. Use friends?
+        GLFWwindow* handle() {
+            return m_handle;
+        }
 
-    void setWireframeMode(bool wireframeMode);
+        bool isMinimized() const {
+            return glfwGetWindowAttrib(m_handle, GLFW_ICONIFIED);
+        }
 
-    void setShouldClose(bool shouldClose);
+        const std::string& getTitle() const {
+            return m_title;
+        }
 
-    void setCursorMode(CursorMode cursorMode);
+        void setTitle(const std::string& title) {
+            m_title = title;
+            glfwSetWindowTitle(m_handle, title.c_str());
+        }
 
-public:
-    const std::string& getTitle() const {
-        return m_title;
-    }
-        
-    const Dimensions& getDimensions() const {
-        return m_dimensions;
-    }
+        Dimensions getDimensions() const {
+            return m_dimensions;
+        }
 
-    bool getVSync() const {
-        return m_vSync;
-    }
+        void setDimensions(const Dimensions& dimensions) {
+            m_dimensions = dimensions;
+            glfwSetWindowSize(m_handle, dimensions.width, dimensions.height);
+        }
 
-    bool getWireframeMode() const {
-        return m_wireframeMode;
-    }
+        CursorMode getCursorMode() const {
+            return m_cursorMode;
+        }
 
-    bool getShouldClose() const {
-        return glfwWindowShouldClose(m_handle);
-    }
+        void setCursorMode(CursorMode cursorMode, bool resetLastCursorPosition = true);
 
-    CursorMode getCursorMode() const {
-        return m_cursorMode;
-    }
-};
+        bool getVSync() const {
+            return m_vSync;
+        }
+
+        void setVSync(bool vSync) {
+            m_vSync = vSync;
+            glfwSwapInterval(vSync ? 1 : 0);
+        }
+
+        bool getShouldClose() const {
+            return glfwWindowShouldClose(m_handle);
+        }
+
+        void setShouldClose(bool shouldClose) {
+            glfwSetWindowShouldClose(m_handle, shouldClose);
+        }
+    };
+}
 
 } // namespace rf

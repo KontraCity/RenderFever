@@ -1,75 +1,91 @@
 #pragma once
 
-#include <deque>
+#include <unordered_map>
+#include <utility>
 
 #include <flecs.h>
 
-#include "rf/world/entity.hpp"
+#include <rf/graphics/camera.hpp>
+#include <rf/world/components.hpp>
+#include <rf/world/entity.hpp>
 
 namespace rf {
 
-class Scene {
-private:
-    std::map<flecs::entity_t, Entity> m_entities;
-    flecs::world m_world;
+namespace World {
+    class Scene {
+    private:
+        std::unordered_map<flecs::entity_t, Entity> m_entities;
+        flecs::world m_world;
 
-public:
-    Scene() {
-        m_world.add<rf::Camera>();
-    }
+    public:
+        Scene() {
+            // TODO: A better way to do this?
+            m_world.add<rf::Graphics::Camera>();
+        }
 
-    ~Scene() {
-        m_entities.clear();
-    }
+        Scene(const Scene& other) = delete;
 
-public:
-    void start() {
-        m_world.each([this](flecs::entity entity, const StartComponent& component) {
-            component.onStart(m_entities.at(entity.id()));
-        });
-    }
+        Scene(Scene&& other) noexcept = delete;
 
-    void update(float deltaTime) {
-        m_world.each([this, deltaTime](flecs::entity entity, const UpdateComponent& component) {
-            component.onUpdate(m_entities.at(entity.id()), deltaTime);
-        });
-    }
+        ~Scene() {
+            // Ensure that the entities are destroyed before the world.
+            m_entities.clear();
+        }
 
-public:
-    Entity& newEntity() {
-        Entity entity(m_world);
-        return m_entities.emplace(entity.getId(), std::move(entity)).first->second;
-    }
+    public:
+        Scene& operator=(const Scene& other) = delete;
 
-    template <typename Component>
-    void add() {
-        m_world.add<Component>();
-    }
+        Scene& operator=(Scene&& other) noexcept = delete;
 
-    template <typename Component>
-    void set(Component&& value) {
-        m_world.set<Component>(std::forward<Component>(value));
-    }
+    public:
+        void start() {
+            m_world.each([this](flecs::entity entity, const StartComponent& component) {
+                component.onStart(m_entities.at(entity.id()));
+            });
+        }
 
-    template <typename Component>
-    const Component* get() const {
-        return m_world.singleton<Component>().get<Component>();
-    }
+        void update(float deltaTime) {
+            m_world.each([this, deltaTime](flecs::entity entity, const UpdateComponent& component) {
+                component.onUpdate(m_entities.at(entity.id()), deltaTime);
+            });
+        }
 
-    template <typename Component>
-    flecs::ref<Component> get() {
-        return m_world.singleton<Component>().get_ref<Component>();
-    }
+    public:
+        Entity& newEntity() {
+            Entity entity(m_world);
+            return m_entities.emplace(entity.id(), std::move(entity)).first->second;
+        }
 
-    template <typename... Components>
-    flecs::query<Components...> query() {
-        return m_world.query<Components...>();
-    }
+        template <typename Component>
+        void add() {
+            m_world.add<Component>();
+        }
 
-    template <typename Function>
-    void each(Function&& function) {
-        m_world.each(std::forward<Function>(function));
-    }
-};
+        template <typename Component>
+        void set(Component&& value) {
+            m_world.set<Component>(std::forward<Component>(value));
+        }
+
+        template <typename Component>
+        const Component* get() const {
+            return m_world.singleton<Component>().get<Component>();
+        }
+
+        template <typename Component>
+        flecs::ref<Component> get() {
+            return m_world.singleton<Component>().get_ref<Component>();
+        }
+
+        template <typename... Components>
+        flecs::query<Components...> query() {
+            return m_world.query<Components...>();
+        }
+
+        template <typename Function>
+        void each(Function&& function) {
+            m_world.each(std::forward<Function>(function));
+        }
+    };
+}
 
 } // namespace rf

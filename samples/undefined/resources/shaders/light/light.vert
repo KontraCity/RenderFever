@@ -1,4 +1,4 @@
-#include "../include/version.glsl"
+#include "../common/version.glsl"
 
 layout (location = 0) in vec3 aPos;
 

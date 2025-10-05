@@ -1,4 +1,4 @@
-#include "../include/version.glsl"
+#include "../common/version.glsl"
 
 out vec4 ioFragColor;
 

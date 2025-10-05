@@ -1,13 +1,15 @@
 #pragma once
 
-#include "rf/graphics/mesh.hpp"
+#include <rf/graphics/mesh.hpp>
 
 namespace rf {
 
-namespace Meshes {
-    Mesh Plane();
+namespace Graphics {
+    namespace Meshes {
+        Mesh Plane();
 
-    Mesh Cube();
+        Mesh Cube();
+    }
 }
 
 } // namespace rf

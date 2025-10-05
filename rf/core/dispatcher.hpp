@@ -1,10 +1,11 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
-#include <mutex>
-#include <map>
 #include <memory>
+#include <mutex>
+#include <utility>
+#include <unordered_map>
+#include <functional>
 using namespace std::placeholders;
 
 namespace rf {
@@ -20,6 +21,7 @@ public:
         using Base = std::shared_ptr<Dispatcher<Arguments...>>;
 
     public:
+        // std::make_shared requires public constructor, hence here operator new is used instead
         Pointer() : Base(new Dispatcher) {}
         using Base::Base;
     };
@@ -40,37 +42,40 @@ public:
         Handle(const Handle& other) = delete;
 
         Handle(Handle&& other) noexcept
-            : m_root(other.m_root)
-            , m_callbackId(other.m_callbackId) {
-            other.reset();
-        }
+            : m_root(std::move(other.m_root))
+            , m_callbackId(std::exchange(other.m_callbackId, 0))
+        {}
 
         ~Handle() {
-            auto dispatcher = m_root.lock();
-            if (dispatcher && m_callbackId)
-                dispatcher->unsubscribe(m_callbackId);
+            free();
         }
 
     public:
         Handle& operator=(const Handle& other) = delete;
 
         Handle& operator=(Handle&& other) noexcept {
-            m_root = other.m_root;
-            m_callbackId = other.m_callbackId;
-            other.reset();
+            if (this != &other) {
+                free();
+                m_root = std::move(other.m_root);
+                m_callbackId = std::exchange(other.m_callbackId, 0);
+            }
             return *this;
         }
 
     private:
-        void reset() {
-            m_root.reset();
-            m_callbackId = 0;
+        void free() {
+            if (!m_callbackId)
+                return;
+
+            auto dispatcher = m_root.lock();
+            if (dispatcher)
+                dispatcher->unsubscribe(m_callbackId);
         }
     };
 
 private:
     mutable std::mutex m_mutex;
-    std::map<CallbackId, Callback> m_callbacks;
+    std::unordered_map<CallbackId, Callback> m_callbacks;
 
 private:
     // Dispatchers should only be created via Dispatcher::Pointers!
@@ -79,6 +84,7 @@ private:
 public:
     Dispatcher(const Dispatcher& other) = delete;
 
+    // Pointer should be moved instead (standalone Dispatcher is prohibited)
     Dispatcher(Dispatcher&& other) = delete;
 
     ~Dispatcher() = default;
@@ -86,6 +92,7 @@ public:
 public:
     Dispatcher& operator=(const Dispatcher& other) = delete;
 
+    // Pointer should be moved instead (standalone Dispatcher is prohibited)
     Dispatcher& operator=(Dispatcher&& other) = delete;
 
 private:

@@ -1,0 +1,18 @@
+if(MSVC)
+    # Enable MSVC's /ZI - "Program Database for Edit and Continue" (Hot Reload)
+    # Also ensure that there is no /Zi do avoid a lot of compiler warnings.
+    foreach(CompileFlags CMAKE_CXX_FLAGS_DEBUG CMAKE_C_FLAGS_DEBUG)
+        if(DEFINED ${CompileFlags})
+            set(CurrentFlags "${${CompileFlags}}")
+        else()
+            set(CurrentFlags "")
+        endif()
+
+        string(REPLACE "/Zi" "/ZI" CurrentFlags "${CurrentFlags}")
+        string(REGEX REPLACE "(^| )/ZI($| )" " " CurrentFlags "${CurrentFlags}")
+        set(CurrentFlags "${CurrentFlags} /ZI")
+        string(REGEX REPLACE "  +" " " CurrentFlags "${CurrentFlags}")
+        string(STRIP "${CurrentFlags}" CurrentFlags)
+        set(${CompileFlags} "${CurrentFlags}" CACHE STRING "MSVC ${CompileFlags}" FORCE)
+    endforeach()
+endif()

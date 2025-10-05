@@ -4,7 +4,7 @@ namespace Undefined {
 
 namespace Utility {
     template <typename Type>
-    void Limit(Type& value, Type min, Type max) {
+    inline void Limit(Type& value, Type min, Type max) {
         if (value <= min)
             value = min;
         if (value >= max)
@@ -12,7 +12,7 @@ namespace Utility {
     }
 
     template <typename Type>
-    Type LimitedValue(Type value, Type min, Type max) {
+    inline Type LimitedValue(Type value, Type min, Type max) {
         Limit(value);
         return value;
     }

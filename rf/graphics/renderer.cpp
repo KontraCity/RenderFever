@@ -1,33 +1,65 @@
 #include "renderer.hpp"
 
-#include <fmt/format.h>
+#include <utility>
 
-#include "rf/core/engine.hpp"
-#include "rf/core/stopwatch.hpp"
-#include "rf/graphics/material.hpp"
-#include "rf/graphics/mesh.hpp"
-#include "rf/graphics/transform.hpp"
-#include "rf/world/entity.hpp"
+#include <rf/core/engine.hpp>
+#include <rf/core/math.hpp>
+#include <rf/graphics/lighting.hpp>
+#include <rf/graphics/shader.hpp>
+#include <rf/world/components.hpp>
 
 namespace rf {
 
-static void SetStorageSize(Storage& storage, GLint size) {
+static void SetStorageSize(Graphics::Storage& storage, GLint size) {
     storage.write(&size, sizeof(size));
 }
 
-void Renderer::clear() {
+Graphics::Renderer::Renderer(const Config& config, const Resources::Library& library) 
+    : m_lightStorage(Storage::Type::Lighting, sizeof(GLint) * 4 + sizeof(Light) * config.lightSourcesReserve)
+    , m_depthTestingMode(config.depthTestingMode) 
+    , m_faceCullingMode(config.faceCullingMode) 
+    , m_wireframeMode(config.wireframeMode) {
+    m_shaders.main = library.loadShader(config.mainShaderPath);
+    m_shaders.light = library.loadShader(config.lightShaderPath);
+    SetStorageSize(m_lightStorage, 0);
+
+    setDepthTestingMode(m_depthTestingMode);
+    setFaceCullingMode(m_faceCullingMode);
+    setWireframeMode(m_wireframeMode);
+}
+
+Graphics::Renderer::Renderer(Renderer&& other) noexcept
+    : m_shaders(std::exchange(other.m_shaders, {}))
+    , m_lightStorage(std::move(other.m_lightStorage))
+    , m_depthTestingMode(std::exchange(other.m_depthTestingMode, true))
+    , m_faceCullingMode(std::exchange(other.m_faceCullingMode, true))
+    , m_wireframeMode(std::exchange(other.m_wireframeMode, false))
+{}
+
+Graphics::Renderer& Graphics::Renderer::operator=(Renderer&& other) noexcept {
+    if (this != &other) {
+        m_shaders = std::exchange(other.m_shaders, {});
+        m_lightStorage = std::move(other.m_lightStorage);
+        m_depthTestingMode = std::exchange(other.m_depthTestingMode, true);
+        m_faceCullingMode = std::exchange(other.m_faceCullingMode, true);
+        m_wireframeMode = std::exchange(other.m_wireframeMode, false);
+    }
+    return *this;
+}
+
+void Graphics::Renderer::clear() {
     glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::capture() {
+void Graphics::Renderer::capture() {
     const Camera& camera = *Engine::Scene().get<Camera>().get();
     m_shaders.main->capture(camera);
     m_shaders.light->capture(camera);
 }
 
-void Renderer::illuminate() {
-    glm::mat4 view = Engine::Scene().get<Camera>().get()->evaluateView();
+void Graphics::Renderer::illuminate() {
+    glm::mat4 view = Math::EvaluateView(*Engine::Scene().get<Camera>().get());
     Engine::Scene().query<Light>().run([this, &view](flecs::iter& iterator) {
         GLint totalLights = 0;
         size_t offset = sizeof(totalLights) * 4;
@@ -53,14 +85,14 @@ void Renderer::illuminate() {
             }
 
             totalLights += iterator.count();
-            offset += m_lightStorage->write(lights.data(), iterator.count() * sizeof(Light), offset);
+            offset += m_lightStorage.write(lights.data(), iterator.count() * sizeof(Light), offset);
         }
-        SetStorageSize(*m_lightStorage, totalLights);
+        SetStorageSize(m_lightStorage, totalLights);
     });
 }
 
-void Renderer::draw() {
-    Engine::Scene().each([this](const DrawComponent& draw) {
+void Graphics::Renderer::draw() {
+    Engine::Scene().each([this](const World::DrawComponent& draw) {
         const Shader* shader = draw.shader.get();
         shader->transform(draw.transform);
         shader->material(draw.material);
@@ -68,26 +100,7 @@ void Renderer::draw() {
     });
 }
 
-void Renderer::init(const Config& config) {
-    if (m_init)
-        return;
-    
-    Stopwatch stopwatch;
-    m_shaders.main = Engine::Assets().loadShader(config.mainShaderPath);
-    m_shaders.light = Engine::Assets().loadShader(config.lightShaderPath);
-    m_lightStorage = std::make_unique<Storage>(Storage::LightingType, sizeof(GLint) * 4 + sizeof(Light) * config.lightSourcesReserve);
-    SetStorageSize(*m_lightStorage, 0);
-    fmt::print("Renderer initialized in {} ms\n", stopwatch.milliseconds());
-
-    m_init = true;
-}
-
-void Renderer::render() {
-    if (!m_init) {
-        fmt::print("Renderer is not initialized to render!\n");
-        return;
-    }
-
+void Graphics::Renderer::render() {
     clear();
     capture();
     illuminate();

@@ -7,10 +7,10 @@ const int PointLightType       = 1;
 const int SpotLightType        = 2;
 
 struct Light {
-    vec3 position;              // Point and spot lights only
-    float _padding1;            // [Padding, unused]
-    vec3 direction;             // Directional and spot lights only
-    float _padding2;            // [Padding, unused]
+    vec3 position;      // Point and spot lights only
+    float _padding1;
+    vec3 direction;     // Directional and spot lights only
+    float _padding2;
     vec3 color;
     int type;
 
@@ -25,19 +25,19 @@ struct Light {
     float quadraticAttenuation; // Point and spot lights only
 
     // Cutoff
-    float spotInnerCutoff;      // Spot light only
-    float spotOuterCutoff;      // Spot light only
+    float spotInnerCutoff;  // Spot light only
+    float spotOuterCutoff;  // Spot light only
 };
 
 vec3 CalcDirectionalLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
-    vec3 ambient = light.color * light.ambientProperty * vec3(texture(material.texture, fragProperties.texCoords));
+    vec3 ambient = light.color * light.ambientProperty * vec3(texture(material.diffuse, fragProperties.texCoords));
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(-light.direction);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * vec3(texture(material.texture, fragProperties.texCoords));
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * vec3(texture(material.diffuse, fragProperties.texCoords));
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);
@@ -51,13 +51,13 @@ vec3 CalcDirectionalLight(in FragProperties fragProperties, in Light light, in M
 
 vec3 CalcPointLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
-    vec3 ambient = light.color * light.ambientProperty * texture(material.texture, fragProperties.texCoords).rgb;
+    vec3 ambient = light.color * light.ambientProperty * texture(material.diffuse, fragProperties.texCoords).rgb;
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(light.position - fragProperties.position);
     float diffuseValue = max(0.0f, dot(lightDirection, normal));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * texture(material.texture, fragProperties.texCoords).rgb;
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * texture(material.diffuse, fragProperties.texCoords).rgb;
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);
@@ -78,13 +78,13 @@ vec3 CalcPointLight(in FragProperties fragProperties, in Light light, in Materia
 
 vec3 CalcSpotLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
-    vec3 ambient = light.color * light.ambientProperty * texture(material.texture, fragProperties.texCoords).rgb;
+    vec3 ambient = light.color * light.ambientProperty * texture(material.diffuse, fragProperties.texCoords).rgb;
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(light.position - fragProperties.position);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * texture(material.texture, fragProperties.texCoords).rgb;
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * texture(material.diffuse, fragProperties.texCoords).rgb;
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);

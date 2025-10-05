@@ -2,7 +2,7 @@
 
 namespace rf {
 
-Mesh Meshes::Plane() {
+Graphics::Mesh Graphics::Meshes::Plane() {
     return {
         {
             { {-0.5f, +0.0f, -0.5f}, {+0.0f, +1.0f, +0.0f}, {0.0f, 1.0f} },
@@ -16,7 +16,7 @@ Mesh Meshes::Plane() {
     };
 }
 
-Mesh Meshes::Cube() {
+Graphics::Mesh Graphics::Meshes::Cube() {
     return {
         {
             // Front

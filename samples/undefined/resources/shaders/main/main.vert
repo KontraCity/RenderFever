@@ -1,5 +1,5 @@
-#include "../include/version.glsl"
-#include "../include/essentials.glsl"
+#include "../common/version.glsl"
+#include "../common/essentials.glsl"
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
