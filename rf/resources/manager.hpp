@@ -134,8 +134,8 @@ namespace Resources {
             );
 
             if (entry == m_resources.end()) {
-                static ResourceId nextResourceId = 1;
-                ResourceId resourceId = nextResourceId++;
+                static ResourceId s_nextResourceId = 1;
+                ResourceId resourceId = s_nextResourceId++;
 
                 entry = m_resources.emplace(
                     std::piecewise_construct,

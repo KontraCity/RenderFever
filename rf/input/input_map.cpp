@@ -75,20 +75,20 @@ void Input::InputMap::broadcastCursorMoveEvent(double xPosition, double yPositio
     if (IsInputDisabled())
         return;
 
-    static float lastXPosition = xPosition;
-    static float lastYPosition = yPosition;
+    static float s_lastXPosition = xPosition;
+    static float s_lastYPosition = yPosition;
 
     std::lock_guard lock(m_mutex);
     if (m_resetLastCursorPosition) {
-        lastXPosition = xPosition;
-        lastYPosition = yPosition;
+        s_lastXPosition = xPosition;
+        s_lastYPosition = yPosition;
         m_resetLastCursorPosition = false;
     }
 
-    float xOffset = xPosition - lastXPosition;
-    float yOffset = lastYPosition - yPosition;
-    lastXPosition = xPosition;
-    lastYPosition = yPosition;
+    float xOffset = xPosition - s_lastXPosition;
+    float yOffset = s_lastYPosition - yPosition;
+    s_lastXPosition = xPosition;
+    s_lastYPosition = yPosition;
     m_cursorMoveDispatcher->broadcast({ xOffset, yOffset });
 }
 

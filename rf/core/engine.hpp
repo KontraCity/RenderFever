@@ -21,6 +21,7 @@ public:
 
     struct FrameInfo {
         size_t index    = 0;
+        float time      = 0.0f;
         float deltaTime = 0.0f;
     };
 
@@ -79,7 +80,7 @@ public:
         return Instance->m_overlay;
     }
 
-    static const FrameInfo& FrameInfo() {
+    static const FrameInfo& GetFrameInfo() {
         return Instance->m_frameInfo;
     }
 };

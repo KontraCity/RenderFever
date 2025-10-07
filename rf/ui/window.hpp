@@ -15,13 +15,18 @@ namespace Ui {
         virtual ~Window() = default;
 
     public:
+        virtual void update() = 0;
+
+    public:
         virtual const char* name() const = 0;
 
         virtual ImGuiWindowFlags flags() const {
             return 0;
         }
 
-        virtual void draw() const = 0;
+        virtual ImVec2 size() const {
+            return ImVec2(0, 0);
+        }
     };
 }
 

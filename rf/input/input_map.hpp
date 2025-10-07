@@ -72,8 +72,8 @@ namespace Input {
     public:
         template <typename Id>
         KeyBinding* createKeyBinding(Id id, const std::string& description) {
-            static KeyBindingHandle nextKeyBindingHandle = 1;
-            KeyBindingHandle keyBindingHandle = nextKeyBindingHandle++;
+            static KeyBindingHandle s_nextKeyBindingHandle = 1;
+            KeyBindingHandle keyBindingHandle = s_nextKeyBindingHandle++;
 
             std::unique_lock lock(m_mutex);
             auto entry = m_keyBindings.try_emplace(

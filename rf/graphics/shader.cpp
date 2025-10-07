@@ -12,6 +12,15 @@
 
 namespace rf {
 
+constexpr const char* ShaderName(int type) {
+    switch (type) {
+        case GL_VERTEX_SHADER:      return "vertex";
+        case GL_GEOMETRY_SHADER:    return "geometry";
+        case GL_FRAGMENT_SHADER:    return "fragment";
+        default:                    return "unknown";
+    }
+}
+
 static std::string ReadSource(fs::path path, std::vector<fs::path>& included) {
     path = fs::canonical(path);
     included.push_back(path);
@@ -38,15 +47,6 @@ static std::string ReadSource(const fs::path& path) {
 
 static std::string MakeUniformName(const std::string& name) {
     return 'u' + name;
-}
-
-static const char* ShaderName(int type) {
-    switch (type) {
-        case GL_VERTEX_SHADER:      return "vertex";
-        case GL_GEOMETRY_SHADER:    return "geometry";
-        case GL_FRAGMENT_SHADER:    return "fragment";
-        default:                    return "unknown";
-    }
 }
 
 static GLuint CompileShader(const char* source, GLenum type) {

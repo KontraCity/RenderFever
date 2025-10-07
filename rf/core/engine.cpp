@@ -8,9 +8,9 @@
 namespace rf {
 
 static float EvaluateDeltaTime(float time) {
-    static float lastTime = time;
-    float deltaTime = time - lastTime;
-    lastTime = time;
+    static float s_lastTime = time;
+    float deltaTime = time - s_lastTime;
+    s_lastTime = time;
     return deltaTime;
 }
 
@@ -60,7 +60,8 @@ void Engine::run() {
     m_scene.start();
     for (size_t frameIndex = 0; !m_window.getShouldClose(); ++frameIndex) {
         m_frameInfo.index = frameIndex;
-        m_frameInfo.deltaTime = EvaluateDeltaTime(glfwGetTime());
+        m_frameInfo.time = glfwGetTime();
+        m_frameInfo.deltaTime = EvaluateDeltaTime(m_frameInfo.time);
         
         glfwPollEvents();
         if (m_window.isMinimized()) {

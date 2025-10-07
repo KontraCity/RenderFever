@@ -42,7 +42,7 @@ list(APPEND RfLinkDependencies glm::glm)
 find_package(Stb REQUIRED)
 include_directories("${Stb_INCLUDE_DIR}")
 
-# Flecs - A fast entity component system (ECS) for C & C++.
+# flecs - A fast entity component system (ECS) for C & C++.
 # https://github.com/SanderMertens/flecs
 # vcpkg install flecs
 find_package(flecs CONFIG REQUIRED)
@@ -53,3 +53,9 @@ list(APPEND RfLinkDependencies flecs::flecs_static)
 # vcpkg install imgui
 find_package(imgui CONFIG REQUIRED)
 list(APPEND RfLinkDependencies imgui::imgui)
+
+# zlib - A massively spiffy yet delicately unobtrusive compression library.
+# https://github.com/madler/zlib
+# vcpkg install zlib
+find_package(ZLIB REQUIRED)
+list(APPEND RfLinkDependencies ZLIB::ZLIB)

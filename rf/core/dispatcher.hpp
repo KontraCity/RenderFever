@@ -110,8 +110,8 @@ public:
 
     [[nodiscard("Dispatcher handle must be stored while callback is in use!")]]
     Handle subscribe(const Callback& callback) {
-        static CallbackId nextCallbackid = 1;
-        CallbackId callbackId = nextCallbackid++;
+        static CallbackId s_nextCallbackid = 1;
+        CallbackId callbackId = s_nextCallbackid++;
 
         std::lock_guard lock(m_mutex);
         m_callbacks.emplace(callbackId, callback);

@@ -1,7 +1,6 @@
-#include "bindings_hint.hpp"
+#include "bindings.hpp"
 
 #include <vector>
-#include <utility>
 #include <algorithm>
 
 #include <rf/core/engine.hpp>
@@ -27,39 +26,39 @@ static std::vector<Binding> GetSortedBindings() {
     return bindings;
 }
 
-struct FieldsWidths {
+struct LongestWidths {
     float key = 0.0f;
     float description = 0.0f;
 };
 
-static FieldsWidths GetLongestFieldsWidths(const std::vector<Binding>& binding) {
-    FieldsWidths fieldsWidths = {};
-    for (const Binding& binding : binding) {
-        fieldsWidths.key = std::max(fieldsWidths.key, ImGui::CalcTextSize(binding.key.c_str()).x);
-        fieldsWidths.description = std::max(fieldsWidths.description, ImGui::CalcTextSize(binding.description.c_str()).x);
+static LongestWidths GetLongestWidths(const std::vector<Binding>& bindings) {
+    LongestWidths longestWidths = {};
+    for (const Binding& binding : bindings) {
+        longestWidths.key = std::max(longestWidths.key, ImGui::CalcTextSize(binding.key.c_str()).x);
+        longestWidths.description = std::max(longestWidths.description, ImGui::CalcTextSize(binding.description.c_str()).x);
     }
-    return fieldsWidths;
+    return longestWidths;
 }
 
-void Ui::BindingsHint::draw() const {
+void Ui::Windows::Bindings::update() {
     if (ImGui::BeginTable("BindingsTable", 2, ImGuiTableFlags_Borders)) {
-        std::vector<Binding> bindings = GetSortedBindings();
-        FieldsWidths longestFieldsWidths = GetLongestFieldsWidths(bindings);
+        static std::vector<Binding> s_bindings = GetSortedBindings();
+        static LongestWidths s_longestWidths = GetLongestWidths(s_bindings);
 
-        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, longestFieldsWidths.key, 0);
-        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, longestFieldsWidths.description, 1);
+        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, s_longestWidths.key, 0);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, s_longestWidths.description, 1);
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         for (int column = 0; column < ImGui::TableGetColumnCount(); column++) {
             ImGui::TableSetColumnIndex(column);
-            ImUtil::TextUnformattedShiftedRight(ImGui::TableGetColumnName(column), 0.5f);
+            ImUtil::TextShiftedRight(ImGui::TableGetColumnName(column), 0.5f);
         }
 
-        for (const Binding& binding : bindings) {
+        for (const Binding& binding : s_bindings) {
             ImGui::TableNextRow();
             if (Engine::Window().getCursorMode() == Graphics::CursorMode::Disabled && binding.keyDown)
                 ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(ImGuiCol_TextSelectedBg));
             ImGui::TableNextColumn();
-            ImUtil::TextUnformattedShiftedRight(binding.key.c_str(), 0.5f);
+            ImUtil::TextShiftedRight(binding.key.c_str(), 0.5f);
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(binding.description.c_str());
         }

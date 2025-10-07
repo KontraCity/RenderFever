@@ -3,6 +3,7 @@ add_library(RenderFever STATIC
     "core/fio.cpp"
     "core/image.cpp"
     "core/math.cpp"
+    "core/zip.cpp"
     "graphics/mesh.cpp"
     "graphics/meshes.cpp"
     "graphics/renderer.cpp"
@@ -11,8 +12,9 @@ add_library(RenderFever STATIC
     "graphics/texture.cpp" 
     "graphics/window.cpp"
     "input/input_map.cpp"
-    "ui/bindings_hint.cpp"
-    "ui/imutil.cpp"
+    "ui/fonts/b612_regular_ttf.cpp"
+    "ui/windows/bindings.cpp"
+    "ui/windows/perfomance.cpp"
     "ui/overlay.cpp"
 )
 target_link_libraries(RenderFever PRIVATE ${RfLinkDependencies})

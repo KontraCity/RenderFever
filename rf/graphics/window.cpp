@@ -7,7 +7,7 @@
 
 namespace rf {
 
-static int CursorModeToGlfwMacro(Graphics::CursorMode cursorMode) {
+constexpr int CursorModeToGlfwMacro(Graphics::CursorMode cursorMode) {
     switch (cursorMode) {
         case Graphics::CursorMode::Normal:      return GLFW_CURSOR_NORMAL;
         case Graphics::CursorMode::Hidden:      return GLFW_CURSOR_HIDDEN;

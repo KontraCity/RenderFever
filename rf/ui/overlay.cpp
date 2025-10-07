@@ -2,7 +2,10 @@
 
 #include <utility>
 
-#include <rf/ui/bindings_hint.hpp>
+#include <rf/ui/fonts/b612_regular_ttf.hpp>
+#include <rf/ui/windows/bindings.hpp>
+#include <rf/ui/windows/perfomance.hpp>
+#include <rf/ui/font.hpp>
 
 namespace rf {
 
@@ -11,13 +14,31 @@ Ui::Overlay::Overlay(GLFWwindow* handle) {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(handle, true);
     ImGui_ImplOpenGL3_Init();
-
+    
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    m_windows.push_back(std::make_unique<BindingsHint>());
+    ImFontConfig config = ImFontConfig();
+    config.FontDataOwnedByAtlas = false;
+
+    const auto& font = Fonts::B612_Regular_Ttf();
+    io.Fonts->AddFontFromMemoryTTF(
+        const_cast<void*>(reinterpret_cast<const void*>(font.data())),
+        static_cast<int>(font.size()),
+        FontSize(Font::Normal),
+        &config
+    );
+    io.Fonts->AddFontFromMemoryTTF(
+        const_cast<void*>(reinterpret_cast<const void*>(font.data())),
+        static_cast<int>(font.size()),
+        FontSize(Font::Huge),
+        &config
+    );
+    
+    m_windows.push_back(std::make_unique<Windows::Bindings>());
+    m_windows.push_back(std::make_unique<Windows::Perfomance>());
 }
 
 Ui::Overlay::Overlay(Overlay&& other) noexcept
@@ -48,15 +69,17 @@ void Ui::Overlay::render() const {
     ImGui::NewFrame();
 
     for (const Window::Instance& window : m_windows) {
+        if (window->size().x * window->size().y)
+            ImGui::SetNextWindowSize(window->size());
         if (ImGui::Begin(window->name(), nullptr, window->flags()))
-            window->draw();
+            window->update();
         ImGui::End();
     }
 
-    static bool firstRender = true;
-    if (firstRender) {
+    static bool s_firstRender = true;
+    if (s_firstRender) {
         ImGui::SetWindowFocus(nullptr);
-        firstRender = false;
+        s_firstRender = false;
     }
 
     ImGui::Render();
