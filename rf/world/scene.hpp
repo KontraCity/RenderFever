@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <algorithm>
 #include <utility>
 
 #include <flecs.h>
@@ -13,8 +14,11 @@ namespace rf {
 
 namespace World {
     class Scene {
+    public:
+        using Entities = std::unordered_map<EntityId, Entity>;
+
     private:
-        std::unordered_map<flecs::entity_t, Entity> m_entities;
+        Entities m_entities;
         flecs::world m_world;
 
     public:
@@ -51,9 +55,27 @@ namespace World {
         }
 
     public:
-        Entity& newEntity() {
-            Entity entity(m_world);
-            return m_entities.emplace(entity.id(), std::move(entity)).first->second;
+        Entities& entities() {
+            return m_entities;
+        }
+
+        Entity& newEntity(const char* name = "Entity") {
+            for (size_t index = 0; true; ++index) {
+                std::string postfixedName = index == 0 ? name : fmt::format("{} ({})", name, index);
+                auto entry = std::find_if(m_entities.begin(), m_entities.end(), [&postfixedName](const auto& entry) {
+                    return postfixedName == entry.second.name();
+                });
+
+                if (entry == m_entities.end()) {
+                    Entity entity(m_world, postfixedName.c_str());
+                    return m_entities.emplace(entity.id(), std::move(entity)).first->second;
+                }
+            }
+        }
+
+        template <typename Component>
+        bool is(flecs::id id) {
+            return id == m_world.id<Component>();
         }
 
         template <typename Component>
@@ -77,8 +99,18 @@ namespace World {
         }
 
         template <typename... Components>
+        flecs::query<Components...> query() const {
+            return m_world.query<Components...>();
+        }
+
+        template <typename... Components>
         flecs::query<Components...> query() {
             return m_world.query<Components...>();
+        }
+
+        template <typename Function>
+        void each(Function&& function) const {
+            m_world.each(std::forward<Function>(function));
         }
 
         template <typename Function>

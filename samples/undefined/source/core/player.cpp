@@ -2,7 +2,6 @@
 
 #include <rf/core/engine.hpp>
 #include <rf/core/math.hpp>
-#include <rf/graphics/meshes.hpp>
 
 #include "settings.hpp"
 #include "utility/values.hpp"
@@ -79,26 +78,26 @@ Player::Player() {
         rf::World::Scene& scene = rf::Engine::Scene();
         auto camera = scene.get<rf::Graphics::Camera>();
 
-        // Light's "body"
-        scene.newEntity().setComponent<rf::World::DrawComponent>({
-            .shader = rf::Engine::Renderer().shaders().light,
+        rf::World::Entity& spawnedLight = scene.newEntity("Spawned Light");
+        spawnedLight.setComponent<rf::World::DrawComponent>({
             .transform = {
                 .position = camera->position,
                 .rotation = { camera->pitch, -camera->yaw, 0.0f },
-                .scale = { 0.1f, 0.1f, 0.4f }
+                .scale = { 0.1f, 0.1f, 0.4f },
             },
-            .material = {},
-            .mesh = rf::Graphics::Meshes::Cube(),
+            .material = {
+                .shader = rf::Engine::Library().loadShader("light/"),
+            },
+            .mesh = rf::Engine::Library().loadMesh("cube.glb"),
         });
-
-        // The light
-        // TODO: Standartize light components!
-        scene.newEntity().setComponent<rf::Graphics::Light>({
-            .position = camera->position,
-            .direction = rf::Math::EvaluateDirection(*camera.get()),
-            .type = rf::Graphics::LightType::SpotLight,
-            .spotInnerCutoff = 7.0f,
-            .spotOuterCutoff = 10.0f
+        spawnedLight.setComponent<rf::World::LightComponent>({
+            .light = {
+                .type = rf::Graphics::LightType::SpotLight,
+                .position = camera->position,
+                .direction = rf::Math::EvaluateDirection(*camera.get()),
+                .spotInnerCutoff = 7.0f,
+                .spotOuterCutoff = 10.0f,
+            }
         });
     });
 

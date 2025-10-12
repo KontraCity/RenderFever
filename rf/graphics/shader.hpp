@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include <rf/auxiliary/fs.hpp>
 #include <rf/auxiliary/gl.hpp>
 #include <rf/auxiliary/glm.hpp>
 
@@ -18,19 +17,20 @@ namespace rf {
 namespace Graphics {
     class Shader {
     public:
-        static void Unuse() {
-            glUseProgram(0);
-        }
+        struct Config {
+            std::string vertexSource;
+            std::string geometrySource;
+            std::string fragmentSource;
+        };
 
     private:
         GLuint m_vertexShader = 0;
         GLuint m_fragmentShader = 0;
         GLuint m_geometryShader = 0;
         GLuint m_shaderProgram = 0;
-        std::string m_name;
 
     public:
-        Shader(const fs::path& directoryPath);
+        Shader(const Config& config);
 
         Shader(const Shader& other) = delete;
 
@@ -70,6 +70,10 @@ namespace Graphics {
     public:
         void use() const {
             glUseProgram(m_shaderProgram);
+        }
+
+        void unuse() const {
+            glUseProgram(0);
         }
     };
 }

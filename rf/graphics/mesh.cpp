@@ -25,6 +25,14 @@ Graphics::Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Ind
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    glm::vec3 minBounds(FLT_MAX), maxBounds(-FLT_MAX);
+    for (const auto& vertex : vertices) {
+        minBounds = glm::min(minBounds, vertex.position);
+        maxBounds = glm::max(maxBounds, vertex.position);
+    }
+    m_center = (minBounds + maxBounds) * 0.5f;
+    m_radius = glm::length((maxBounds - minBounds) * 0.5f);
 }
 
 Graphics::Mesh::Mesh(Mesh&& other) noexcept
@@ -32,6 +40,8 @@ Graphics::Mesh::Mesh(Mesh&& other) noexcept
     , m_vertexBuffer(std::exchange(other.m_vertexBuffer, 0))
     , m_elementBuffer(std::exchange(other.m_elementBuffer, 0))
     , m_indicesCount(std::exchange(other.m_indicesCount, 0))
+    , m_center(std::exchange(other.m_center, glm::vec3(0.0f)))
+    , m_radius(std::exchange(other.m_radius, 0.0f))
 {}
 
 Graphics::Mesh::~Mesh() {
@@ -45,6 +55,8 @@ Graphics::Mesh& Graphics::Mesh::operator=(Mesh&& other) noexcept {
         m_vertexBuffer = std::exchange(other.m_vertexBuffer, 0);
         m_elementBuffer = std::exchange(other.m_elementBuffer, 0);
         m_indicesCount = std::exchange(other.m_indicesCount, 0);
+        m_center = std::exchange(other.m_center, glm::vec3(0.0f));
+        m_radius = std::exchange(other.m_radius, 0.0f);
     }
     return *this;
 }
@@ -66,6 +78,8 @@ void Graphics::Mesh::free() {
     }
 
     m_indicesCount = 0;
+    m_center = glm::vec3(0.0f);
+    m_radius = 0.0f;
 }
 
 } // namespace rf

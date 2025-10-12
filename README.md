@@ -30,6 +30,9 @@
 * [zlib](https://github.com/madler/zlib) - A massively spiffy yet delicately unobtrusive compression library.
   * Licensed under the [zlib License](https://github.com/madler/zlib/blob/develop/zlib.h#L4-L28).
   * vcpkg: `vcpkg install zlib`
+* [assimp](https://github.com/assimp/assimp) - Open Asset Import Library.
+  * Licensed under the [BSD-3-Clause License](https://github.com/assimp/assimp/blob/master/LICENSE).
+  * vcpkg: `vcpkg install assimp`
 
 ### Fonts
 * [B612](https://github.com/polarsys/b612) — a highly legible open source font family designed and tested to be used on aircraft cockpit screens.

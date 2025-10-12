@@ -4,14 +4,11 @@
 
 #include <rf/auxiliary/gl.hpp>
 
+#include <rf/graphics/dimensions.hpp>
+
 namespace rf {
 
 namespace Graphics {
-    struct Dimensions {
-        GLsizei width = 0;
-        GLsizei height = 0;
-    };
-
     enum class CursorMode {
         Normal,     // Cursor hovers over the window, can escape borders
         Hidden,     // The same as Normal, but invisible while in borders

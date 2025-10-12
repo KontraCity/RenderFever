@@ -41,7 +41,7 @@ static LongestWidths GetLongestWidths(const std::vector<Binding>& bindings) {
 }
 
 void Ui::Windows::Bindings::update() {
-    if (ImGui::BeginTable("BindingsTable", 2, ImGuiTableFlags_Borders)) {
+    if (ImGui::BeginTable("##bindings_table", 2, ImGuiTableFlags_Borders)) {
         static std::vector<Binding> s_bindings = GetSortedBindings();
         static LongestWidths s_longestWidths = GetLongestWidths(s_bindings);
 
@@ -50,7 +50,7 @@ void Ui::Windows::Bindings::update() {
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         for (int column = 0; column < ImGui::TableGetColumnCount(); column++) {
             ImGui::TableSetColumnIndex(column);
-            ImUtil::TextShiftedRight(ImGui::TableGetColumnName(column), 0.5f);
+            ImUtil::TextShifted(ImGui::TableGetColumnName(column), 0.5f);
         }
 
         for (const Binding& binding : s_bindings) {
@@ -58,7 +58,7 @@ void Ui::Windows::Bindings::update() {
             if (Engine::Window().getCursorMode() == Graphics::CursorMode::Disabled && binding.keyDown)
                 ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(ImGuiCol_TextSelectedBg));
             ImGui::TableNextColumn();
-            ImUtil::TextShiftedRight(binding.key.c_str(), 0.5f);
+            ImUtil::TextShifted(binding.key.c_str(), 0.5f);
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(binding.description.c_str());
         }

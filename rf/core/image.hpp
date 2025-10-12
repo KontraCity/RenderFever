@@ -7,11 +7,16 @@
 namespace rf {
 
 class Image {
+public:
+    struct Dimensions {
+        int width = 0;
+        int height = 0;
+        int channels = 0;
+    };
+
 private:
     uint8_t* m_data = nullptr;
-    int m_width = 0;
-    int m_height = 0;
-    int m_channels = 0;
+    Dimensions m_dimensions = {};
 
 public:
     Image(const fs::path& filePath, bool verticalFlip = false);
@@ -44,16 +49,8 @@ public:
         return m_data;
     }
 
-    int width() const {
-        return m_width;
-    }
-
-    int height() const {
-        return m_height;
-    }
-
-    int channels() const {
-        return m_channels;
+    const Dimensions& dimensions() const {
+        return m_dimensions;
     }
 
 public:

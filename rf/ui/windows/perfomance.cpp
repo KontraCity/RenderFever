@@ -118,14 +118,14 @@ void Ui::Windows::Perfomance::update() {
     UpdateInfo info = MakeRecord();
     MaxValues maxPlotScales = GetMaxPlotScales(info.history);
 
-    if (ImGui::BeginTable("##fps_table", 2, ImGuiTableFlags_SizingStretchSame)) {
-        ImGui::TableSetupColumn("##fps_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-        ImGui::TableSetupColumn("##fps_table_text", ImGuiTableColumnFlags_WidthStretch);
+    if (ImGui::BeginTable("##perfomance_fps_table", 2, ImGuiTableFlags_SizingStretchSame)) {
+        ImGui::TableSetupColumn("##perfomance_fps_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+        ImGui::TableSetupColumn("##perfomance_fps_table_text", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PlotLines(
-            "##fps_plot",
+            "##perfomance_fps_plot",
             [](void* data, int index) { return (reinterpret_cast<Record*>(data) + index)->fps; },
             const_cast<void*>(reinterpret_cast<const void*>(info.history.data())),
             info.history.size(), 0, nullptr, 0, maxPlotScales.fps,
@@ -134,24 +134,24 @@ void Ui::Windows::Perfomance::update() {
 
         ImGui::TableSetColumnIndex(1);
         ImGui::BeginGroup();
-        ImUtil::TextShiftedRight("Frames Per Second", 1.0f);
+        ImUtil::TextShifted("Frames Per Second", 1.0f);
         WithFont(Font::Huge, [this, &info]() {
             std::string text = fmt::format("{:.1f}", info.lastRecord.fps);
-            ImUtil::TextShiftedRight(text.c_str(), 1.0f);
+            ImUtil::TextShifted(text.c_str(), 1.0f);
         });
         ImGui::EndGroup();
 
         ImGui::EndTable();
     }
 
-    if (ImGui::BeginTable("##ft_table", 2, ImGuiTableFlags_SizingStretchSame)) {
-        ImGui::TableSetupColumn("##ft_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-        ImGui::TableSetupColumn("##ft_table_text", ImGuiTableColumnFlags_WidthStretch);
+    if (ImGui::BeginTable("##perfomance_ft_table", 2, ImGuiTableFlags_SizingStretchSame)) {
+        ImGui::TableSetupColumn("##perfomance_ft_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+        ImGui::TableSetupColumn("##perfomance_ft_table_text", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PlotLines(
-            "##ft_plot",
+            "##perfomance_ft_plot",
             [](void* data, int index) { return (reinterpret_cast<Record*>(data) + index)->ft; },
             const_cast<void*>(reinterpret_cast<const void*>(info.history.data())),
             info.history.size(), 0, nullptr, 0, maxPlotScales.ft,
@@ -160,12 +160,12 @@ void Ui::Windows::Perfomance::update() {
 
         ImGui::TableSetColumnIndex(1);
         ImGui::BeginGroup();
-        ImUtil::TextShiftedRight("Frame Time", 1.0f);
+        ImUtil::TextShifted("Frame Time", 1.0f);
         WithFont(Font::Huge, [this, &info]() {
             std::string text = fmt::format(fmt::runtime(
                 info.lastRecord.ft < 99.95f ? "{:.1f} ms" : "{:.0f} ms"
             ), info.lastRecord.ft);
-            ImUtil::TextShiftedRight(text.c_str(), 1.0f);
+            ImUtil::TextShifted(text.c_str(), 1.0f);
         });
         ImGui::EndGroup();
 

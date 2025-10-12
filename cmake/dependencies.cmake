@@ -59,3 +59,9 @@ list(APPEND RfLinkDependencies imgui::imgui)
 # vcpkg install zlib
 find_package(ZLIB REQUIRED)
 list(APPEND RfLinkDependencies ZLIB::ZLIB)
+
+# assimp - Open Asset Import Library.
+# https://github.com/assimp/assimp
+# vcpkg install assimp
+find_package(assimp CONFIG REQUIRED)
+list(APPEND RfLinkDependencies assimp::assimp)

@@ -5,11 +5,14 @@
 
 #include "core/game.hpp"
 
+#include <rf/graphics/framebuffer.hpp>
+
 static void Run() {
     rf::Engine::Init({
         .renderer = {
-            .mainShaderPath = "main",
-            .lightShaderPath = "light",
+            .mainShaderPath = "main/",
+            .lightShaderPath = "light/",
+            .neutralShaderPath = "neutral/",
         },
         .window = {
             .title = "Undefined",
@@ -17,6 +20,7 @@ static void Run() {
         },
         .library = {
             .resourcesPath = "resources",
+            .meshesPath = "meshes",
             .shadersPath = "shaders",
             .texturesPath = "textures",
         },

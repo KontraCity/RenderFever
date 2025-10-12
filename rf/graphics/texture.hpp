@@ -2,8 +2,9 @@
 
 #include <utility>
 
-#include <rf/auxiliary/fs.hpp>
 #include <rf/auxiliary/gl.hpp>
+
+#include <rf/core/image.hpp>
 
 namespace rf {
 
@@ -15,7 +16,6 @@ namespace Graphics {
             Specular = 1,   // Texture that defines surface shininess, used in the specular term of the Phong lighting model
         };
 
-    public:
         static void Unbind(Type type) {
             glActiveTexture(GL_TEXTURE0 + std::to_underlying(type));
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -25,9 +25,7 @@ namespace Graphics {
         GLuint m_texture = 0;
 
     public:
-        Texture(const fs::path& filePath);
-
-        Texture(const uint8_t* data, size_t length);
+        Texture(const Image& image);
 
         Texture(const Texture& other) = delete;
 
@@ -56,6 +54,16 @@ namespace Graphics {
         void bind(Type type) const {
             glActiveTexture(GL_TEXTURE0 + std::to_underlying(type));
             glBindTexture(GL_TEXTURE_2D, m_texture);
+        }
+
+        void unbind(Type type) const {
+            Unbind(type);
+        }
+
+    public:
+        // TODO: The only user of this is the UI. Use friends?
+        GLuint handle() const {
+            return m_texture;
         }
     };
 }

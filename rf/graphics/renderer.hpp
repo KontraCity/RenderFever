@@ -3,8 +3,10 @@
 #include <rf/auxiliary/fs.hpp>
 #include <rf/auxiliary/gl.hpp>
 
+#include <rf/graphics/framebuffer.hpp>
 #include <rf/graphics/storage.hpp>
 #include <rf/resources/library.hpp>
+#include <rf/world/scene.hpp>
 
 namespace rf {
 
@@ -14,26 +16,27 @@ namespace Graphics {
         struct Config {
             fs::path mainShaderPath;
             fs::path lightShaderPath;
-            size_t lightSourcesReserve = 1000;
+            fs::path neutralShaderPath;
+            size_t lightSourcesReserve = 100;
+            Dimensions previewFramebufferDimensions = { 500, 500 };
+
             bool depthTestingMode = true;
             bool faceCullingMode = true;
             bool wireframeMode = false;
         };
 
-        struct Shaders {
-            Resources::Shader main;
-            Resources::Shader light;
-        };
-
     private:
-        Shaders m_shaders;
+        Resources::Shader m_mainShader;
+        Resources::Shader m_lightShader;
         Storage m_lightStorage;
+        Framebuffer m_previewFramebuffer;
+
         bool m_depthTestingMode = true;
         bool m_faceCullingMode = true;
         bool m_wireframeMode = false;
 
     public:
-        Renderer(const Config& config, const Resources::Library& library);
+        Renderer(const Config& config, Resources::Library& library);
 
         Renderer(const Renderer& other) = delete;
 
@@ -49,18 +52,19 @@ namespace Graphics {
     private:
         void clear();
 
-        void capture();
+        void capture(const World::Scene& scene);
 
-        void illuminate();
+        void illuminate(const World::Scene& scene);
 
-        void draw();
-
-    public:
-        void render();
+        void draw(const World::Scene& scene);
 
     public:
-        Shaders shaders() const {
-            return m_shaders;
+        // Passing preview scene will force the renderer to render to preview framebuffer
+        void render(const World::Scene* previewScene = nullptr);
+
+    public:
+        const Framebuffer& previewFramebuffer() const {
+            return m_previewFramebuffer;
         }
         
         bool getDepthTestingMode() const {

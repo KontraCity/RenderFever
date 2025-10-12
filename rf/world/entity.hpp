@@ -7,13 +7,15 @@
 namespace rf {
 
 namespace World {
+    using EntityId = flecs::entity_t;
+
     class Entity {
     private:
         flecs::entity m_entity;
 
     public:
-        Entity(flecs::world& world)
-            : m_entity(world.entity())
+        Entity(flecs::world& world, const char* name)
+            : m_entity(world.entity(name))
         {}
 
         Entity(const Entity& other) = delete;
@@ -41,6 +43,10 @@ namespace World {
             return m_entity.id();
         }
 
+        const char* name() const {
+            return m_entity.name().c_str();
+        }
+
         template <typename ComponentType>
         Entity& addComponent() {
             m_entity.add<ComponentType>();
@@ -65,8 +71,23 @@ namespace World {
         }
 
         template <typename ComponentType>
-        flecs::ref<ComponentType> getComponent() {
+        ComponentType* getComponent() {
+            return m_entity.get_mut<ComponentType>();
+        }
+
+        template <typename ComponentType>
+        flecs::ref<ComponentType> getComponentRef() {
             return m_entity.get_ref<ComponentType>();
+        }
+
+        template <typename Function>
+        void each(Function&& function) const {
+            m_entity.each(std::forward<Function>(function));
+        }
+
+        template <typename Function>
+        void each(Function&& function) {
+            m_entity.each(std::forward<Function>(function));
         }
     };
 }

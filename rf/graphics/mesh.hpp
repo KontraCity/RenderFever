@@ -23,6 +23,10 @@ namespace Graphics {
         GLuint m_elementBuffer = 0;
         size_t m_indicesCount = 0;
 
+        // Mean vertices center and radius
+        glm::vec3 m_center { 0.0f };
+        float m_radius = 0.0f;
+
     public:
         Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices);
 
@@ -43,6 +47,10 @@ namespace Graphics {
         void free();
 
     public:
+        bool isValid() const {
+            return m_vertexArray && m_vertexBuffer && m_elementBuffer && m_indicesCount;
+        }
+
         GLuint vertexArray() const {
             return m_vertexArray;
         }
@@ -51,9 +59,17 @@ namespace Graphics {
             return m_indicesCount;
         }
 
+        const glm::vec3& center() const {
+            return m_center;
+        }
+        
+        float radius() const {
+            return m_radius;
+        }
+
     public:
         operator bool() const {
-            return m_indicesCount != 0;
+            return isValid();
         }
     };
 }

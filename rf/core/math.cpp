@@ -1,5 +1,7 @@
 #include "math.hpp"
 
+#include <cmath>
+
 namespace rf {
 
 glm::quat Math::EvaluateOrientation(const Graphics::Camera& camera) {
@@ -53,6 +55,18 @@ glm::mat4 Math::EvaluateModel(const Graphics::Transform& transform) {
     glm::mat4 rotation = glm::toMat4(glm::quat(glm::radians(transform.rotation)));
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
     return translation * rotation * scale;
+}
+
+void Math::DirectCameraAtMesh(Graphics::Camera& camera, const Graphics::Mesh& mesh) {
+    constexpr float CameraFovRadians = glm::radians(Graphics::Camera::PerspectiveFov);
+
+    glm::vec3 direction = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+    float distance = mesh.radius() / std::sin(CameraFovRadians * 0.5f);
+    camera.position = mesh.center() - direction * distance;
+
+    glm::vec3 lookDirection = glm::normalize(mesh.center() - camera.position);
+    camera.yaw = glm::degrees(std::atan2(lookDirection.x, -lookDirection.z));
+    camera.pitch = glm::degrees(std::asin(lookDirection.y));
 }
 
 } // namespace rf

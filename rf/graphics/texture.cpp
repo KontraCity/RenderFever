@@ -4,24 +4,13 @@
 
 namespace rf {
 
-static GLuint LoadTexture(const Image& image) {
-    GLuint texture = 0;
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
+Graphics::Texture::Texture(const Image& image) {
+    glGenTextures(1, &m_texture);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.dimensions().width, image.dimensions().height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
-    return texture;
-}
 
-Graphics::Texture::Texture(const fs::path& filePath)
-    : m_texture(LoadTexture({ filePath, true })) {
-    setFiltering(GL_LINEAR);
-}
-
-Graphics::Texture::Texture(const uint8_t* data, size_t length)
-    : m_texture(LoadTexture({ data, length, false })) {
     setFiltering(GL_LINEAR);
 }
 

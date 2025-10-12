@@ -1,18 +1,13 @@
 #include "shader.hpp"
 
-#include <vector>
-#include <regex>
-#include <algorithm>
 #include <utility>
 
-#include <rf/core/engine.hpp>
 #include <rf/core/error.hpp>
-#include <rf/core/fio.hpp>
 #include <rf/core/math.hpp>
 
 namespace rf {
 
-constexpr const char* ShaderName(int type) {
+static constexpr const char* ShaderName(int type) {
     switch (type) {
         case GL_VERTEX_SHADER:      return "vertex";
         case GL_GEOMETRY_SHADER:    return "geometry";
@@ -21,37 +16,10 @@ constexpr const char* ShaderName(int type) {
     }
 }
 
-static std::string ReadSource(fs::path path, std::vector<fs::path>& included) {
-    path = fs::canonical(path);
-    included.push_back(path);
-
-    std::string source = FIO::ReadFile(path.string());
-    while (true) {
-        std::smatch matches;
-        std::regex regex(R"(^[ \t]*#include[ \t]*["<](.+)[">][ \t]*$)");
-        if (!std::regex_search(source, matches, regex))
-            return source;
-
-        std::string includeSource;
-        fs::path includePath = fs::canonical(path.parent_path() / matches.str(1));
-        if (std::find(included.begin(), included.end(), includePath) == included.end())
-            includeSource = ReadSource(path.parent_path() / matches.str(1), included);
-        source.replace(matches.position(), matches.length(), includeSource);
-    }
-}
-
-static std::string ReadSource(const fs::path& path) {
-    std::vector<fs::path> included;
-    return ReadSource(path, included);
-}
-
-static std::string MakeUniformName(const std::string& name) {
-    return 'u' + name;
-}
-
-static GLuint CompileShader(const char* source, GLenum type) {
+static GLuint CompileShader(const std::string& source, GLenum type) {
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, nullptr);
+    const char* data = source.c_str();
+    glShaderSource(shader, 1, &data, nullptr);
     glCompileShader(shader);
 
     GLint result = 0;
@@ -84,19 +52,26 @@ static GLuint LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader, GLui
     throw RF_LOCATED_ERROR("Couldn't link shader program").withDetails(error);
 }
 
-Graphics::Shader::Shader(const fs::path& directoryPath)
-    : m_name(directoryPath.stem().string()) {
+static std::string MakeUniformName(const std::string& name) {
+    return 'u' + name;
+}
+
+static Graphics::Dimensions GetViewportDimensions() {
+    GLint parameters[4];
+    glGetIntegerv(GL_VIEWPORT, parameters);
+
+    // parameters[0] = x
+    // parameters[1] = y
+    // parameters[2] = width
+    // parameters[3] = height
+    return { parameters[2], parameters[3] };
+}
+
+Graphics::Shader::Shader(const Config& config) {
     try {
-        fs::path vertexFilePath = directoryPath / (m_name + ".vert");
-        m_vertexShader = CompileShader(ReadSource(vertexFilePath).c_str(), GL_VERTEX_SHADER);
-
-        fs::path geometryFilePath = directoryPath / (m_name + ".geom");
-        if (fs::is_regular_file(geometryFilePath))
-            m_geometryShader = CompileShader(ReadSource(geometryFilePath).c_str(), GL_GEOMETRY_SHADER);
-
-        fs::path fragmentFilePath = directoryPath / (m_name + ".frag");
-        m_fragmentShader = CompileShader(ReadSource(fragmentFilePath).c_str(), GL_FRAGMENT_SHADER);
-
+        m_vertexShader = CompileShader(config.vertexSource, GL_VERTEX_SHADER);
+        m_geometryShader = config.geometrySource.empty() ? 0 : CompileShader(config.geometrySource, GL_GEOMETRY_SHADER);
+        m_fragmentShader = CompileShader(config.fragmentSource, GL_FRAGMENT_SHADER);
         m_shaderProgram = LinkShaderProgram(m_vertexShader, m_fragmentShader, m_geometryShader);
         free(true); // program is ready, compiled shaders are no longer needed
     }
@@ -111,7 +86,6 @@ Graphics::Shader::Shader(Shader&& other) noexcept
     , m_geometryShader(std::exchange(other.m_geometryShader, 0))
     , m_fragmentShader(std::exchange(other.m_fragmentShader, 0))
     , m_shaderProgram(std::exchange(other.m_shaderProgram, 0))
-    , m_name(std::move(other.m_name))
 {}
 
 Graphics::Shader::~Shader() {
@@ -125,7 +99,6 @@ Graphics::Shader& Graphics::Shader::operator=(Shader&& other) noexcept {
         m_geometryShader = std::exchange(other.m_geometryShader, 0);
         m_fragmentShader = std::exchange(other.m_fragmentShader, 0);
         m_shaderProgram = std::exchange(other.m_shaderProgram, 0);
-        m_name = std::move(other.m_name);
     }
     return *this;
 }
@@ -189,7 +162,7 @@ void Graphics::Shader::set(const std::string& name, const Resources::Texture& va
 
 void Graphics::Shader::capture(const Camera& camera) const {
     set("View", Math::EvaluateView(camera));
-    set("Projection", Math::EvaluateProjection(camera, Engine::Window().getDimensions()));
+    set("Projection", Math::EvaluateProjection(camera, GetViewportDimensions()));
 }
 
 void Graphics::Shader::transform(const Transform& transform) const {
@@ -197,6 +170,7 @@ void Graphics::Shader::transform(const Transform& transform) const {
 }
 
 void Graphics::Shader::material(const Material& material) const {
+    set("Material.complete", material.diffuse.isValid());
     set("Material.diffuse", material.diffuse, Texture::Type::Diffuse);
     set("Material.specular", material.specular, Texture::Type::Specular);
     set("Material.shininess", material.shininess);

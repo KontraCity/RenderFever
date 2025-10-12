@@ -23,10 +23,9 @@ namespace World {
     };
 
     struct DrawComponent {
-        Resources::Shader shader;
         Graphics::Transform transform;
         Graphics::Material material;
-        Graphics::Mesh mesh;
+        Resources::Mesh mesh;
     };
 
     // TODO: Standardize components and actually use this!

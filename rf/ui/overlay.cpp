@@ -5,6 +5,7 @@
 #include <rf/ui/fonts/b612_regular_ttf.hpp>
 #include <rf/ui/windows/bindings.hpp>
 #include <rf/ui/windows/perfomance.hpp>
+#include <rf/ui/windows/scene.hpp>
 #include <rf/ui/font.hpp>
 
 namespace rf {
@@ -39,6 +40,7 @@ Ui::Overlay::Overlay(GLFWwindow* handle) {
     
     m_windows.push_back(std::make_unique<Windows::Bindings>());
     m_windows.push_back(std::make_unique<Windows::Perfomance>());
+    m_windows.push_back(std::make_unique<Windows::Scene>());
 }
 
 Ui::Overlay::Overlay(Overlay&& other) noexcept
@@ -70,7 +72,7 @@ void Ui::Overlay::render() const {
 
     for (const Window::Instance& window : m_windows) {
         if (window->size().x * window->size().y)
-            ImGui::SetNextWindowSize(window->size());
+            ImGui::SetNextWindowSize(window->size(), ImGuiCond_FirstUseEver);
         if (ImGui::Begin(window->name(), nullptr, window->flags()))
             window->update();
         ImGui::End();

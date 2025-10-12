@@ -14,13 +14,14 @@ static void SetStorageSize(Graphics::Storage& storage, GLint size) {
     storage.write(&size, sizeof(size));
 }
 
-Graphics::Renderer::Renderer(const Config& config, const Resources::Library& library) 
+Graphics::Renderer::Renderer(const Config& config, Resources::Library& library) 
     : m_lightStorage(Storage::Type::Lighting, sizeof(GLint) * 4 + sizeof(Light) * config.lightSourcesReserve)
+    , m_previewFramebuffer(config.previewFramebufferDimensions)
     , m_depthTestingMode(config.depthTestingMode) 
     , m_faceCullingMode(config.faceCullingMode) 
     , m_wireframeMode(config.wireframeMode) {
-    m_shaders.main = library.loadShader(config.mainShaderPath);
-    m_shaders.light = library.loadShader(config.lightShaderPath);
+    m_mainShader = library.loadShader(config.mainShaderPath);
+    m_lightShader= library.loadShader(config.lightShaderPath);
     SetStorageSize(m_lightStorage, 0);
 
     setDepthTestingMode(m_depthTestingMode);
@@ -29,8 +30,10 @@ Graphics::Renderer::Renderer(const Config& config, const Resources::Library& lib
 }
 
 Graphics::Renderer::Renderer(Renderer&& other) noexcept
-    : m_shaders(std::exchange(other.m_shaders, {}))
+    : m_mainShader(std::move(other.m_mainShader))
+    , m_lightShader(std::move(other.m_lightShader))
     , m_lightStorage(std::move(other.m_lightStorage))
+    , m_previewFramebuffer(std::move(other.m_previewFramebuffer))
     , m_depthTestingMode(std::exchange(other.m_depthTestingMode, true))
     , m_faceCullingMode(std::exchange(other.m_faceCullingMode, true))
     , m_wireframeMode(std::exchange(other.m_wireframeMode, false))
@@ -38,8 +41,10 @@ Graphics::Renderer::Renderer(Renderer&& other) noexcept
 
 Graphics::Renderer& Graphics::Renderer::operator=(Renderer&& other) noexcept {
     if (this != &other) {
-        m_shaders = std::exchange(other.m_shaders, {});
+        m_mainShader = std::move(other.m_mainShader);
+        m_lightShader = std::move(other.m_lightShader);
         m_lightStorage = std::move(other.m_lightStorage);
+        m_previewFramebuffer = std::move(other.m_previewFramebuffer);
         m_depthTestingMode = std::exchange(other.m_depthTestingMode, true);
         m_faceCullingMode = std::exchange(other.m_faceCullingMode, true);
         m_wireframeMode = std::exchange(other.m_wireframeMode, false);
@@ -52,20 +57,22 @@ void Graphics::Renderer::clear() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Graphics::Renderer::capture() {
-    const Camera& camera = *Engine::Scene().get<Camera>().get();
-    m_shaders.main->capture(camera);
-    m_shaders.light->capture(camera);
+void Graphics::Renderer::capture(const World::Scene& scene) {
+    const Camera& camera = *scene.get<Camera>();
+    m_mainShader->capture(camera);
+    m_lightShader->capture(camera);
 }
 
-void Graphics::Renderer::illuminate() {
-    glm::mat4 view = Math::EvaluateView(*Engine::Scene().get<Camera>().get());
-    Engine::Scene().query<Light>().run([this, &view](flecs::iter& iterator) {
+void Graphics::Renderer::illuminate(const World::Scene& scene) {
+    glm::mat4 view = Math::EvaluateView(*scene.get<Camera>());
+    scene.query<World::LightComponent>().run([this, &view](flecs::iter& iterator) {
         GLint totalLights = 0;
         size_t offset = sizeof(totalLights) * 4;
         while (iterator.next()) {
-            const Light* buffer = &iterator.field<Light>(0)[0];
-            std::vector<Light> lights(buffer, buffer + iterator.count());
+            const World::LightComponent* buffer = &iterator.field<World::LightComponent>(0)[0];
+            std::vector<Light> lights(iterator.count());
+            for (size_t index = 0, size = iterator.count(); index < size; ++index)
+                lights[index] = (buffer + index)->light;
 
             for (Light& light : lights) {
                 switch (light.type) {
@@ -91,20 +98,27 @@ void Graphics::Renderer::illuminate() {
     });
 }
 
-void Graphics::Renderer::draw() {
-    Engine::Scene().each([this](const World::DrawComponent& draw) {
-        const Shader* shader = draw.shader.get();
+void Graphics::Renderer::draw(const World::Scene& scene) {
+    scene.each([this](const World::DrawComponent& draw) {
+        const Shader* shader = draw.material.shader.get();
         shader->transform(draw.transform);
         shader->material(draw.material);
-        shader->draw(draw.mesh);
+        shader->draw(*draw.mesh);
     });
 }
 
-void Graphics::Renderer::render() {
+void Graphics::Renderer::render(const World::Scene* previewScene) {
+    if (previewScene)
+        m_previewFramebuffer.bind();
+
+    const World::Scene& scene = previewScene ? *previewScene : Engine::Scene();
     clear();
-    capture();
-    illuminate();
-    draw();
+    capture(scene);
+    illuminate(scene);
+    draw(scene);
+
+    if (previewScene)
+        m_previewFramebuffer.unbind();
 }
 
 } // namespace rf
