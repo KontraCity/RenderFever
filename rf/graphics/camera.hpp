@@ -2,6 +2,8 @@
 
 #include <rf/auxiliary/glm.hpp>
 
+#include <rf/graphics/rotation.hpp>
+
 namespace rf {
 
 namespace Graphics {
@@ -9,6 +11,14 @@ namespace Graphics {
         Perspective,    // Objects shrink with distance, mimicking real life vision
         Orthographic,   // Objects keep the same size regardless of distance
     };
+
+    constexpr const char* ProjectionModeToString(ProjectionMode mode) {
+        switch (mode) {
+            case ProjectionMode::Perspective:   return "Perspective";
+            case ProjectionMode::Orthographic:  return "Orthographic";
+            default:                            return "Unknown";
+        }
+    }
 
     struct Camera {
         static constexpr glm::vec3 Up           { 0.0f, 1.0f, 0.0f };
@@ -19,11 +29,10 @@ namespace Graphics {
         static constexpr float NearPlane         = 0.1f;
         static constexpr float FarPlane          = 10000.0f;
 
-        glm::vec3 position { 0.0f };
-        float yaw   = 0.0f;
-        float pitch = 0.0f;
-        float zoom  = 1.0f;
         ProjectionMode projectionMode = ProjectionMode::Perspective;
+        glm::vec3 position { 0.0f };
+        Rotation rotation = {};
+        float zoom = 1.0f;
     };
 }
 

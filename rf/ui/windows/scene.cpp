@@ -1,5 +1,8 @@
 #include "scene.hpp"
 
+#include <vector>
+#include <algorithm>
+
 #include <fmt/format.h>
 
 #include <rf/core/engine.hpp>
@@ -9,34 +12,61 @@
 
 namespace rf {
 
-static ImTextureID RenderMeshPreviewScene(const Resources::Mesh& mesh) {
+static ImTextureID RenderMeshPreview(const Resources::Mesh& mesh) {
     static World::Scene s_previewScene;
     static World::Entity* s_previewEntity = nullptr;
     static bool s_configured = false;
     if (!s_configured) {
-        World::Entity& entity = s_previewScene.newEntity();
-        entity.setComponent<World::DrawComponent>({
-            .material = { .shader = Engine::Library().loadShader("main/") },
-        });
-        entity.setComponent<rf::World::LightComponent>({
+        World::Entity& observer = s_previewScene.newEntity("Observer");
+        observer.add<World::CameraComponent>();
+        s_previewScene.setActiveCameraEntity(observer);
+
+        World::Entity& light = s_previewScene.newEntity("Light");
+        light.set<rf::World::LightComponent>({
             .light = {
                 .type = rf::Graphics::LightType::DirectionalLight,
                 .direction = { -0.3f, -1.0f, -0.3f },
             }
         });
 
-        Math::DirectCameraAtMesh(*s_previewScene.get<rf::Graphics::Camera>().get(), *mesh);
-        s_previewEntity = &entity;
+        World::Entity& object = s_previewScene.newEntity("Object");
+        object.set<World::DrawComponent>({
+            .material = {
+                .shader = Engine::Library().loadShader("main/")
+            }
+        });
+
+        s_previewEntity = &object;
         s_configured = true;
     }
-    s_previewEntity->getComponent<World::DrawComponent>()->mesh = mesh;
+
+    Math::DirectCameraAtMesh(*s_previewScene.getActiveCamera(), *mesh);
+    s_previewEntity->get<World::DrawComponent>()->mesh = mesh;
 
     Graphics::Renderer& renderer = Engine::Renderer();
     renderer.render(&s_previewScene);
     return static_cast<ImTextureID>(renderer.previewFramebuffer().texture());
 }
 
-static void Render(const char* id, const Resources::Shader& shader) {
+// TODO: Finish this when LogicComponent finally becomes resourced ScriptComponent
+static void Draw(const char* id, const World::LogicComponent::Callback& callback) {
+    if (!callback) {
+        ImGui::BeginDisabled();
+        ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
+        ImGui::EndDisabled();
+        return;
+    }
+
+    ImGui::Button(fmt::format("Callback##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+        ImGui::BeginTooltip();
+        ImGui::Button("Callback", ImVec2(100, 100));
+        ImGui::TextUnformatted("Callback");
+        ImGui::EndTooltip();
+    }
+}
+
+static void Draw(const char* id, const Resources::Shader& shader) {
     if (!shader.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
@@ -68,7 +98,7 @@ static void Render(const char* id, const Resources::Shader& shader) {
     }
 }
 
-static void Render(const char* id, const Resources::Texture& texture) {
+static void Draw(const char* id, const Resources::Texture& texture) {
     if (!texture.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
@@ -93,7 +123,7 @@ static void Render(const char* id, const Resources::Texture& texture) {
     }
 }
 
-static void Render(const char* id, const Resources::Mesh& mesh) {
+static void Draw(const char* id, const Resources::Mesh& mesh) {
     if (!mesh.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
@@ -104,7 +134,7 @@ static void Render(const char* id, const Resources::Mesh& mesh) {
     ImGui::Button(fmt::format("Mesh resource #{}##{}", mesh.id(), id).c_str(), ImVec2(-FLT_MIN, 0));
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
         ImGui::BeginTooltip();
-        ImGui::Image(RenderMeshPreviewScene(mesh), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(RenderMeshPreview(mesh), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         ImGui::TextUnformatted(fmt::format("Mesh resource #{}", mesh.id()).c_str());
         ImGui::TextUnformatted(fmt::format(
             "{} indice{}, {} triangle{}",
@@ -118,90 +148,26 @@ static void Render(const char* id, const Resources::Mesh& mesh) {
     }
 }
 
-static void Render(World::DrawComponent* component) {
-    if (!ImGui::CollapsingHeader("Draw Component"))
+static void Draw(World::LogicComponent& component) {
+    if (!ImGui::CollapsingHeader("Logic Component"))
         return;
 
-    if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_transform_table", 2)) {
+    if (ImGui::TreeNodeEx("Callbacks", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scene_logic_component_callback_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+            
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Start");
+            ImGui::TableNextColumn();
+            Draw("##scene_logic_component_start_callback", component.onStart);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Position");
+            ImGui::TextUnformatted("Update");
             ImGui::TableNextColumn();
-            ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_position", glm::value_ptr(component->transform.position), 0.01f);
-            ImGui::PopItemWidth();
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Rotation");
-            ImGui::TableNextColumn();
-            ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_rotation", glm::value_ptr(component->transform.rotation), 0.5f);
-            ImGui::PopItemWidth();
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Scale");
-            ImGui::TableNextColumn();
-            ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_scale", glm::value_ptr(component->transform.scale), 0.01f);
-            ImGui::PopItemWidth();
-
-            ImGui::EndTable();
-        }
-        ImGui::TreePop();
-    }
-    
-    if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Shader");
-            ImGui::TableNextColumn();
-            Render("##scene_draw_component_material_shader", component->material.shader);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Diffuse texture");
-            ImGui::TableNextColumn();
-            Render("##scene_draw_component_material_diffuse", component->material.diffuse);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Specular texture");
-            ImGui::TableNextColumn();
-            Render("##scene_material_draw_component_specular", component->material.specular);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Shininess");
-            ImGui::TableNextColumn();
-            ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_draw_component_material_shininess", &component->material.shininess, 1.0f, 256.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
-            ImGui::PopItemWidth();
-
-            ImGui::EndTable();
-        }
-        ImGui::TreePop();
-    }
-
-    if (ImGui::TreeNodeEx("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::TextUnformatted("Mesh");
-            ImGui::TableNextColumn();
-            Render("##scene_draw_component_mesh", component->mesh);
+            Draw("##scene_logic_component_update_callback", component.onUpdate);
 
             ImGui::EndTable();
         }
@@ -209,10 +175,64 @@ static void Render(World::DrawComponent* component) {
     }
 }
 
-static void Render(World::LightComponent* component) {
+static void Draw(World::CameraComponent& component) {
+    if (!ImGui::CollapsingHeader("Camera Component"))
+        return;
+    Graphics::Camera& camera = component.camera;
+
+    if (ImGui::TreeNodeEx("Common", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scene_camera_component_common_table", 2)) {
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Projection mode");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            if (ImGui::BeginCombo("##scene_camera_component_projection_mode", Graphics::ProjectionModeToString(camera.projectionMode))) {
+                if (ImGui::Selectable(Graphics::ProjectionModeToString(Graphics::ProjectionMode::Perspective), camera.projectionMode == Graphics::ProjectionMode::Perspective))
+                    camera.projectionMode = Graphics::ProjectionMode::Perspective;
+                else if (ImGui::Selectable(Graphics::ProjectionModeToString(Graphics::ProjectionMode::Orthographic), camera.projectionMode == Graphics::ProjectionMode::Orthographic))
+                    camera.projectionMode = Graphics::ProjectionMode::Orthographic;
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Position");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::DragFloat3("##scene_camera_component_camera_position", glm::value_ptr(camera.position), 0.01f);
+            ImGui::PopItemWidth();
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Rotation");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::DragFloat3("##scene_camera_component_camera_yaw_pitch", reinterpret_cast<float*>(&camera.rotation), 0.05f);
+            ImGui::PopItemWidth();
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Zoom");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::SliderFloat("##scene_camera_component_camera_zoom", &camera.zoom, 0.3f, 20.0f);
+            ImGui::PopItemWidth();
+
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+}
+
+static void Draw(World::LightComponent& component) {
     if (!ImGui::CollapsingHeader("Light Component"))
         return;
-    Graphics::Light& light = component->light;
+    Graphics::Light& light = component.light;
 
     if (ImGui::TreeNodeEx("Common", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("##scene_light_component_common_table", 2)) {
@@ -376,6 +396,97 @@ static void Render(World::LightComponent* component) {
     }
 }
 
+static void Draw(World::DrawComponent& component) {
+    if (!ImGui::CollapsingHeader("Draw Component"))
+        return;
+
+    if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scene_draw_component_transform_table", 2)) {
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Position");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::DragFloat3("##scene_draw_component_transform_position", glm::value_ptr(component.transform.position), 0.01f);
+            ImGui::PopItemWidth();
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Rotation");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::DragFloat3("##scene_draw_component_transform_rotation", reinterpret_cast<float*>(&component.transform.rotation), 0.5f);
+            ImGui::PopItemWidth();
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Scale");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::DragFloat3("##scene_draw_component_transform_scale", glm::value_ptr(component.transform.scale), 0.01f);
+            ImGui::PopItemWidth();
+
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+    
+    if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Shader");
+            ImGui::TableNextColumn();
+            Draw("##scene_draw_component_material_shader", component.material.shader);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Diffuse texture");
+            ImGui::TableNextColumn();
+            Draw("##scene_draw_component_material_diffuse", component.material.diffuse);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Specular texture");
+            ImGui::TableNextColumn();
+            Draw("##scene_material_draw_component_specular", component.material.specular);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Shininess");
+            ImGui::TableNextColumn();
+            ImGui::PushItemWidth(-FLT_MIN);
+            ImGui::SliderFloat("##scene_draw_component_material_shininess", &component.material.shininess, 1.0f, 256.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
+            ImGui::PopItemWidth();
+
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Mesh");
+            ImGui::TableNextColumn();
+            Draw("##scene_draw_component_mesh", component.mesh);
+
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+}
+
 void Ui::Windows::Scene::update() {
     World::Scene& scene = Engine::Scene();
     World::Scene::Entities& entities = scene.entities();
@@ -386,8 +497,14 @@ void Ui::Windows::Scene::update() {
         if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             s_selectedEntityId = 0;
 
-        for (const auto& entityEntry : entities) {
-            const World::Entity& entity = entityEntry.second;
+        std::vector<World::EntityId> entityIds;
+        entityIds.reserve(entities.size());
+        for (const auto& entityEntry : entities)
+            entityIds.push_back(entityEntry.first);
+        std::sort(entityIds.begin(), entityIds.end());
+
+        for (World::EntityId& entityId : entityIds) {
+            const World::Entity& entity = entities.at(entityId);
             if (ImGui::Selectable(entity.name(), entity.id() == s_selectedEntityId))
                 s_selectedEntityId = entity.id();
         }
@@ -414,9 +531,15 @@ void Ui::Windows::Scene::update() {
             ImGui::Separator();
             if (ImGui::BeginTabBar(fmt::format("##scene_item_#{}_tabs", entity.id()).c_str(), ImGuiTabBarFlags_None)) {
                 if (ImGui::BeginTabItem("Info")) {
-                    if (ImGui::BeginTable("##scene_item_table", 2)) {
-                        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-                        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+                    if (ImGui::BeginTable("##scene_item_table", 2, ImGuiTableFlags_Borders)) {
+                        ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+                        ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+
+                        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+                        ImGui::TableNextColumn();
+                        ImGui::TextUnformatted("Field");
+                        ImGui::TableNextColumn();
+                        ImGui::TextUnformatted("Value");
 
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
@@ -436,12 +559,14 @@ void Ui::Windows::Scene::update() {
                 }
 
                 if (ImGui::BeginTabItem("Components")) {
-                    entity.each([&scene, &entity](flecs::id id) {
-                        if (scene.is<World::DrawComponent>(id))
-                            Render(entity.getComponent<World::DrawComponent>());
-                        else if (scene.is<World::LightComponent>(id))
-                            Render(entity.getComponent<World::LightComponent>());
-                    });
+                    if (entity.has<World::LogicComponent>())
+                        Draw(*entity.get<World::LogicComponent>());
+                    if (entity.has<World::CameraComponent>())
+                        Draw(*entity.get<World::CameraComponent>());
+                    if (entity.has<World::LightComponent>())
+                        Draw(*entity.get<World::LightComponent>());
+                    if (entity.has<World::DrawComponent>())
+                        Draw(*entity.get<World::DrawComponent>());
                     ImGui::EndTabItem();
                 }
 

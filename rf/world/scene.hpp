@@ -18,14 +18,11 @@ namespace World {
         using Entities = std::unordered_map<EntityId, Entity>;
 
     private:
-        Entities m_entities;
         flecs::world m_world;
+        Entities m_entities;
 
     public:
-        Scene() {
-            // TODO: A better way to do this?
-            m_world.add<rf::Graphics::Camera>();
-        }
+        Scene() = default;
 
         Scene(const Scene& other) = delete;
 
@@ -43,18 +40,26 @@ namespace World {
 
     public:
         void start() {
-            m_world.each([this](flecs::entity entity, const StartComponent& component) {
-                component.onStart(m_entities.at(entity.id()));
+            m_world.each([this](flecs::entity entity, const LogicComponent& component) {
+                if (!component.onStart)
+                    return;
+                component.onStart(m_entities.at(entity.id()), 0.0f);
             });
         }
 
         void update(float deltaTime) {
-            m_world.each([this, deltaTime](flecs::entity entity, const UpdateComponent& component) {
+            m_world.each([this, deltaTime](flecs::entity entity, const LogicComponent& component) {
+                if (!component.onUpdate)
+                    return;
                 component.onUpdate(m_entities.at(entity.id()), deltaTime);
             });
         }
 
     public:
+        const Entities& entities() const {
+            return m_entities;
+        }
+
         Entities& entities() {
             return m_entities;
         }
@@ -71,6 +76,54 @@ namespace World {
                     return m_entities.emplace(entity.id(), std::move(entity)).first->second;
                 }
             }
+        }
+
+        const Entity* getEntity(EntityId id) const {
+            auto entry = m_entities.find(id);
+            return entry == m_entities.end() ? nullptr : &entry->second;
+        }
+
+        Entity* getEntity(EntityId id) {
+            auto entry = m_entities.find(id);
+            return entry == m_entities.end() ? nullptr : &entry->second;
+        }
+
+        const Entity* getActiveCameraEntity() const {
+            flecs::entity entity = m_world.query<CameraComponent, CameraComponent::ActiveCameraTag>().first();
+            return entity.is_alive() ? &m_entities.at(entity.id()) : nullptr;
+        }
+
+        Entity* getActiveCameraEntity() {
+            flecs::entity entity = m_world.query<CameraComponent, CameraComponent::ActiveCameraTag>().first();
+            return entity.is_alive() ? &m_entities.at(entity.id()) : nullptr;
+        }
+
+        void setActiveCameraEntity(Entity& entity) {
+            // Don't do anything if this entity doesn't have a camera.
+            if (!entity.has<CameraComponent>())
+                return;
+
+            // Ensure that no entities have active camera tag and give the tag to this entity.
+            m_world.remove_all<CameraComponent::ActiveCameraTag>();
+            entity.add<CameraComponent::ActiveCameraTag>();
+        }
+
+        const Graphics::Camera* getActiveCamera() const {
+            const rf::World::Entity* cameraEntity = getActiveCameraEntity();
+            if (!cameraEntity)
+                return nullptr;
+
+            const CameraComponent* cameraComponent = cameraEntity->get<rf::World::CameraComponent>();
+            return cameraComponent ? &cameraComponent->camera : nullptr;
+        }
+
+        Graphics::Camera* getActiveCamera() {
+            rf::World::Entity* cameraEntity = getActiveCameraEntity();
+            if (!cameraEntity)
+                return nullptr;
+
+            CameraComponent* cameraComponent = cameraEntity->get<rf::World::CameraComponent>();
+            return cameraComponent ? &cameraComponent->camera : nullptr;
         }
 
         template <typename Component>
@@ -94,8 +147,8 @@ namespace World {
         }
 
         template <typename Component>
-        flecs::ref<Component> get() {
-            return m_world.singleton<Component>().get_ref<Component>();
+        Component* get() {
+            return m_world.singleton<Component>().get_mut<Component>();
         }
 
         template <typename... Components>

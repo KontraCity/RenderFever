@@ -47,37 +47,42 @@ namespace World {
             return m_entity.name().c_str();
         }
 
-        template <typename ComponentType>
-        Entity& addComponent() {
-            m_entity.add<ComponentType>();
+        template <typename Component>
+        bool has() const {
+            return m_entity.has<Component>();
+        }
+
+        template <typename Component>
+        Entity& add() {
+            m_entity.add<Component>();
             return *this;
         }
 
-        template <typename ComponentType>
-        Entity& addComponent(ComponentType&& value) {
-            m_entity.add<ComponentType>(std::forward<ComponentType>(value));
+        template <typename Component>
+        Entity& add(Component&& value) {
+            m_entity.add<Component>(std::forward<Component>(value));
             return *this;
         }
 
-        template <typename ComponentType>
-        Entity& setComponent(ComponentType&& value) {
-            m_entity.set<ComponentType>(std::forward<ComponentType>(value));
+        template <typename Component>
+        Entity& set(Component&& value) {
+            m_entity.set<Component>(std::forward<Component>(value));
             return *this;
         }
 
-        template <typename ComponentType>
-        const ComponentType* getComponent() const {
-            return m_entity.get<ComponentType>();
+        template <typename Component>
+        const Component* get() const {
+            return m_entity.get<Component>();
         }
 
-        template <typename ComponentType>
-        ComponentType* getComponent() {
-            return m_entity.get_mut<ComponentType>();
+        template <typename Component>
+        Component* get() {
+            return m_entity.get_mut<Component>();
         }
 
-        template <typename ComponentType>
-        flecs::ref<ComponentType> getComponentRef() {
-            return m_entity.get_ref<ComponentType>();
+        template <typename Component>
+        void remove() {
+            m_entity.remove<Component>();
         }
 
         template <typename Function>

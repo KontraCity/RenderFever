@@ -21,7 +21,7 @@ Graphics::Renderer::Renderer(const Config& config, Resources::Library& library)
     , m_faceCullingMode(config.faceCullingMode) 
     , m_wireframeMode(config.wireframeMode) {
     m_mainShader = library.loadShader(config.mainShaderPath);
-    m_lightShader= library.loadShader(config.lightShaderPath);
+    m_lightShader = library.loadShader(config.lightShaderPath);
     SetStorageSize(m_lightStorage, 0);
 
     setDepthTestingMode(m_depthTestingMode);
@@ -58,13 +58,20 @@ void Graphics::Renderer::clear() {
 }
 
 void Graphics::Renderer::capture(const World::Scene& scene) {
-    const Camera& camera = *scene.get<Camera>();
-    m_mainShader->capture(camera);
-    m_lightShader->capture(camera);
+    const Camera* camera = scene.getActiveCamera();
+    if (!camera)
+        return;
+
+    m_mainShader->capture(*camera);
+    m_lightShader->capture(*camera);
 }
 
 void Graphics::Renderer::illuminate(const World::Scene& scene) {
-    glm::mat4 view = Math::EvaluateView(*scene.get<Camera>());
+    const Camera* camera = scene.getActiveCamera();
+    if (!camera)
+        return;
+
+    glm::mat4 view = Math::EvaluateView(*camera);
     scene.query<World::LightComponent>().run([this, &view](flecs::iter& iterator) {
         GLint totalLights = 0;
         size_t offset = sizeof(totalLights) * 4;
@@ -108,6 +115,7 @@ void Graphics::Renderer::draw(const World::Scene& scene) {
 }
 
 void Graphics::Renderer::render(const World::Scene* previewScene) {
+    // TODO: Return bind handles.
     if (previewScene)
         m_previewFramebuffer.bind();
 

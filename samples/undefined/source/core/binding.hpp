@@ -25,6 +25,7 @@ enum class Binding {
     ToggleVSync,
     ToggleWireframeMode,
     SwitchProjectionMode,
+    SwitchToStandaloneCamera,
 };
 
 struct BindingEntry {
@@ -34,20 +35,21 @@ struct BindingEntry {
 };
 
 constexpr auto BindingRecords = std::to_array<BindingEntry>({
-    { Binding::None,                    rf::Input::Key::None,               "None"                          },
-    { Binding::MoveForward,             rf::Input::Key::Key_W,              "Move forward"                  },
-    { Binding::MoveBackward,            rf::Input::Key::Key_S,              "Move backward"                 },
-    { Binding::MoveLeft,                rf::Input::Key::Key_A,              "Move left"                     },
-    { Binding::MoveRight,               rf::Input::Key::Key_D,              "Move right"                    },
-    { Binding::MoveUp,                  rf::Input::Key::Key_Space,          "Move up"                       },
-    { Binding::MoveDown,                rf::Input::Key::Key_LeftControl,    "Move down"                     },
-    { Binding::MoveQuickly,             rf::Input::Key::Key_LeftShift,      "Move quickly"                  },
-    { Binding::MoveSlowly,              rf::Input::Key::Key_LeftAlt,        "Move slowly"                   },
-    { Binding::ResetPlayer,             rf::Input::Key::Key_R,              "Reset player"                  },
-    { Binding::SpawnLight,              rf::Input::Key::Key_T,              "Spawn light"                   },
-    { Binding::ToggleVSync,             rf::Input::Key::Key_I,              "Toggle VSync"                  },
-    { Binding::ToggleWireframeMode,     rf::Input::Key::Key_O,              "Toggle wireframe mode"         },
-    { Binding::SwitchProjectionMode,    rf::Input::Key::Key_P,              "Switch camera projection mode" },
+    { Binding::None,                        rf::Input::Key::None,               "None"                          },
+    { Binding::MoveForward,                 rf::Input::Key::Key_W,              "Move forward"                  },
+    { Binding::MoveBackward,                rf::Input::Key::Key_S,              "Move backward"                 },
+    { Binding::MoveLeft,                    rf::Input::Key::Key_A,              "Move left"                     },
+    { Binding::MoveRight,                   rf::Input::Key::Key_D,              "Move right"                    },
+    { Binding::MoveUp,                      rf::Input::Key::Key_Space,          "Move up"                       },
+    { Binding::MoveDown,                    rf::Input::Key::Key_LeftControl,    "Move down"                     },
+    { Binding::MoveQuickly,                 rf::Input::Key::Key_LeftShift,      "Move quickly"                  },
+    { Binding::MoveSlowly,                  rf::Input::Key::Key_LeftAlt,        "Move slowly"                   },
+    { Binding::ResetPlayer,                 rf::Input::Key::Key_R,              "Reset player"                  },
+    { Binding::SpawnLight,                  rf::Input::Key::Key_T,              "Spawn light"                   },
+    { Binding::ToggleVSync,                 rf::Input::Key::Key_I,              "Toggle VSync"                  },
+    { Binding::ToggleWireframeMode,         rf::Input::Key::Key_O,              "Toggle wireframe mode"         },
+    { Binding::SwitchProjectionMode,        rf::Input::Key::Key_P,              "Switch camera projection mode" },
+    { Binding::SwitchToStandaloneCamera,    rf::Input::Key::Key_L,              "Switch to standalone camera"   },
 });
 
 inline BindingEntry GetBindingEntry(Binding binding) {

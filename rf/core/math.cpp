@@ -4,24 +4,25 @@
 
 namespace rf {
 
-glm::quat Math::EvaluateOrientation(const Graphics::Camera& camera) {
-    glm::quat pitchRotation = glm::angleAxis(glm::radians(camera.pitch), Graphics::Camera::Right);
-    glm::quat yawRotation = glm::angleAxis(glm::radians(-camera.yaw), Graphics::Camera::Up);
-    return glm::normalize(yawRotation * pitchRotation);
+glm::quat Math::EvaluateOrientation(const Graphics::Rotation& rotation) {
+    glm::quat pitchRotation = glm::angleAxis(glm::radians(rotation.pitch), Graphics::Camera::Right);
+    glm::quat yawRotation   = glm::angleAxis(glm::radians(-rotation.yaw), Graphics::Camera::Up);
+    glm::quat rollRotation  = glm::angleAxis(glm::radians(rotation.roll), Graphics::Camera::Direction);
+    return glm::normalize(yawRotation * pitchRotation * rollRotation);
 }
 
 glm::vec3 Math::EvaluateUp(const Graphics::Camera& camera) {
-    glm::quat orientation = EvaluateOrientation(camera);
+    glm::quat orientation = EvaluateOrientation(camera.rotation);
     return glm::normalize(orientation * Graphics::Camera::Up);
 }
 
 glm::vec3 Math::EvaluateRight(const Graphics::Camera& camera) {
-    glm::quat orientation = EvaluateOrientation(camera);
+    glm::quat orientation = EvaluateOrientation(camera.rotation);
     return glm::normalize(orientation * Graphics::Camera::Right);
 }
 
 glm::vec3 Math::EvaluateDirection(const Graphics::Camera& camera) {
-    glm::quat orientation = EvaluateOrientation(camera);
+    glm::quat orientation = EvaluateOrientation(camera.rotation);
     return glm::normalize(orientation * Graphics::Camera::Direction);
 }
 
@@ -52,7 +53,7 @@ glm::mat4 Math::EvaluateProjection(const Graphics::Camera& camera, const Graphic
 
 glm::mat4 Math::EvaluateModel(const Graphics::Transform& transform) {
     glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
-    glm::mat4 rotation = glm::toMat4(glm::quat(glm::radians(transform.rotation)));
+    glm::mat4 rotation = glm::toMat4(EvaluateOrientation(transform.rotation));
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
     return translation * rotation * scale;
 }
@@ -65,8 +66,10 @@ void Math::DirectCameraAtMesh(Graphics::Camera& camera, const Graphics::Mesh& me
     camera.position = mesh.center() - direction * distance;
 
     glm::vec3 lookDirection = glm::normalize(mesh.center() - camera.position);
-    camera.yaw = glm::degrees(std::atan2(lookDirection.x, -lookDirection.z));
-    camera.pitch = glm::degrees(std::asin(lookDirection.y));
+    camera.rotation.pitch = glm::degrees(std::asin(lookDirection.y));
+    camera.rotation.yaw = glm::degrees(std::atan2(lookDirection.x, -lookDirection.z));
+    camera.rotation.roll = 0.0f;
+    camera.zoom = 1.0f;
 }
 
 } // namespace rf

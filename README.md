@@ -26,7 +26,7 @@
   * vcpkg: `vcpkg install flecs`
 * [ImGui](https://github.com/ocornut/imgui) - Bloat-free Graphical User interface for C++ with minimal dependencies.
   * Licensed under the [MIT License](https://github.com/ocornut/imgui/blob/master/LICENSE.txt).
-  * vcpkg: `vcpkg install imgui`
+  * vcpkg: `vcpkg install imgui[core,glfw-binding,opengl3-binding]`
 * [zlib](https://github.com/madler/zlib) - A massively spiffy yet delicately unobtrusive compression library.
   * Licensed under the [zlib License](https://github.com/madler/zlib/blob/develop/zlib.h#L4-L28).
   * vcpkg: `vcpkg install zlib`
