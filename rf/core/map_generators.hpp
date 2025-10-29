@@ -15,16 +15,16 @@ constexpr bool HasDuplicates(const Array& array, ValueExtractor extractor) {
     return false;
 }
 
-template <auto& records, typename Value, typename Entry, typename ValueExtractor>
+template <auto& Records, typename Value, typename Entry, typename ValueExtractor>
 constexpr auto GenerateValueToEntryMap(ValueExtractor extractor) {
     static_assert(
-        !HasDuplicates(records, extractor),
+        !HasDuplicates(Records, extractor),
         "Record arrays can only contain unique values!"
     );
 
-    std::array<std::pair<Value, Entry>, records.size()> array = {};
-    for (size_t index = 0; index < records.size(); ++index)
-        array[index] = { extractor(records[index]), records[index] };
+    std::array<std::pair<Value, Entry>, Records.size()> array = {};
+    for (size_t index = 0; index < Records.size(); ++index)
+        array[index] = { extractor(Records[index]), Records[index] };
     return frozen::make_unordered_map(array);
 }
 

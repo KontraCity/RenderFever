@@ -2,10 +2,11 @@
 
 #include <utility>
 
-#include <rf/ui/fonts/b612_regular_ttf.hpp>
-#include <rf/ui/windows/bindings.hpp>
-#include <rf/ui/windows/perfomance.hpp>
-#include <rf/ui/windows/scene.hpp>
+#include <rf/ui/embedded/b612_font_ttf.hpp>
+#include <rf/ui/windows/bindings_hint.hpp>
+#include <rf/ui/windows/perfomance_monitor.hpp>
+#include <rf/ui/windows/resource_browser.hpp>
+#include <rf/ui/windows/scene_tree.hpp>
 #include <rf/ui/font.hpp>
 
 namespace rf {
@@ -24,7 +25,7 @@ Ui::Overlay::Overlay(GLFWwindow* handle) {
     ImFontConfig config = ImFontConfig();
     config.FontDataOwnedByAtlas = false;
 
-    const auto& font = Fonts::B612_Regular_Ttf();
+    const auto& font = Embedded::B612RegularFontTtf();
     io.Fonts->AddFontFromMemoryTTF(
         const_cast<void*>(reinterpret_cast<const void*>(font.data())),
         static_cast<int>(font.size()),
@@ -38,14 +39,17 @@ Ui::Overlay::Overlay(GLFWwindow* handle) {
         &config
     );
     
-    m_windows.push_back(std::make_unique<Windows::Bindings>());
-    m_windows.push_back(std::make_unique<Windows::Perfomance>());
-    m_windows.push_back(std::make_unique<Windows::Scene>());
+    m_windows.push_back(std::make_unique<Windows::BindingsHint>());
+    m_windows.push_back(std::make_unique<Windows::PerfomanceMonitor>());
+    m_windows.push_back(std::make_unique<Windows::ResourceBrowser>());
+    m_windows.push_back(std::make_unique<Windows::SceneTree>());
 }
 
 Ui::Overlay::Overlay(Overlay&& other) noexcept
     : m_handle(std::exchange(other.m_handle, nullptr))
     , m_windows(std::move(other.m_windows))
+    , m_iconMap(std::move(other.m_iconMap))
+    , m_previewMap(std::move(other.m_previewMap))
 {}
 
 Ui::Overlay::~Overlay() {
@@ -61,6 +65,8 @@ Ui::Overlay& Ui::Overlay::operator=(Overlay&& other) noexcept {
     if (this != &other) {
         m_handle = std::exchange(other.m_handle, nullptr);
         m_windows = std::move(other.m_windows);
+        m_iconMap = std::move(other.m_iconMap);
+        m_previewMap = std::move(other.m_previewMap);
     }
     return *this;
 }

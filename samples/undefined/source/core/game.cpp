@@ -1,6 +1,5 @@
 #include "game.hpp"
 
-#include <rf/core/engine.hpp>
 #include <rf/core/math.hpp>
 
 #include "settings.hpp"
@@ -18,9 +17,14 @@ static rf::Graphics::Camera* GetEntityCamera(rf::World::EntityId entityId) {
     return cameraComponent ? &cameraComponent->camera : nullptr;
 }
 
-Game::Game() {
+Game::Game(const rf::Engine::Config& config) {
+    rf::Engine::Init(config);
     handlesSetup();
     sceneSetup();
+}
+
+Game::~Game() {
+    rf::Engine::Shutdown();
 }
 
 void Game::handlesSetup() {
@@ -123,9 +127,9 @@ void Game::handlesSetup() {
                 .scale = { 0.1f, 0.1f, 0.4f },
             },
             .material = {
-                .shader = rf::Engine::Library().loadShader("light/"),
+                .shader = rf::Engine::Library().loadShader("shaders/light.rfs"),
             },
-            .mesh = rf::Engine::Library().loadMesh("cube.glb"),
+            .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
         });
         spawnedLight.set<rf::World::LightComponent>({
             .light = {
@@ -189,9 +193,9 @@ void Game::sceneSetup() {
             .scale = { 0.4f, 1.0f, 0.4f }
         },
         .material = {
-            .shader = rf::Engine::Library().loadShader("main/"),
+            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
         },
-        .mesh = rf::Engine::Library().loadMesh("cube.glb"),
+        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
     });
     player.set<rf::World::LogicComponent>({
         .onUpdate = [](rf::World::Entity& entity, float) {
@@ -224,9 +228,9 @@ void Game::sceneSetup() {
             .scale = { 0.1f, 0.1f, 0.4f },
         },
         .material = {
-            .shader = rf::Engine::Library().loadShader("light/"),
+            .shader = rf::Engine::Library().loadShader("shaders/light.rfs"),
         },
-        .mesh = rf::Engine::Library().loadMesh("cube.glb"),
+        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
     });
     fillLight.set<rf::World::LightComponent>({
         .light = {
@@ -251,12 +255,12 @@ void Game::sceneSetup() {
     mainCube.set<rf::World::DrawComponent>({
         .transform = {},
         .material = {
-            .shader = rf::Engine::Library().loadShader("main/"),
-            .diffuse = rf::Engine::Library().loadTexture("container/diffuse.png"),
-            .specular = rf::Engine::Library().loadTexture("container/specular.png"),
+            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
+            .diffuse = rf::Engine::Library().loadTexture("textures/container_diffuse.png"),
+            .specular = rf::Engine::Library().loadTexture("textures/container_specular.png"),
             .shininess = 32.0f,
         },
-        .mesh = rf::Engine::Library().loadMesh("cube.glb"),
+        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
     });
 
     rf::World::Entity& neighbouringPlane = scene.newEntity("Neighbouring Plane");
@@ -267,12 +271,12 @@ void Game::sceneSetup() {
             .scale = { 4.0f, 1.0f, 4.0f }
         },
         .material = {
-            .shader = rf::Engine::Library().loadShader("main/"),
-            .diffuse = rf::Engine::Library().loadTexture("container/diffuse.png"),
-            .specular = rf::Engine::Library().loadTexture("container/specular.png"),
+            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
+            .diffuse = rf::Engine::Library().loadTexture("textures/container_diffuse.png"),
+            .specular = rf::Engine::Library().loadTexture("textures/container_specular.png"),
             .shininess = 32.0f,
         },
-        .mesh = rf::Engine::Library().loadMesh("plane.glb"),
+        .mesh = rf::Engine::Library().loadMesh("meshes/plane.glb"),
     });
 }
 

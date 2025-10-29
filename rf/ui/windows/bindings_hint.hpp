@@ -8,21 +8,17 @@ namespace rf {
 
 namespace Ui {
     namespace Windows {
-        class Scene : public Window {
+        class BindingsHint : public Window {
         public:
             virtual void update();
 
         public:
             virtual const char* name() const {
-                return "Scene";
+                return "Bindings Hint";
             }
 
             virtual ImGuiWindowFlags flags() const {
-                return 0;
-            }
-
-            virtual ImVec2 size() const {
-                return ImVec2(500, 440);
+                return ImGuiWindowFlags_AlwaysAutoResize;
             }
         };
     }

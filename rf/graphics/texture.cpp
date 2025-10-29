@@ -1,21 +1,45 @@
 #include "texture.hpp"
 
-#include <rf/core/image.hpp>
-
 namespace rf {
 
-Graphics::Texture::Texture(const Image& image) {
+Graphics::Texture::Texture(const Image& image)
+    : m_dimensions({
+        .width = static_cast<int>(image.dimensions().width),
+        .height = static_cast<int>(image.dimensions().height),
+      }) {
     glGenTextures(1, &m_texture);
     glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.dimensions().width, image.dimensions().height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
-    setFiltering(GL_LINEAR);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8,
+        m_dimensions.width,
+        m_dimensions.height,
+        0, GL_RGBA, GL_UNSIGNED_BYTE,
+        image.data()
+    );
+
+    // TODO: Custom filtering and wrapping setters? No idea how to use them now.
+
+    // Filtering
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    // Wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+Graphics::Texture::Texture(GLuint texture, const Dimensions& dimensions)
+    : m_texture(texture)
+    , m_dimensions(dimensions)
+{}
 
 Graphics::Texture::Texture(Texture&& other) noexcept
     : m_texture(std::exchange(other.m_texture, 0))
+    , m_dimensions(std::exchange(other.m_dimensions, {}))
 {}
 
 Graphics::Texture::~Texture() {
@@ -26,6 +50,7 @@ Graphics::Texture& Graphics::Texture::operator=(Texture&& other) noexcept {
     if (this != &other) {
         free();
         m_texture = std::exchange(other.m_texture, 0);
+        m_dimensions = std::exchange(other.m_dimensions, {});
     }
     return *this;
 }
@@ -35,32 +60,7 @@ void Graphics::Texture::free() {
         glDeleteTextures(1, &m_texture);
         m_texture = 0;
     }
-}
-
-void Graphics::Texture::setFiltering(int direction, int mode) const {
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, direction, mode);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Graphics::Texture::setFiltering(int mode) const {
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Graphics::Texture::setWrapping(int direction, int mode) const {
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, direction, mode);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Graphics::Texture::setWrapping(int mode) const {
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    m_dimensions = {};
 }
 
 } // namespace rf

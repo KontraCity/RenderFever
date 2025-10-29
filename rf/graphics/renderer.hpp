@@ -18,7 +18,7 @@ namespace Graphics {
             fs::path lightShaderPath;
             fs::path neutralShaderPath;
             size_t lightSourcesReserve = 100;
-            Dimensions previewFramebufferDimensions = { 500, 500 };
+            Dimensions previewFramebufferDimensions = { 100, 100 };
 
             bool depthTestingMode = true;
             bool faceCullingMode = true;
@@ -63,6 +63,10 @@ namespace Graphics {
         void render(const World::Scene* previewScene = nullptr);
 
     public:
+        const Resources::Shader& mainShader() const {
+            return m_mainShader;
+        }
+
         const Framebuffer& previewFramebuffer() const {
             return m_previewFramebuffer;
         }

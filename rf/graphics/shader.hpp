@@ -28,6 +28,7 @@ namespace Graphics {
         GLuint m_fragmentShader = 0;
         GLuint m_geometryShader = 0;
         GLuint m_shaderProgram = 0;
+        bool m_geometryStage = false;
 
     public:
         Shader(const Config& config);
@@ -67,6 +68,11 @@ namespace Graphics {
 
         void draw(const Mesh& mesh) const;
      
+    public:
+        bool geometryStage() const {
+            return m_geometryStage;
+        }
+
     public:
         void use() const {
             glUseProgram(m_shaderProgram);

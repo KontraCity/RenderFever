@@ -1,5 +1,6 @@
 #pragma once
 
+#include <rf/core/engine.hpp>
 #include <rf/input/input_map.hpp>
 #include <rf/input/key_actions.hpp>
 #include <rf/world/entity.hpp>
@@ -36,13 +37,13 @@ private:
     rf::World::EntityId m_standaloneCameraEntityId = 0;
 
 public:
-    Game();
+    Game(const rf::Engine::Config& config);
 
     Game(const Game& other) = delete;
 
     Game(Game&& other) = delete;
 
-    ~Game() = default;
+    ~Game();
 
 public:
     Game& operator=(const Game& other) = delete;

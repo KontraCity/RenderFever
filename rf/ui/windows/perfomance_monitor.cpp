@@ -1,4 +1,4 @@
-#include "perfomance.hpp"
+#include "perfomance_monitor.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -113,19 +113,19 @@ static MaxValues GetMaxPlotScales(const std::vector<Record>& records) {
     return maxPlotScales;
 }
 
-void Ui::Windows::Perfomance::update() {
+void Ui::Windows::PerfomanceMonitor::update() {
     constexpr float RowHeight = FontSize(Font::Normal) + FontSize(Font::Huge);
     UpdateInfo info = MakeRecord();
     MaxValues maxPlotScales = GetMaxPlotScales(info.history);
 
-    if (ImGui::BeginTable("##perfomance_fps_table", 2, ImGuiTableFlags_SizingStretchSame)) {
-        ImGui::TableSetupColumn("##perfomance_fps_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-        ImGui::TableSetupColumn("##perfomance_fps_table_text", ImGuiTableColumnFlags_WidthStretch);
+    if (ImGui::BeginTable("##perfomancemon_fps_table", 2, ImGuiTableFlags_SizingStretchSame)) {
+        ImGui::TableSetupColumn("##perfomancemon_fps_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+        ImGui::TableSetupColumn("##perfomancemon_fps_table_text", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PlotLines(
-            "##perfomance_fps_plot",
+            "##perfomancemon_fps_plot",
             [](void* data, int index) { return (reinterpret_cast<Record*>(data) + index)->fps; },
             const_cast<void*>(reinterpret_cast<const void*>(info.history.data())),
             info.history.size(), 0, nullptr, 0, maxPlotScales.fps,
@@ -144,14 +144,14 @@ void Ui::Windows::Perfomance::update() {
         ImGui::EndTable();
     }
 
-    if (ImGui::BeginTable("##perfomance_ft_table", 2, ImGuiTableFlags_SizingStretchSame)) {
-        ImGui::TableSetupColumn("##perfomance_ft_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-        ImGui::TableSetupColumn("##perfomance_ft_table_text", ImGuiTableColumnFlags_WidthStretch);
+    if (ImGui::BeginTable("##perfomancemon_ft_table", 2, ImGuiTableFlags_SizingStretchSame)) {
+        ImGui::TableSetupColumn("##perfomancemon_ft_table_plot", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+        ImGui::TableSetupColumn("##perfomancemon_ft_table_text", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PlotLines(
-            "##perfomance_ft_plot",
+            "##perfomancemon_ft_plot",
             [](void* data, int index) { return (reinterpret_cast<Record*>(data) + index)->ft; },
             const_cast<void*>(reinterpret_cast<const void*>(info.history.data())),
             info.history.size(), 0, nullptr, 0, maxPlotScales.ft,

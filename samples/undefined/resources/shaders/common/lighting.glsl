@@ -29,16 +29,22 @@ struct Light {
     float spotOuterCutoff;  // Spot light only
 };
 
+vec3 GetMaterialDiffuse(in FragProperties fragProperties, in Material material) {
+    if (!material.complete)
+        return vec3(0.7f);
+    return texture(material.diffuse, fragProperties.texCoords).rgb;
+}
+
 vec3 CalcDirectionalLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
     // TODO: Implement one place where completeness is being checked?
-    vec3 ambient = light.color * light.ambientProperty * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 ambient = light.color * light.ambientProperty * GetMaterialDiffuse(fragProperties, material);
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(-light.direction);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * GetMaterialDiffuse(fragProperties, material);
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);
@@ -52,13 +58,13 @@ vec3 CalcDirectionalLight(in FragProperties fragProperties, in Light light, in M
 
 vec3 CalcPointLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
-    vec3 ambient = light.color * light.ambientProperty * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 ambient = light.color * light.ambientProperty * GetMaterialDiffuse(fragProperties, material);
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(light.position - fragProperties.position);
     float diffuseValue = max(0.0f, dot(lightDirection, normal));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * GetMaterialDiffuse(fragProperties, material);
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);
@@ -79,13 +85,13 @@ vec3 CalcPointLight(in FragProperties fragProperties, in Light light, in Materia
 
 vec3 CalcSpotLight(in FragProperties fragProperties, in Light light, in Material material) {
     // Ambient lighting
-    vec3 ambient = light.color * light.ambientProperty * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 ambient = light.color * light.ambientProperty * GetMaterialDiffuse(fragProperties, material);
 
     // Diffuse lighting
     vec3 normal = normalize(fragProperties.normal);
     vec3 lightDirection = normalize(light.position - fragProperties.position);
     float diffuseValue = max(0.0f, dot(normal, lightDirection));
-    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * (material.complete ? texture(material.diffuse, fragProperties.texCoords).rgb : vec3(0.7f));
+    vec3 diffuse = light.color * light.diffuseProperty * diffuseValue * GetMaterialDiffuse(fragProperties, material);
 
     // Specular lighting
     vec3 viewDirection = normalize(-fragProperties.position);

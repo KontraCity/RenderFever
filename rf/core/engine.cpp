@@ -79,7 +79,7 @@ void Engine::run() {
 
 Engine::Engine(const Config& config)
     : m_inputMap(std::bind(&Engine::onEscape, this), std::bind(&Engine::onCapture, this))
-    , m_library(config.library)
+    , m_library(config.resourcesRootDirectory)
     , m_scene()
     , m_window(config.window)
     , m_renderer(config.renderer, m_library)

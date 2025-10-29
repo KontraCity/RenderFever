@@ -5,6 +5,8 @@
 #include <rf/auxiliary/gl.hpp>
 #include <rf/auxiliary/imgui.hpp>
 
+#include <rf/ui/icon_map.hpp>
+#include <rf/ui/preview_map.hpp>
 #include <rf/ui/window.hpp>
 
 namespace rf {
@@ -14,6 +16,8 @@ namespace Ui {
     private:
         GLFWwindow* m_handle = nullptr;
         std::vector<Window::Instance> m_windows;
+        IconMap m_iconMap;
+        PreviewMap m_previewMap;
 
     public:
         Overlay(GLFWwindow* handle);
@@ -33,6 +37,14 @@ namespace Ui {
         void render() const;
 
     public:
+        const IconMap& iconMap() const {
+            return m_iconMap;
+        }
+
+        PreviewMap& previewMap() {
+            return m_previewMap;
+        }
+
         bool isMouseWanted() const {
             return ImGui::GetIO().WantCaptureMouse;
         }

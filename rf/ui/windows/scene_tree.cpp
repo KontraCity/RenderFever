@@ -1,4 +1,4 @@
-#include "scene.hpp"
+#include "scene_tree.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -6,47 +6,16 @@
 #include <fmt/format.h>
 
 #include <rf/core/engine.hpp>
-#include <rf/core/math.hpp>
+#include <rf/ui/context_menus.hpp>
+#include <rf/ui/drag_drop_types.hpp>
+#include <rf/ui/hints.hpp>
 #include <rf/ui/imutil.hpp>
+#include <rf/ui/styles.hpp>
+#include <rf/ui/tooltips.hpp>
 #include <rf/world/scene.hpp>
+using namespace rf::Ui;
 
 namespace rf {
-
-static ImTextureID RenderMeshPreview(const Resources::Mesh& mesh) {
-    static World::Scene s_previewScene;
-    static World::Entity* s_previewEntity = nullptr;
-    static bool s_configured = false;
-    if (!s_configured) {
-        World::Entity& observer = s_previewScene.newEntity("Observer");
-        observer.add<World::CameraComponent>();
-        s_previewScene.setActiveCameraEntity(observer);
-
-        World::Entity& light = s_previewScene.newEntity("Light");
-        light.set<rf::World::LightComponent>({
-            .light = {
-                .type = rf::Graphics::LightType::DirectionalLight,
-                .direction = { -0.3f, -1.0f, -0.3f },
-            }
-        });
-
-        World::Entity& object = s_previewScene.newEntity("Object");
-        object.set<World::DrawComponent>({
-            .material = {
-                .shader = Engine::Library().loadShader("main/")
-            }
-        });
-
-        s_previewEntity = &object;
-        s_configured = true;
-    }
-
-    Math::DirectCameraAtMesh(*s_previewScene.getActiveCamera(), *mesh);
-    s_previewEntity->get<World::DrawComponent>()->mesh = mesh;
-
-    Graphics::Renderer& renderer = Engine::Renderer();
-    renderer.render(&s_previewScene);
-    return static_cast<ImTextureID>(renderer.previewFramebuffer().texture());
-}
 
 // TODO: Finish this when LogicComponent finally becomes resourced ScriptComponent
 static void Draw(const char* id, const World::LogicComponent::Callback& callback) {
@@ -66,86 +35,52 @@ static void Draw(const char* id, const World::LogicComponent::Callback& callback
     }
 }
 
-static void Draw(const char* id, const Resources::Shader& shader) {
+static void Draw(const char* id, Resources::Shader& shader) {
     if (!shader.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
+        ImUtil::AcceptDragDropPayload(DragDropTypes::Shader, shader);
         return;
     }
 
     ImGui::Button(fmt::format("Shader resource #{}##{}", shader.id(), id).c_str(), ImVec2(-FLT_MIN, 0));
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
-        ImGui::BeginTooltip();
-
-        ImGui::Button("Vertex", ImVec2(75, 75));
-        ImGui::SameLine();
-        if (!shader.info().geometryStage)
-            ImGui::BeginDisabled();
-        ImGui::Button("Geometry", ImVec2(75, 75));
-        if (!shader.info().geometryStage)
-            ImGui::EndDisabled();
-        ImGui::SameLine();
-        ImGui::Button("Fragment", ImVec2(75, 75));
-
-        ImGui::TextUnformatted(fmt::format("Shader resource #{}", shader.id()).c_str());
-        ImGui::TextUnformatted(fmt::format("\"{}\"", shader.info().vertexFilePath.string()).c_str());
-        if (shader.info().geometryStage)
-            ImGui::TextUnformatted(fmt::format("\"{}\"", shader.info().geometryFilePath.string()).c_str());
-        ImGui::TextUnformatted(fmt::format("\"{}\"", shader.info().fragmentFilePath.string()).c_str());
-
-        ImGui::EndTooltip();
-    }
+    ImUtil::AcceptDragDropPayload(DragDropTypes::Shader, shader);
+    if (!ImUtil::SendDragDropPayload(DragDropTypes::Shader, shader, [&shader]() { Hints::DrawShaderHint(shader); }))
+        Tooltips::DrawShaderTooltip(shader);
+    ContextMenus::DrawShaderContextMenu(shader, true);
 }
 
-static void Draw(const char* id, const Resources::Texture& texture) {
+static void Draw(const char* id, Resources::Texture& texture) {
     if (!texture.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
+        ImUtil::AcceptDragDropPayload(DragDropTypes::Texture, texture);
         return;
     }
 
     ImGui::Button(fmt::format("Texture resource #{}##{}", texture.id(), id).c_str(), ImVec2(-FLT_MIN, 0));
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
-        ImGui::BeginTooltip();
-        ImGui::Image(static_cast<ImTextureID>(texture->handle()), ImVec2(100, 100));
-        ImGui::TextUnformatted(fmt::format("Texture resource #{}", texture.id()).c_str());
-        ImGui::TextUnformatted(fmt::format(
-            "{}x{}, {} channel{}",
-            texture.info().dimensions.width,
-            texture.info().dimensions.height,
-            texture.info().dimensions.channels,
-            (texture.info().dimensions.channels == 1) ? "" : "s"
-        ).c_str());
-        ImGui::TextUnformatted(fmt::format("\"{}\"", texture.path().string()).c_str());
-        ImGui::EndTooltip();
-    }
+    ImUtil::AcceptDragDropPayload(DragDropTypes::Texture, texture);
+    if (!ImUtil::SendDragDropPayload(DragDropTypes::Texture, texture, [&texture]() { Hints::DrawTextureHint(texture); }))
+        Tooltips::DrawTextureTooltip(texture);
+    ContextMenus::DrawTextureContextMenu(texture, true);
 }
 
-static void Draw(const char* id, const Resources::Mesh& mesh) {
+static void Draw(const char* id, Resources::Mesh& mesh) {
     if (!mesh.isValid()) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
+        ImUtil::AcceptDragDropPayload(DragDropTypes::Mesh, mesh);
         return;
     }
 
     ImGui::Button(fmt::format("Mesh resource #{}##{}", mesh.id(), id).c_str(), ImVec2(-FLT_MIN, 0));
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
-        ImGui::BeginTooltip();
-        ImGui::Image(RenderMeshPreview(mesh), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::TextUnformatted(fmt::format("Mesh resource #{}", mesh.id()).c_str());
-        ImGui::TextUnformatted(fmt::format(
-            "{} indice{}, {} triangle{}",
-            mesh->indicesCount(),
-            mesh->indicesCount() == 1 ? "" : "s",
-            mesh->indicesCount() / 3,
-            mesh->indicesCount() / 3 == 1 ? "" : "s"
-        ).c_str());
-        ImGui::TextUnformatted(fmt::format("\"{}\"", mesh.path().string()).c_str());
-        ImGui::EndTooltip();
-    }
+    ImUtil::AcceptDragDropPayload(DragDropTypes::Mesh, mesh);
+    if (!ImUtil::SendDragDropPayload(DragDropTypes::Mesh, mesh, [&mesh]() { Hints::DrawMeshHint(mesh); }))
+        Tooltips::DrawMeshTooltip(mesh);
+    ContextMenus::DrawMeshContextMenu(mesh, true);
 }
 
 static void Draw(World::LogicComponent& component) {
@@ -153,7 +88,7 @@ static void Draw(World::LogicComponent& component) {
         return;
 
     if (ImGui::TreeNodeEx("Callbacks", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_logic_component_callback_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_logic_component_callback_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
             
@@ -161,13 +96,13 @@ static void Draw(World::LogicComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Start");
             ImGui::TableNextColumn();
-            Draw("##scene_logic_component_start_callback", component.onStart);
+            Draw("##scenetree_logic_component_start_callback", component.onStart);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Update");
             ImGui::TableNextColumn();
-            Draw("##scene_logic_component_update_callback", component.onUpdate);
+            Draw("##scenetree_logic_component_update_callback", component.onUpdate);
 
             ImGui::EndTable();
         }
@@ -181,7 +116,7 @@ static void Draw(World::CameraComponent& component) {
     Graphics::Camera& camera = component.camera;
 
     if (ImGui::TreeNodeEx("Common", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_camera_component_common_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_camera_component_common_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -190,7 +125,7 @@ static void Draw(World::CameraComponent& component) {
             ImGui::TextUnformatted("Projection mode");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            if (ImGui::BeginCombo("##scene_camera_component_projection_mode", Graphics::ProjectionModeToString(camera.projectionMode))) {
+            if (ImGui::BeginCombo("##scenetree_camera_component_projection_mode", Graphics::ProjectionModeToString(camera.projectionMode))) {
                 if (ImGui::Selectable(Graphics::ProjectionModeToString(Graphics::ProjectionMode::Perspective), camera.projectionMode == Graphics::ProjectionMode::Perspective))
                     camera.projectionMode = Graphics::ProjectionMode::Perspective;
                 else if (ImGui::Selectable(Graphics::ProjectionModeToString(Graphics::ProjectionMode::Orthographic), camera.projectionMode == Graphics::ProjectionMode::Orthographic))
@@ -204,7 +139,7 @@ static void Draw(World::CameraComponent& component) {
             ImGui::TextUnformatted("Position");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_camera_component_camera_position", glm::value_ptr(camera.position), 0.01f);
+            ImGui::DragFloat3("##scenetree_camera_component_camera_position", glm::value_ptr(camera.position), 0.01f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -212,7 +147,7 @@ static void Draw(World::CameraComponent& component) {
             ImGui::TextUnformatted("Rotation");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_camera_component_camera_yaw_pitch", reinterpret_cast<float*>(&camera.rotation), 0.05f);
+            ImGui::DragFloat3("##scenetree_camera_component_camera_yaw_pitch", reinterpret_cast<float*>(&camera.rotation), 0.05f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -220,7 +155,7 @@ static void Draw(World::CameraComponent& component) {
             ImGui::TextUnformatted("Zoom");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_camera_component_camera_zoom", &camera.zoom, 0.3f, 20.0f);
+            ImGui::SliderFloat("##scenetree_camera_component_camera_zoom", &camera.zoom, 0.3f, 20.0f);
             ImGui::PopItemWidth();
 
             ImGui::EndTable();
@@ -235,7 +170,7 @@ static void Draw(World::LightComponent& component) {
     Graphics::Light& light = component.light;
 
     if (ImGui::TreeNodeEx("Common", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_light_component_common_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_light_component_common_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -244,7 +179,7 @@ static void Draw(World::LightComponent& component) {
             ImGui::TextUnformatted("Type");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            if (ImGui::BeginCombo("##scene_light_component_light_type", Graphics::LightTypeToString(light.type))) {
+            if (ImGui::BeginCombo("##scenetree_light_component_light_type", Graphics::LightTypeToString(light.type))) {
                 if (ImGui::Selectable(Graphics::LightTypeToString(Graphics::LightType::DirectionalLight), light.type == Graphics::LightType::DirectionalLight))
                     light.type = Graphics::LightType::DirectionalLight;
                 else if (ImGui::Selectable(Graphics::LightTypeToString(Graphics::LightType::PointLight), light.type == Graphics::LightType::PointLight))
@@ -261,7 +196,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Position");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::DragFloat3("##scene_light_component_light_position", glm::value_ptr(light.position), 0.01f);
+                ImGui::DragFloat3("##scenetree_light_component_light_position", glm::value_ptr(light.position), 0.01f);
                 ImGui::PopItemWidth();
             }
 
@@ -271,7 +206,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Direction");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::DragFloat3("##scene_light_component_light_direction", glm::value_ptr(light.direction), 0.01f);
+                ImGui::DragFloat3("##scenetree_light_component_light_direction", glm::value_ptr(light.direction), 0.01f);
                 ImGui::PopItemWidth();
             }
 
@@ -280,7 +215,7 @@ static void Draw(World::LightComponent& component) {
             ImGui::TextUnformatted("Color");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::ColorEdit3("##scene_light_component_light_color", glm::value_ptr(light.color));
+            ImGui::ColorEdit3("##scenetree_light_component_light_color", glm::value_ptr(light.color));
             ImGui::PopItemWidth();
 
             ImGui::EndTable();
@@ -289,7 +224,7 @@ static void Draw(World::LightComponent& component) {
     }
 
     if (ImGui::TreeNodeEx("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_light_component_properties_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_light_component_properties_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -298,7 +233,7 @@ static void Draw(World::LightComponent& component) {
             ImGui::TextUnformatted("Ambient");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_light_component_light_ambient_property", &light.ambientProperty, 0.0f, 1.0f);
+            ImGui::SliderFloat("##scenetree_light_component_light_ambient_property", &light.ambientProperty, 0.0f, 1.0f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -306,7 +241,7 @@ static void Draw(World::LightComponent& component) {
             ImGui::TextUnformatted("Diffuse");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_light_component_light_diffuse_property", &light.diffuseProperty, 0.0f, 1.5f);
+            ImGui::SliderFloat("##scenetree_light_component_light_diffuse_property", &light.diffuseProperty, 0.0f, 1.5f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -314,7 +249,7 @@ static void Draw(World::LightComponent& component) {
             ImGui::TextUnformatted("Specular");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_light_component_light_specular_property", &light.specularProperty, 0.0f, 2.0f);
+            ImGui::SliderFloat("##scenetree_light_component_light_specular_property", &light.specularProperty, 0.0f, 2.0f);
             ImGui::PopItemWidth();
 
             ImGui::EndTable();
@@ -324,7 +259,7 @@ static void Draw(World::LightComponent& component) {
    
     if (light.type == Graphics::LightType::PointLight || light.type == Graphics::LightType::SpotLight) {
         if (ImGui::TreeNodeEx("Attenuation", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::BeginTable("##scene_light_component_attenuation_table", 2)) {
+            if (ImGui::BeginTable("##scenetree_light_component_attenuation_table", 2)) {
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -333,7 +268,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Constant");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::SliderFloat("##scene_light_component_light_constant_attenuation", &light.constantAttenuation, 0.0f, 2.0f);
+                ImGui::SliderFloat("##scenetree_light_component_light_constant_attenuation", &light.constantAttenuation, 0.0f, 2.0f);
                 ImGui::PopItemWidth();
 
                 ImGui::TableNextRow();
@@ -341,7 +276,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Linear");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::SliderFloat("##scene_light_component_light_linear_attenuation", &light.linearAttenuation, 0.0f, 1.0f);
+                ImGui::SliderFloat("##scenetree_light_component_light_linear_attenuation", &light.linearAttenuation, 0.0f, 1.0f);
                 ImGui::PopItemWidth();
 
                 ImGui::TableNextRow();
@@ -349,7 +284,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Quadratic");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::SliderFloat("##scene_light_component_light_quadratic_attenuation", &light.quadraticAttenuation, 0.0f, 0.2f);
+                ImGui::SliderFloat("##scenetree_light_component_light_quadratic_attenuation", &light.quadraticAttenuation, 0.0f, 0.2f);
                 ImGui::PopItemWidth();
 
                 ImGui::EndTable();
@@ -360,7 +295,7 @@ static void Draw(World::LightComponent& component) {
 
     if (light.type == Graphics::LightType::SpotLight) {
         if (ImGui::TreeNodeEx("Spot cutoff", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::BeginTable("##scene_light_component_spot_cutoff_table", 2)) {
+            if (ImGui::BeginTable("##scenetree_light_component_spot_cutoff_table", 2)) {
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -369,7 +304,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Inner cutoff");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::SliderFloat("##scene_light_component_light_inner_cutoff", &light.spotInnerCutoff, 0.0f, 90.0f);
+                ImGui::SliderFloat("##scenetree_light_component_light_inner_cutoff", &light.spotInnerCutoff, 0.0f, 90.0f);
                 ImGui::PopItemWidth();
                 bool innerCutoffSliderActive = ImGui::IsItemActive();
 
@@ -378,7 +313,7 @@ static void Draw(World::LightComponent& component) {
                 ImGui::TextUnformatted("Outer cutoff");
                 ImGui::TableNextColumn();
                 ImGui::PushItemWidth(-FLT_MIN);
-                ImGui::SliderFloat("##scene_light_component_light_outer_cutoff", &light.spotOuterCutoff, 0.0f, 90.0f);
+                ImGui::SliderFloat("##scenetree_light_component_light_outer_cutoff", &light.spotOuterCutoff, 0.0f, 90.0f);
                 ImGui::PopItemWidth();
                 bool outerCutoffSliderActive = ImGui::IsItemActive();
 
@@ -399,9 +334,9 @@ static void Draw(World::LightComponent& component) {
 static void Draw(World::DrawComponent& component) {
     if (!ImGui::CollapsingHeader("Draw Component"))
         return;
-
+    
     if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_transform_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_draw_component_transform_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -410,7 +345,7 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TextUnformatted("Position");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_position", glm::value_ptr(component.transform.position), 0.01f);
+            ImGui::DragFloat3("##scenetree_draw_component_transform_position", glm::value_ptr(component.transform.position), 0.01f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -418,7 +353,7 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TextUnformatted("Rotation");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_rotation", reinterpret_cast<float*>(&component.transform.rotation), 0.5f);
+            ImGui::DragFloat3("##scenetree_draw_component_transform_rotation", reinterpret_cast<float*>(&component.transform.rotation), 0.5f);
             ImGui::PopItemWidth();
 
             ImGui::TableNextRow();
@@ -426,7 +361,7 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TextUnformatted("Scale");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::DragFloat3("##scene_draw_component_transform_scale", glm::value_ptr(component.transform.scale), 0.01f);
+            ImGui::DragFloat3("##scenetree_draw_component_transform_scale", glm::value_ptr(component.transform.scale), 0.01f);
             ImGui::PopItemWidth();
 
             ImGui::EndTable();
@@ -435,7 +370,7 @@ static void Draw(World::DrawComponent& component) {
     }
     
     if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_draw_component_material_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -443,26 +378,26 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Shader");
             ImGui::TableNextColumn();
-            Draw("##scene_draw_component_material_shader", component.material.shader);
+            Draw("##scenetree_draw_component_material_shader", component.material.shader);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Diffuse texture");
             ImGui::TableNextColumn();
-            Draw("##scene_draw_component_material_diffuse", component.material.diffuse);
+            Draw("##scenetree_draw_component_material_diffuse", component.material.diffuse);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Specular texture");
             ImGui::TableNextColumn();
-            Draw("##scene_material_draw_component_specular", component.material.specular);
+            Draw("##scenetree_material_draw_component_specular", component.material.specular);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Shininess");
             ImGui::TableNextColumn();
             ImGui::PushItemWidth(-FLT_MIN);
-            ImGui::SliderFloat("##scene_draw_component_material_shininess", &component.material.shininess, 1.0f, 256.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("##scenetree_draw_component_material_shininess", &component.material.shininess, 1.0f, 256.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
             ImGui::PopItemWidth();
 
             ImGui::EndTable();
@@ -471,7 +406,7 @@ static void Draw(World::DrawComponent& component) {
     }
 
     if (ImGui::TreeNodeEx("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scene_draw_component_material_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_draw_component_material_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -479,20 +414,28 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Mesh");
             ImGui::TableNextColumn();
-            Draw("##scene_draw_component_mesh", component.mesh);
+            Draw("##scenetree_draw_component_mesh", component.mesh);
 
             ImGui::EndTable();
         }
         ImGui::TreePop();
     }
+
+    if (!component.material.shader || !component.mesh) {
+        Styles::WithColorStyle(Styles::ErrorText, []() {
+            ImGui::Separator();
+            ImGui::TextUnformatted("Draw component is incomplete!");
+            ImGui::TextUnformatted("Shader or mesh is absent. Entity render is skipped.");
+        });
+    }
 }
 
-void Ui::Windows::Scene::update() {
+void Ui::Windows::SceneTree::update() {
     World::Scene& scene = Engine::Scene();
     World::Scene::Entities& entities = scene.entities();
     static World::EntityId s_selectedEntityId = 0;
 
-    ImGui::BeginChild("##scene_left_pane", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    ImGui::BeginChild("##scenetree_left_pane", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
     {
         if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             s_selectedEntityId = 0;
@@ -503,7 +446,7 @@ void Ui::Windows::Scene::update() {
             entityIds.push_back(entityEntry.first);
         std::sort(entityIds.begin(), entityIds.end());
 
-        for (World::EntityId& entityId : entityIds) {
+        for (World::EntityId entityId : entityIds) {
             const World::Entity& entity = entities.at(entityId);
             if (ImGui::Selectable(entity.name(), entity.id() == s_selectedEntityId))
                 s_selectedEntityId = entity.id();
@@ -513,7 +456,7 @@ void Ui::Windows::Scene::update() {
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("##scene_item_view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+    ImGui::BeginChild("##scenetree_item_view", ImVec2(0, 0));
     {
         auto entityEntry = entities.find(s_selectedEntityId);
         if (entityEntry == entities.end()) {
@@ -529,9 +472,9 @@ void Ui::Windows::Scene::update() {
             World::Entity& entity = entityEntry->second;
             ImGui::TextUnformatted(fmt::format("Entity: {}", entity.name()).c_str());
             ImGui::Separator();
-            if (ImGui::BeginTabBar(fmt::format("##scene_item_#{}_tabs", entity.id()).c_str(), ImGuiTabBarFlags_None)) {
+            if (ImGui::BeginTabBar(fmt::format("##scenetree_item_#{}_tabs", entity.id()).c_str())) {
                 if (ImGui::BeginTabItem("Info")) {
-                    if (ImGui::BeginTable("##scene_item_table", 2, ImGuiTableFlags_Borders)) {
+                    if (ImGui::BeginTable("##scenetree_item_table", 2, ImGuiTableFlags_Borders)) {
                         ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                         ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 

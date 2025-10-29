@@ -17,6 +17,10 @@ Image::Image(const uint8_t* data, size_t length, bool verticalFlip) {
     load(data, length, verticalFlip);
 }
 
+Image::Image(const std::vector<uint8_t>& buffer, bool verticalFlip) {
+    load(buffer.data(), buffer.size(), verticalFlip);
+}
+
 Image::Image(Image&& other) noexcept
     : m_data(std::exchange(other.m_data, nullptr))
     , m_dimensions(std::exchange(other.m_dimensions, {}))

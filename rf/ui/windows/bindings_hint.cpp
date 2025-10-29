@@ -1,4 +1,4 @@
-#include "bindings.hpp"
+#include "bindings_hint.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -40,8 +40,8 @@ static LongestWidths GetLongestWidths(const std::vector<Binding>& bindings) {
     return longestWidths;
 }
 
-void Ui::Windows::Bindings::update() {
-    if (ImGui::BeginTable("##bindings_table", 2, ImGuiTableFlags_Borders)) {
+void Ui::Windows::BindingsHint::update() {
+    if (ImGui::BeginTable("##bindingshint_table", 2, ImGuiTableFlags_Borders)) {
         static std::vector<Binding> s_bindings = GetSortedBindings();
         static LongestWidths s_longestWidths = GetLongestWidths(s_bindings);
 

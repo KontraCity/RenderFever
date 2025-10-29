@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include <rf/auxiliary/fs.hpp>
 
@@ -22,6 +23,8 @@ public:
     Image(const fs::path& filePath, bool verticalFlip = false);
 
     Image(const uint8_t* data, size_t length, bool verticalFlip = false);
+
+    Image(const std::vector<uint8_t>& buffer, bool verticalFlip = false);
 
     Image() = default;
 

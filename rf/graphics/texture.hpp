@@ -5,6 +5,7 @@
 #include <rf/auxiliary/gl.hpp>
 
 #include <rf/core/image.hpp>
+#include <rf/graphics/dimensions.hpp>
 
 namespace rf {
 
@@ -23,9 +24,12 @@ namespace Graphics {
 
     private:
         GLuint m_texture = 0;
+        Dimensions m_dimensions;
 
     public:
         Texture(const Image& image);
+
+        Texture(GLuint texture, const Dimensions& dimensions);
 
         Texture(const Texture& other) = delete;
 
@@ -42,13 +46,14 @@ namespace Graphics {
         void free();
 
     public:
-        void setFiltering(int direction, int mode) const;
+        // TODO: The only user of this is the UI. Use friends?
+        GLuint handle() const {
+            return m_texture;
+        }
 
-        void setFiltering(int mode) const;
-
-        void setWrapping(int direction, int mode) const;
-
-        void setWrapping(int mode) const;
+        const Dimensions& dimensions() const {
+            return m_dimensions;
+        }
 
     public:
         void bind(Type type) const {
@@ -58,12 +63,6 @@ namespace Graphics {
 
         void unbind(Type type) const {
             Unbind(type);
-        }
-
-    public:
-        // TODO: The only user of this is the UI. Use friends?
-        GLuint handle() const {
-            return m_texture;
         }
     };
 }

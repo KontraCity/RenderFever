@@ -73,6 +73,7 @@ Graphics::Shader::Shader(const Config& config) {
         m_geometryShader = config.geometrySource.empty() ? 0 : CompileShader(config.geometrySource, GL_GEOMETRY_SHADER);
         m_fragmentShader = CompileShader(config.fragmentSource, GL_FRAGMENT_SHADER);
         m_shaderProgram = LinkShaderProgram(m_vertexShader, m_fragmentShader, m_geometryShader);
+        m_geometryStage = !config.geometrySource.empty();
         free(true); // program is ready, compiled shaders are no longer needed
     }
     catch (...) {
@@ -86,6 +87,7 @@ Graphics::Shader::Shader(Shader&& other) noexcept
     , m_geometryShader(std::exchange(other.m_geometryShader, 0))
     , m_fragmentShader(std::exchange(other.m_fragmentShader, 0))
     , m_shaderProgram(std::exchange(other.m_shaderProgram, 0))
+    , m_geometryStage(std::exchange(other.m_geometryStage, false))
 {}
 
 Graphics::Shader::~Shader() {
@@ -99,6 +101,7 @@ Graphics::Shader& Graphics::Shader::operator=(Shader&& other) noexcept {
         m_geometryShader = std::exchange(other.m_geometryShader, 0);
         m_fragmentShader = std::exchange(other.m_fragmentShader, 0);
         m_shaderProgram = std::exchange(other.m_shaderProgram, 0);
+        m_geometryStage = std::exchange(other.m_geometryStage, false);
     }
     return *this;
 }
@@ -123,6 +126,8 @@ void Graphics::Shader::free(bool onlyFreeShaders) {
         glDeleteProgram(m_shaderProgram);
         m_shaderProgram = 0;
     }
+
+    m_geometryStage = false;
 }
 
 void Graphics::Shader::set(const std::string& name, bool value) const {

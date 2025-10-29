@@ -8,21 +8,17 @@ namespace rf {
 
 namespace Ui {
     namespace Windows {
-        class Perfomance : public Window {
+        class ResourceBrowser : public Window {
         public:
             virtual void update();
 
         public:
             virtual const char* name() const {
-                return "Perfomance";
-            }
-
-            virtual ImGuiWindowFlags flags() const {
-                return ImGuiWindowFlags_NoResize;
+                return "Resource Browser";
             }
 
             virtual ImVec2 size() const {
-                return ImVec2(365, 174);
+                return ImVec2(800, 440);
             }
         };
     }

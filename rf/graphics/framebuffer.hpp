@@ -3,6 +3,7 @@
 #include <rf/auxiliary/gl.hpp>
 
 #include <rf/graphics/dimensions.hpp>
+#include <rf/graphics/texture.hpp>
 
 namespace rf {
 
@@ -35,10 +36,11 @@ namespace Graphics {
         void bind() const;
 
         void unbind() const;
-
     public:
-        GLuint texture() const {
-            return m_texture;
+        Texture texture() const;
+
+        Dimensions dimensions() const {
+            return m_dimensions;
         }
     };
 }

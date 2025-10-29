@@ -83,4 +83,32 @@ void Graphics::Framebuffer::unbind() const {
     glViewport(0, 0, windowDimensions.width, windowDimensions.height);
 }
 
+Graphics::Texture Graphics::Framebuffer::texture() const {
+    GLuint texture = 0;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_dimensions.width, m_dimensions.height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLuint invertedFramebuffer = 0;
+    glGenFramebuffers(1, &invertedFramebuffer);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, invertedFramebuffer);
+    
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+    glBlitFramebuffer(
+        0, 0, m_dimensions.width, m_dimensions.height,
+        0, m_dimensions.height, m_dimensions.width, 0,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &invertedFramebuffer);
+
+    return { texture, m_dimensions };
+}
+
 } // namespace rf

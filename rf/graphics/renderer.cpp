@@ -107,6 +107,9 @@ void Graphics::Renderer::illuminate(const World::Scene& scene) {
 
 void Graphics::Renderer::draw(const World::Scene& scene) {
     scene.each([this](const World::DrawComponent& draw) {
+        if (!draw.material.shader || !draw.mesh)
+            return;
+
         const Shader* shader = draw.material.shader.get();
         shader->transform(draw.transform);
         shader->material(draw.material);

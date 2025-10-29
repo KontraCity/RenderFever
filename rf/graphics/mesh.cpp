@@ -5,7 +5,8 @@
 namespace rf {
 
 Graphics::Mesh::Mesh(const std::vector<Vertice>& vertices, const std::vector<Indice>& indices)
-    : m_indicesCount(indices.size()) {
+    : m_verticesCount(vertices.size())
+    , m_indicesCount(indices.size()) {
     glGenVertexArrays(1, &m_vertexArray);
     glBindVertexArray(m_vertexArray);
 
@@ -39,6 +40,7 @@ Graphics::Mesh::Mesh(Mesh&& other) noexcept
     : m_vertexArray(std::exchange(other.m_vertexArray, 0))
     , m_vertexBuffer(std::exchange(other.m_vertexBuffer, 0))
     , m_elementBuffer(std::exchange(other.m_elementBuffer, 0))
+    , m_verticesCount(std::exchange(other.m_verticesCount, 0))
     , m_indicesCount(std::exchange(other.m_indicesCount, 0))
     , m_center(std::exchange(other.m_center, glm::vec3(0.0f)))
     , m_radius(std::exchange(other.m_radius, 0.0f))
@@ -54,6 +56,7 @@ Graphics::Mesh& Graphics::Mesh::operator=(Mesh&& other) noexcept {
         m_vertexArray = std::exchange(other.m_vertexArray, 0);
         m_vertexBuffer = std::exchange(other.m_vertexBuffer, 0);
         m_elementBuffer = std::exchange(other.m_elementBuffer, 0);
+        m_verticesCount = std::exchange(other.m_verticesCount, 0);
         m_indicesCount = std::exchange(other.m_indicesCount, 0);
         m_center = std::exchange(other.m_center, glm::vec3(0.0f));
         m_radius = std::exchange(other.m_radius, 0.0f);
@@ -77,6 +80,7 @@ void Graphics::Mesh::free() {
         m_vertexArray = 0;
     }
 
+    m_verticesCount = 0;
     m_indicesCount = 0;
     m_center = glm::vec3(0.0f);
     m_radius = 0.0f;

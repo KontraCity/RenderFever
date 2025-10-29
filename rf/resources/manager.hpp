@@ -13,20 +13,22 @@
 namespace rf {
 
 namespace Resources {
-    template <typename Resource, typename ResourceInfo>
-    class Manager : public std::enable_shared_from_this<Manager<Resource, ResourceInfo>> {
+    template <typename Resource>
+    class Manager : public std::enable_shared_from_this<Manager<Resource>> {
     public:
-        using ResourceId = uint64_t;
+        using ResourceId = int64_t;
+
         struct ResourceEntry {
             ResourceId id;
             fs::path path;
-            ResourceInfo info;
             Resource resource;
         };
 
-        class Pointer : public std::shared_ptr<Manager<Resource, ResourceInfo>> {
+        using Resources = std::unordered_map<ResourceId, ResourceEntry>;
+
+        class Pointer : public std::shared_ptr<Manager<Resource>> {
         private:
-            using Base = std::shared_ptr<Manager<Resource, ResourceInfo>>;
+            using Base = std::shared_ptr<Manager<Resource>>;
 
         public:
             // std::make_shared requires public constructor, hence here operator new is used instead
@@ -38,6 +40,7 @@ namespace Resources {
         private:
             std::shared_ptr<Manager> m_root;
             ResourceId m_resourceId = 0;
+            std::shared_ptr<Resource> m_standalone;
 
         public:
             Handle() = default;
@@ -45,6 +48,13 @@ namespace Resources {
             Handle(const std::shared_ptr<Manager>& root, ResourceId resourceId)
                 : m_root(root)
                 , m_resourceId(resourceId)
+                , m_standalone()
+            {}
+
+            Handle(const std::shared_ptr<Resource>& standalone)
+                : m_root()
+                , m_resourceId(0)
+                , m_standalone(standalone)
             {}
 
             Handle(const Handle& other) = default;
@@ -52,6 +62,7 @@ namespace Resources {
             Handle(Handle&& other) noexcept
                 : m_root(std::move(other.m_root))
                 , m_resourceId(std::exchange(other.m_resourceId, 0))
+                , m_standalone(std::move(other.m_standalone))
             {}
 
             ~Handle() = default;
@@ -63,37 +74,42 @@ namespace Resources {
                 if (this != &other) {
                     m_root = std::move(other.m_root);
                     m_resourceId = std::exchange(other.m_resourceId, 0);
+                    m_standalone = std::move(other.m_standalone);
                 }
                 return *this;
             }
 
         public:
+            bool isBound() const {
+                return m_root.get() && m_resourceId;
+            }
+
+            bool isStandalone() const {
+                return m_standalone.get();
+            }
+
             bool isValid() const {
-                return m_root && m_resourceId;
+                return isBound() || isStandalone();
             }
 
             ResourceId id() const {
-                if (!isValid())
-                    throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
-                return m_root->get(m_resourceId).id;
+                return m_resourceId;
             }
 
-            const fs::path& path() const {
-                if (!isValid())
-                    throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
-                return m_root->get(m_resourceId).path;
-            }
-
-            const ResourceInfo& info() const {
-                if (!isValid())
-                    throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
-                return m_root->get(m_resourceId).info;
+            fs::path path() const {
+                if (isBound())
+                    return m_root->get(m_resourceId).path;
+                if (isStandalone())
+                    return {};
+                throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
             }
 
             const Resource* get() const {
-                if (!isValid())
-                    throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
-                return &m_root->get(m_resourceId).resource;
+                if (isBound())
+                    return &m_root->get(m_resourceId).resource;
+                if (isStandalone())
+                    return m_standalone.get();
+                throw RF_LOCATED_ERROR("Invalid resource handle is being used!");
             }
 
         public:
@@ -111,7 +127,7 @@ namespace Resources {
         };
 
     private:
-        std::unordered_map<ResourceId, ResourceEntry> m_resources;
+        Resources m_resources;
 
     private:
         // ResourceEntry managers should only be created via Manager::Pointers!
@@ -151,16 +167,23 @@ namespace Resources {
             return { this->shared_from_this(), entry->second.id };
         }
 
-        Handle load(fs::path path, ResourceInfo info, Resource&& resource) {
+        Handle load(fs::path path, Resource&& resource) {
             static ResourceId s_nextResourceId = 1;
             ResourceId resourceId = s_nextResourceId++;
 
             auto entry = m_resources.emplace(
                 std::piecewise_construct,
                 std::forward_as_tuple(resourceId),
-                std::forward_as_tuple(resourceId, path, info, std::move(resource))
+                std::forward_as_tuple(resourceId, path, std::move(resource))
             ).first;
             return { this->shared_from_this(), entry->second.id };
+        }
+
+        void reload(const Handle& handle, Resource&& resource) {
+            auto entry = m_resources.find(handle.id());
+            if (entry == m_resources.end())
+                return;
+            entry->second.resource = std::move(resource);
         }
     };
 }

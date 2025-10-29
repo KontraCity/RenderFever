@@ -1,41 +1,24 @@
 #include <fmt/format.h>
 
-#include <rf/core/engine.hpp>
 #include <rf/core/error.hpp>
 
 #include "core/game.hpp"
 
-#include <rf/graphics/framebuffer.hpp>
-
-static void Run() {
-    rf::Engine::Init({
-        .renderer = {
-            .mainShaderPath = "main/",
-            .lightShaderPath = "light/",
-            .neutralShaderPath = "neutral/",
-        },
-        .window = {
-            .title = "Undefined",
-            .dimensions = { 1920, 1080 },
-        },
-        .library = {
-            .resourcesPath = "resources",
-            .meshesPath = "meshes",
-            .shadersPath = "shaders",
-            .texturesPath = "textures",
-        },
-    });
-
-    Undefined::Game game;
-    game.start();
-
-    rf::Engine::Shutdown();
-}
-
 int main() {
     try {
-        Run();
-        return 0;
+        Undefined::Game game({
+            .renderer = {
+                .mainShaderPath = "shaders/main.rfs",
+                .lightShaderPath = "shaders/light.rfs",
+                .neutralShaderPath = "shaders/neutral.rfs",
+            },
+            .window = {
+                .title = "Undefined",
+                .dimensions = { 1920, 1080 },
+            },
+            .resourcesRootDirectory = "resources",
+        });
+        game.start();
     }
     catch (const rf::Error& error) {
         fmt::print(stderr, "Critical rf::Error!\n");

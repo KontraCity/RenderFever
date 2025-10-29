@@ -35,5 +35,21 @@
   * vcpkg: `vcpkg install assimp`
 
 ### Fonts
-* [B612](https://github.com/polarsys/b612) — a highly legible open source font family designed and tested to be used on aircraft cockpit screens.
+* [B612](https://github.com/polarsys/b612) — A highly legible open source font family designed and tested to be used on aircraft cockpit screens.
   * Licensed under the [SIL Open Font License](https://github.com/polarsys/b612/blob/master/OFL.txt).
+
+### Icons
+* [Flaticon](https://www.flaticon.com/) - Free icons in PNG and SVG format to download.
+  * Directory:     https://www.flaticon.com/free-icon/folder_1383970
+  * File:          https://www.flaticon.com/free-icon/file_263091
+  * Gear:          https://www.flaticon.com/free-icon/settings_2099058
+  * Image:         https://www.flaticon.com/free-icon/image_1687806
+  * Cube:          https://www.flaticon.com/free-icon/3d-cube_2641264
+  * Question:      https://www.flaticon.com/free-icon/question_471664
+  * Left:          https://www.flaticon.com/free-icon/right_1286906
+  * Right:         https://www.flaticon.com/free-icon/right_1286906 (Rotated)
+  * Up:            https://www.flaticon.com/free-icon/right_1286906 (Rotated)
+  * Vertex file:   https://www.flaticon.com/free-icon/file_263091 (Modified)
+  * Geometry file: https://www.flaticon.com/free-icon/file_263091 (Modified)
+  * Fragment file: https://www.flaticon.com/free-icon/file_263091 (Modified)
+  * License: All icons are free to use and modify as long as attributied.

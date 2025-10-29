@@ -21,6 +21,8 @@ namespace Graphics {
         GLuint m_vertexArray = 0;
         GLuint m_vertexBuffer = 0;
         GLuint m_elementBuffer = 0;
+
+        size_t m_verticesCount = 0;
         size_t m_indicesCount = 0;
 
         // Mean vertices center and radius
@@ -53,6 +55,14 @@ namespace Graphics {
 
         GLuint vertexArray() const {
             return m_vertexArray;
+        }
+
+        size_t trianglesCount() const {
+            return m_indicesCount / 3;
+        }
+
+        size_t verticesCount() const {
+            return m_verticesCount;
         }
 
         size_t indicesCount() const {

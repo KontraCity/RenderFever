@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include <rf/auxiliary/fs.hpp>
 
 #include <rf/core/image.hpp>
@@ -14,46 +17,36 @@ namespace Graphics {
 }
 
 namespace Resources {
-    struct MeshInfo {};
-    using MeshesManager = Manager<Graphics::Mesh, MeshInfo>;
-    using Mesh = MeshesManager::Handle;
+    using ShadersManager = Manager<Graphics::Shader>;
+    using TexturesManager = Manager<Graphics::Texture>;
+    using MeshesManager = Manager<Graphics::Mesh>;
 
-    struct ShaderInfo {
-        fs::path vertexFilePath;
-        fs::path geometryFilePath;
-        fs::path fragmentFilePath;
-        bool geometryStage = false;
-    };
-    using ShadersManager = Manager<Graphics::Shader, ShaderInfo>;
+    using ShaderId = ShadersManager::ResourceId;
+    using TextureId = TexturesManager::ResourceId;
+    using MeshId = MeshesManager::ResourceId;
+
     using Shader = ShadersManager::Handle;
-
-    struct TextureInfo {
-        Image::Dimensions dimensions;
-    };
-    using TexturesManager = Manager<Graphics::Texture, TextureInfo>;
     using Texture = TexturesManager::Handle;
+    using Mesh = MeshesManager::Handle;
 
     class Library {
     public:
-        struct Config {
-            fs::path resourcesPath = "resources";
-            fs::path meshesPath = "meshes";
-            fs::path shadersPath = "shaders";
-            fs::path texturesPath = "textures";
-        };
+        static Graphics::Shader LoadShader(const fs::path& path);
+
+        static Graphics::Texture LoadTexture(const fs::path& path);
+
+        static Graphics::Mesh LoadMesh(const fs::path& path);
+
+        static Graphics::Mesh LoadMesh(const std::vector<uint8_t>& data, const char* formatHint = "");
 
     private:
-        fs::path m_meshesBasePath;
+        fs::path m_rootDirectory;
+        ShadersManager::Pointer m_shaders;
+        TexturesManager::Pointer m_textures;
         MeshesManager::Pointer m_meshes;
 
-        fs::path m_shadersBasePath;
-        ShadersManager::Pointer m_shaders;
-
-        fs::path m_texturesBasePath;
-        TexturesManager::Pointer m_textures;
-
     public:
-        Library(const Config& config);
+        Library(const fs::path& rootDirectory);
 
         Library(const Library& other) = delete;
 
@@ -65,11 +58,46 @@ namespace Resources {
         Library& operator=(Library&& other) noexcept = default;
 
     public:
-        Mesh loadMesh(fs::path path);
-
         Shader loadShader(fs::path path);
 
         Texture loadTexture(fs::path path);
+
+        Mesh loadMesh(fs::path path);
+
+        void reloadShader(const Shader& shader);
+        
+        void reloadTexture(const Texture& texture);
+
+        void reloadMesh(const Mesh& mesh);
+
+    public:
+        const fs::path& rootDirectory() const {
+            return m_rootDirectory;
+        }
+
+        const ShadersManager& shaders() const {
+            return *m_shaders;
+        }
+
+        ShadersManager& shaders() {
+            return *m_shaders;
+        }
+
+        const TexturesManager& textures() const {
+            return *m_textures;
+        }
+
+        TexturesManager& textures() {
+            return *m_textures;
+        }
+
+        const MeshesManager& meshes() const {
+            return *m_meshes;
+        }
+
+        MeshesManager& meshes() {
+            return *m_meshes;
+        }
     };
 }
 

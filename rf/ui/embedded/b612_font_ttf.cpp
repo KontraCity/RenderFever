@@ -1,8 +1,8 @@
-#include "b612_regular_ttf.hpp"
+#include "b612_font_ttf.hpp"
 
 #include <array>
 
-#include <rf/core/zip.hpp>
+#include <rf/ui/zip_cache.hpp>
 
 namespace rf {
 
@@ -101,7 +101,7 @@ namespace rf {
 // FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 // OTHER DEALINGS IN THE FONT SOFTWARE.
 // -----------------------------------------------------------------------------
-constexpr auto B612_Regular_Ttf_Gzip = std::to_array<uint8_t>({
+constexpr auto B612RegularFontTtfGzip = std::to_array<uint8_t>({
     0x1f, 0x8b, 0x08, 0x00, 0x24, 0x19, 0xe4, 0x68, 0x02, 0xff, 0xbc, 0xbd, 0x07, 0x7c, 0x94, 0x55, 0xd6, 0x3f, 0x7e, 0xef,
     0x33, 0xbd, 0xf7, 0x3e, 0x99, 0x4c, 0x61, 0x26, 0x33, 0x64, 0x26, 0xc9, 0x24, 0xa4, 0x1a, 0x30, 0x40, 0x28, 0x0a, 0x48,
     0x47, 0xb0, 0x87, 0x64, 0x42, 0x22, 0x69, 0xa4, 0xd0, 0x54, 0x64, 0x6d, 0xbb, 0x22, 0xba, 0xae, 0xab, 0xac, 0xbd, 0x77,
@@ -3418,16 +3418,8 @@ constexpr auto B612_Regular_Ttf_Gzip = std::to_array<uint8_t>({
     0x46, 0x2e, 0xec, 0xff, 0x00, 0x20, 0x53, 0x5b, 0x50, 0x80, 0x2d, 0x02, 0x00, 
 });
 
-const std::vector<uint8_t>& Ui::Fonts::B612_Regular_Ttf() {
-    static std::vector<uint8_t> data;
-    if (data.empty()) {
-        data = Zip::Decompress(
-            B612_Regular_Ttf_Gzip.data(),
-            B612_Regular_Ttf_Gzip.size(),
-            Zip::Mode::Gzip
-        );
-    }
-    return data;
+const std::vector<uint8_t>& Ui::Embedded::B612RegularFontTtf() {
+    return DecompressAndCache<B612RegularFontTtfGzip>();
 }
 
 } // namespace rf

@@ -14,9 +14,9 @@ namespace rf {
 class Engine {
 public:
     struct Config {
-        Graphics::Renderer::Config renderer = {};
-        Graphics::Window::Config window     = {};
-        Resources::Library::Config library  = {};
+        Graphics::Renderer::Config renderer;
+        Graphics::Window::Config window;
+        fs::path resourcesRootDirectory;
     };
 
     struct FrameInfo {
