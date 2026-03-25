@@ -363,7 +363,7 @@ static void ShowDirectory(const fs::path& directory, fs::path& selectedPath, Pat
     }
 }
 
-void Ui::Windows::ResourceBrowser::update() {
+void Ui::Windows::ResourceBrowser::updateWindow() {
     const IconMap& iconMap = Engine::Overlay().iconMap();
     const rf::Resources::Library& library = rf::Engine::Library();
 

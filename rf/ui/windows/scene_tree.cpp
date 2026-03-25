@@ -430,7 +430,7 @@ static void Draw(World::DrawComponent& component) {
     }
 }
 
-void Ui::Windows::SceneTree::update() {
+void Ui::Windows::SceneTree::updateWindow() {
     World::Scene& scene = Engine::Scene();
     World::Scene::Entities& entities = scene.entities();
     static World::EntityId s_selectedEntityId = 0;

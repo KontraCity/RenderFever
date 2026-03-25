@@ -72,7 +72,7 @@ void Engine::run() {
         m_inputMap.update(m_frameInfo.deltaTime);
         m_scene.update(m_frameInfo.deltaTime);
         m_renderer.render();
-        m_overlay.render();
+        m_overlay.update();
         m_window.swapBuffers();
     }
 }

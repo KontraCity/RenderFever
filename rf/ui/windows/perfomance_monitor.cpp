@@ -113,7 +113,7 @@ static MaxValues GetMaxPlotScales(const std::vector<Record>& records) {
     return maxPlotScales;
 }
 
-void Ui::Windows::PerfomanceMonitor::update() {
+void Ui::Windows::PerfomanceMonitor::updateWindow() {
     constexpr float RowHeight = FontSize(Font::Normal) + FontSize(Font::Huge);
     UpdateInfo info = MakeRecord();
     MaxValues maxPlotScales = GetMaxPlotScales(info.history);

@@ -2,7 +2,7 @@
 
 #include <rf/core/math.hpp>
 
-#include "settings.hpp"
+#include "main/settings.hpp"
 #include "utility/values.hpp"
 using namespace Undefined::Settings;
 

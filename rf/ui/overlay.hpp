@@ -1,11 +1,10 @@
 #pragma once
 
-#include <vector>
-
 #include <rf/auxiliary/gl.hpp>
 #include <rf/auxiliary/imgui.hpp>
 
 #include <rf/ui/icon_map.hpp>
+#include <rf/ui/menu_bar.hpp>
 #include <rf/ui/preview_map.hpp>
 #include <rf/ui/window.hpp>
 
@@ -15,7 +14,8 @@ namespace Ui {
     class Overlay {
     private:
         GLFWwindow* m_handle = nullptr;
-        std::vector<Window::Instance> m_windows;
+        Window::SharedList m_windows;
+        MenuBar m_menuBar;
         IconMap m_iconMap;
         PreviewMap m_previewMap;
 
@@ -34,7 +34,7 @@ namespace Ui {
         Overlay& operator=(Overlay&& other) noexcept;
 
     public:
-        void render() const;
+        void update();
 
     public:
         const IconMap& iconMap() const {

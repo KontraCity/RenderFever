@@ -11,7 +11,9 @@
 
 namespace rf {
 
-Ui::Overlay::Overlay(GLFWwindow* handle) {
+Ui::Overlay::Overlay(GLFWwindow* handle)
+    : m_windows(std::make_shared<Window::List>())
+    , m_menuBar(m_windows) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(handle, true);
@@ -38,16 +40,21 @@ Ui::Overlay::Overlay(GLFWwindow* handle) {
         FontSize(Font::Huge),
         &config
     );
-    
-    m_windows.push_back(std::make_unique<Windows::BindingsHint>());
-    m_windows.push_back(std::make_unique<Windows::PerfomanceMonitor>());
-    m_windows.push_back(std::make_unique<Windows::ResourceBrowser>());
-    m_windows.push_back(std::make_unique<Windows::SceneTree>());
+
+    m_windows->push_back(std::make_unique<Windows::PerfomanceMonitor>());
+    m_windows->push_back(std::make_unique<Windows::BindingsHint>());
+    m_windows->push_back(std::make_unique<Windows::SceneTree>());
+    m_windows->push_back(std::make_unique<Windows::ResourceBrowser>());
+
+    // Make all windows closed by default
+    for (const Window::Instance& window : *m_windows)
+        window->setIsOpen(false);
 }
 
 Ui::Overlay::Overlay(Overlay&& other) noexcept
     : m_handle(std::exchange(other.m_handle, nullptr))
     , m_windows(std::move(other.m_windows))
+    , m_menuBar(std::move(other.m_menuBar))
     , m_iconMap(std::move(other.m_iconMap))
     , m_previewMap(std::move(other.m_previewMap))
 {}
@@ -65,24 +72,22 @@ Ui::Overlay& Ui::Overlay::operator=(Overlay&& other) noexcept {
     if (this != &other) {
         m_handle = std::exchange(other.m_handle, nullptr);
         m_windows = std::move(other.m_windows);
+        m_menuBar = std::move(other.m_menuBar);
         m_iconMap = std::move(other.m_iconMap);
         m_previewMap = std::move(other.m_previewMap);
     }
     return *this;
 }
 
-void Ui::Overlay::render() const {
+void Ui::Overlay::update() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    for (const Window::Instance& window : m_windows) {
-        if (window->size().x * window->size().y)
-            ImGui::SetNextWindowSize(window->size(), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin(window->name(), nullptr, window->flags()))
+    m_menuBar.update();
+    if (!m_menuBar.areAllWindowsHidden())
+        for (const Window::Instance& window : *m_windows)
             window->update();
-        ImGui::End();
-    }
 
     static bool s_firstRender = true;
     if (s_firstRender) {

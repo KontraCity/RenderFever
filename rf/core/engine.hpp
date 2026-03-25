@@ -56,6 +56,11 @@ private:
     void run();
 
 public:
+    static void Exit() {
+        Instance->m_window.setShouldClose(true);
+    }
+
+public:
     static Input::InputMap& InputMap() {
         return Instance->m_inputMap;
     }

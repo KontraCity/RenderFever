@@ -21,6 +21,7 @@ add_library(RenderFever STATIC
     "ui/windows/perfomance_monitor.cpp"
     "ui/windows/resource_browser.cpp"
     "ui/windows/scene_tree.cpp"
+    "ui/menu_bar.cpp"
     "ui/overlay.cpp"
     "ui/preview_map.cpp"
 )

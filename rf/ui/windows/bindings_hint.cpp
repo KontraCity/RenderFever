@@ -40,7 +40,7 @@ static LongestWidths GetLongestWidths(const std::vector<Binding>& bindings) {
     return longestWidths;
 }
 
-void Ui::Windows::BindingsHint::update() {
+void Ui::Windows::BindingsHint::updateWindow() {
     if (ImGui::BeginTable("##bindingshint_table", 2, ImGuiTableFlags_Borders)) {
         static std::vector<Binding> s_bindings = GetSortedBindings();
         static LongestWidths s_longestWidths = GetLongestWidths(s_bindings);

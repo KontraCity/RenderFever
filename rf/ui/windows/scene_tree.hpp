@@ -10,7 +10,7 @@ namespace Ui {
     namespace Windows {
         class SceneTree : public Window {
         public:
-            virtual void update();
+            virtual void updateWindow();
 
         public:
             virtual const char* name() const {
