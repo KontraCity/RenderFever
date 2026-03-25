@@ -60,10 +60,12 @@ static Graphics::Dimensions GetViewportDimensions() {
     GLint parameters[4];
     glGetIntegerv(GL_VIEWPORT, parameters);
 
-    // parameters[0] = x
-    // parameters[1] = y
-    // parameters[2] = width
-    // parameters[3] = height
+    /*
+    *   parameters[0] = x
+    *   parameters[1] = y
+    *   parameters[2] = width
+    *   parameters[3] = height
+    */
     return { parameters[2], parameters[3] };
 }
 

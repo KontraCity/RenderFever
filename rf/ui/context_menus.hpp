@@ -59,6 +59,24 @@ namespace Ui {
                 ImGui::EndPopup();
             }
         }
+
+        inline void DrawModelContextMenu(Resources::Model& model, bool removable, const fs::path& resourcePath = {}) {
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem(model ? "Reload" : "Load")) {
+                    if (model) {
+                        Engine::Library().reloadModel(model);
+                        Engine::Overlay().previewMap().resetModelPreview(model);
+                    }
+                    else {
+                        Engine::Library().loadMesh(resourcePath);
+                    }
+                }
+                else if (removable && ImGui::MenuItem("Remove")) {
+                    model = {};
+                }
+                ImGui::EndPopup();
+            }
+        }
     }
 }
 

@@ -4,7 +4,6 @@
 
 #include <rf/graphics/camera.hpp>
 #include <rf/graphics/dimensions.hpp>
-#include <rf/graphics/mesh.hpp>
 #include <rf/graphics/rotation.hpp>
 #include <rf/graphics/transform.hpp>
 
@@ -25,7 +24,7 @@ namespace Math {
 
     glm::mat4 EvaluateModel(const Graphics::Transform& transform);
 
-    void DirectCameraAtMesh(Graphics::Camera& camera, const Graphics::Mesh& mesh);
+    void DirectCameraAtSphere(Graphics::Camera& camera, glm::vec3 center, float radius);
 }
 
 } // namespace rf

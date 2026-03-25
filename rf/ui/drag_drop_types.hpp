@@ -7,6 +7,7 @@ namespace Ui {
         constexpr const char* Shader  = "Shader";
         constexpr const char* Texture = "Texture";
         constexpr const char* Mesh    = "Mesh";
+        constexpr const char* Model   = "Model";
     }
 }
 

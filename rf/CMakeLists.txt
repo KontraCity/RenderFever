@@ -6,6 +6,7 @@ add_library(RenderFever STATIC
     "core/zip.cpp"
     "graphics/framebuffer.cpp"
     "graphics/mesh.cpp"
+    "graphics/model.cpp"
     "graphics/renderer.cpp"
     "graphics/shader.cpp"
     "graphics/storage.cpp"

@@ -30,10 +30,17 @@ namespace World {
         Graphics::Light light;
     };
 
-    struct DrawComponent {
+    struct TransformComponent {
         Graphics::Transform transform;
+    };
+
+    struct MeshDrawComponent {
         Graphics::Material material;
         Resources::Mesh mesh;
+    };
+
+    struct ModelDrawComponent {
+        Resources::Model model;
     };
 }
 

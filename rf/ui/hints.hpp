@@ -39,6 +39,15 @@ namespace Ui {
                 HintWidth, true
             ).c_str(), 0.5f);
         }
+
+        inline void DrawModelHint(const Resources::Model& model) {
+            const Graphics::Texture& modelPreview = Engine::Overlay().previewMap().getModelPreview(model);
+            ImGui::Image(modelPreview.handle(), ImVec2(HintWidth, HintWidth));
+            ImUtil::TextShifted(ImUtil::TruncateText(
+                model.path().filename().generic_string().c_str(),
+                HintWidth, true
+            ).c_str(), 0.5f);
+        }
     }
 }
 

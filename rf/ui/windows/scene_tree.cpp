@@ -18,7 +18,7 @@ using namespace rf::Ui;
 namespace rf {
 
 // TODO: Finish this when LogicComponent finally becomes resourced ScriptComponent
-static void Draw(const char* id, const World::LogicComponent::Callback& callback) {
+static void DrawWidget(const char* id, const World::LogicComponent::Callback& callback) {
     if (!callback) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
@@ -35,8 +35,8 @@ static void Draw(const char* id, const World::LogicComponent::Callback& callback
     }
 }
 
-static void Draw(const char* id, Resources::Shader& shader) {
-    if (!shader.isValid()) {
+static void DrawWidget(const char* id, Resources::Shader& shader) {
+    if (!shader) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
@@ -51,8 +51,8 @@ static void Draw(const char* id, Resources::Shader& shader) {
     ContextMenus::DrawShaderContextMenu(shader, true);
 }
 
-static void Draw(const char* id, Resources::Texture& texture) {
-    if (!texture.isValid()) {
+static void DrawWidget(const char* id, Resources::Texture& texture) {
+    if (!texture) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
@@ -67,8 +67,8 @@ static void Draw(const char* id, Resources::Texture& texture) {
     ContextMenus::DrawTextureContextMenu(texture, true);
 }
 
-static void Draw(const char* id, Resources::Mesh& mesh) {
-    if (!mesh.isValid()) {
+static void DrawWidget(const char* id, Resources::Mesh& mesh) {
+    if (!mesh) {
         ImGui::BeginDisabled();
         ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
         ImGui::EndDisabled();
@@ -83,7 +83,23 @@ static void Draw(const char* id, Resources::Mesh& mesh) {
     ContextMenus::DrawMeshContextMenu(mesh, true);
 }
 
-static void Draw(World::LogicComponent& component) {
+static void DrawWidget(const char* id, Resources::Model& model) {
+    if (!model) {
+        ImGui::BeginDisabled();
+        ImGui::Button(fmt::format("[None]##{}", id).c_str(), ImVec2(-FLT_MIN, 0));
+        ImGui::EndDisabled();
+        ImUtil::AcceptDragDropPayload(DragDropTypes::Model, model);
+        return;
+    }
+
+    ImGui::Button(fmt::format("Model resource #{}##{}", model.id(), id).c_str(), ImVec2(-FLT_MIN, 0));
+    ImUtil::AcceptDragDropPayload(DragDropTypes::Model, model);
+    if (!ImUtil::SendDragDropPayload(DragDropTypes::Model, model, [&model]() { Hints::DrawModelHint(model); }))
+        Tooltips::DrawModelTooltip(model);
+    ContextMenus::DrawModelContextMenu(model, true);
+}
+
+static void DrawComponent(World::LogicComponent& component) {
     if (!ImGui::CollapsingHeader("Logic Component"))
         return;
 
@@ -96,13 +112,13 @@ static void Draw(World::LogicComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Start");
             ImGui::TableNextColumn();
-            Draw("##scenetree_logic_component_start_callback", component.onStart);
+            DrawWidget("##scenetree_logic_component_start_callback", component.onStart);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Update");
             ImGui::TableNextColumn();
-            Draw("##scenetree_logic_component_update_callback", component.onUpdate);
+            DrawWidget("##scenetree_logic_component_update_callback", component.onUpdate);
 
             ImGui::EndTable();
         }
@@ -110,12 +126,12 @@ static void Draw(World::LogicComponent& component) {
     }
 }
 
-static void Draw(World::CameraComponent& component) {
+static void DrawComponent(World::CameraComponent& component) {
     if (!ImGui::CollapsingHeader("Camera Component"))
         return;
     Graphics::Camera& camera = component.camera;
 
-    if (ImGui::TreeNodeEx("Common", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("##scenetree_camera_component_common_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
@@ -164,7 +180,7 @@ static void Draw(World::CameraComponent& component) {
     }
 }
 
-static void Draw(World::LightComponent& component) {
+static void DrawComponent(World::LightComponent& component) {
     if (!ImGui::CollapsingHeader("Light Component"))
         return;
     Graphics::Light& light = component.light;
@@ -331,10 +347,10 @@ static void Draw(World::LightComponent& component) {
     }
 }
 
-static void Draw(World::DrawComponent& component) {
-    if (!ImGui::CollapsingHeader("Draw Component"))
+static void DrawComponent(World::TransformComponent& component) {
+    if (!ImGui::CollapsingHeader("Transform Component"))
         return;
-    
+
     if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("##scenetree_draw_component_transform_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
@@ -368,6 +384,11 @@ static void Draw(World::DrawComponent& component) {
         }
         ImGui::TreePop();
     }
+}
+
+static void DrawComponent(World::MeshDrawComponent& component, bool entityHasTransform) {
+    if (!ImGui::CollapsingHeader("Mesh Draw Component"))
+        return;
     
     if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("##scenetree_draw_component_material_table", 2)) {
@@ -378,19 +399,19 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Shader");
             ImGui::TableNextColumn();
-            Draw("##scenetree_draw_component_material_shader", component.material.shader);
+            DrawWidget("##scenetree_draw_component_material_shader", component.material.shader);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Diffuse texture");
             ImGui::TableNextColumn();
-            Draw("##scenetree_draw_component_material_diffuse", component.material.diffuse);
+            DrawWidget("##scenetree_draw_component_material_diffuse", component.material.diffuse);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Specular texture");
             ImGui::TableNextColumn();
-            Draw("##scenetree_material_draw_component_specular", component.material.specular);
+            DrawWidget("##scenetree_material_draw_component_specular", component.material.specular);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -406,7 +427,7 @@ static void Draw(World::DrawComponent& component) {
     }
 
     if (ImGui::TreeNodeEx("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::BeginTable("##scenetree_draw_component_material_table", 2)) {
+        if (ImGui::BeginTable("##scenetree_mesh_draw_component_mesh_table", 2)) {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 
@@ -414,19 +435,76 @@ static void Draw(World::DrawComponent& component) {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted("Mesh");
             ImGui::TableNextColumn();
-            Draw("##scenetree_draw_component_mesh", component.mesh);
+            DrawWidget("##scenetree_mesh_draw_component_mesh", component.mesh);
 
             ImGui::EndTable();
         }
         ImGui::TreePop();
     }
 
-    if (!component.material.shader || !component.mesh) {
+    if (!component.material.shader || !entityHasTransform || !component.mesh) {
+        Styles::WithColorStyle(Styles::ErrorText, []() {
+            ImGui::Separator();
+            ImGui::TextUnformatted("Mesh draw component is incomplete!");
+            ImGui::TextUnformatted("Missing shader, transform or mesh.");
+            ImGui::TextUnformatted("Entity render is skipped.");
+        });
+    }
+}
+
+static void DrawComponent(World::ModelDrawComponent& component, bool entityHasTransform) {
+    if (!ImGui::CollapsingHeader("Model Draw Component"))
+        return;
+
+    if (ImGui::TreeNodeEx("Model", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("##scenetree_model_draw_component_model_table", 2)) {
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Model");
+            ImGui::TableNextColumn();
+            DrawWidget("##scenetree_model_draw_component_model", component.model);
+
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+
+    if (!entityHasTransform || !component.model) {
         Styles::WithColorStyle(Styles::ErrorText, []() {
             ImGui::Separator();
             ImGui::TextUnformatted("Draw component is incomplete!");
-            ImGui::TextUnformatted("Shader or mesh is absent. Entity render is skipped.");
+            ImGui::TextUnformatted("Missing transform or model.");
+            ImGui::TextUnformatted("Entity render is skipped.");
         });
+    }
+}
+
+template <typename Component>
+static void DrawComponentCheckbox(World::Entity& entity, const char* name) {
+    bool hasComponent = entity.has<Component>();
+    if (ImGui::Checkbox(name, &hasComponent)) {
+        if (hasComponent)
+            entity.add<Component>();
+        else
+            entity.remove<Component>();
+    }
+}
+
+static void DrawComponentsManager(World::Entity& entity) {
+    if (ImGui::Button("Manage Components", ImVec2(-FLT_MIN, 0)))
+        ImGui::OpenPopup("##scenetree_components_manager_popup");
+
+    if (ImGui::BeginPopup("##scenetree_components_manager_popup")) {
+        DrawComponentCheckbox<World::LogicComponent>(entity, "Logic Component");
+        DrawComponentCheckbox<World::CameraComponent>(entity, "Camera Component");
+        DrawComponentCheckbox<World::LightComponent>(entity, "Light Component");
+        DrawComponentCheckbox<World::TransformComponent>(entity, "Transform Component");
+        DrawComponentCheckbox<World::MeshDrawComponent>(entity, "Mesh Draw Component");
+        DrawComponentCheckbox<World::ModelDrawComponent>(entity, "Model Draw Component");
+        ImGui::EndPopup();
     }
 }
 
@@ -503,13 +581,19 @@ void Ui::Windows::SceneTree::updateWindow() {
 
                 if (ImGui::BeginTabItem("Components")) {
                     if (entity.has<World::LogicComponent>())
-                        Draw(*entity.get<World::LogicComponent>());
+                        DrawComponent(*entity.get<World::LogicComponent>());
                     if (entity.has<World::CameraComponent>())
-                        Draw(*entity.get<World::CameraComponent>());
+                        DrawComponent(*entity.get<World::CameraComponent>());
                     if (entity.has<World::LightComponent>())
-                        Draw(*entity.get<World::LightComponent>());
-                    if (entity.has<World::DrawComponent>())
-                        Draw(*entity.get<World::DrawComponent>());
+                        DrawComponent(*entity.get<World::LightComponent>());
+                    if (entity.has<World::TransformComponent>())
+                        DrawComponent(*entity.get<World::TransformComponent>());
+                    if (entity.has<World::MeshDrawComponent>())
+                        DrawComponent(*entity.get<World::MeshDrawComponent>(), entity.has<World::TransformComponent>());
+                    if (entity.has<World::ModelDrawComponent>())
+                        DrawComponent(*entity.get<World::ModelDrawComponent>(), entity.has<World::TransformComponent>());
+
+                    DrawComponentsManager(entity);
                     ImGui::EndTabItem();
                 }
 

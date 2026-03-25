@@ -106,14 +106,26 @@ void Graphics::Renderer::illuminate(const World::Scene& scene) {
 }
 
 void Graphics::Renderer::draw(const World::Scene& scene) {
-    scene.each([this](const World::DrawComponent& draw) {
-        if (!draw.material.shader || !draw.mesh)
+    scene.each([this](const World::TransformComponent& transform, const World::MeshDrawComponent& draw) {
+        if (!draw.material.shader || !draw.mesh || !draw.mesh->isValid())
             return;
 
         const Shader* shader = draw.material.shader.get();
-        shader->transform(draw.transform);
+        shader->transform(transform.transform);
         shader->material(draw.material);
         shader->draw(*draw.mesh);
+    });
+
+    scene.each([this](const World::TransformComponent& transform, const World::ModelDrawComponent& draw) {
+        if (!draw.model || !draw.model->isValid())
+            return;
+
+        m_mainShader->transform(transform.transform);
+        for (const Model::MatMesh& entry : draw.model->meshes()) {
+            m_mainShader->material(entry.matIndex < 0 ? Material{} : draw.model->materials()[entry.matIndex]);
+            m_mainShader->draw(entry.mesh);
+        }
+        
     });
 }
 

@@ -18,6 +18,28 @@ namespace Ui {
             ImGui::TextUnformatted(text);
         }
 
+    
+        template <typename Target>
+        inline bool SendDragDropPayload(const char* type, const Target& target, const std::function<void()>& drawDragDropHint) {
+            bool hintDrawn = ImGui::BeginDragDropSource();
+            if (hintDrawn) {
+                ImGui::SetDragDropPayload(type, &target, sizeof(Target));
+                drawDragDropHint();
+                ImGui::EndDragDropSource();
+            }
+            return hintDrawn;
+        }
+
+        template <typename Target>
+        inline void AcceptDragDropPayload(const char* type, Target& target) {
+            if (ImGui::BeginDragDropTarget()) {
+                const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(type);
+                if (payload && payload->DataSize == sizeof(Target))
+                    target = *reinterpret_cast<Target*>(payload->Data);
+                ImGui::EndDragDropTarget();
+            }
+        }
+
         inline std::string TruncateText(const char* text, float maxWidth, bool truncateAtEnd = true) {
             ImVec2 textSize = ImGui::CalcTextSize(text);
             if (textSize.x < maxWidth)
@@ -46,27 +68,30 @@ namespace Ui {
             else
                 return std::string(text, text + left) + "...";
         }
-    
-        template <typename Target>
-        inline bool SendDragDropPayload(const char* type, const Target& target, const std::function<void()>& drawDragDropHint) {
-            bool hintDrawn = ImGui::BeginDragDropSource();
-            if (hintDrawn) {
-                ImGui::SetDragDropPayload(type, &target, sizeof(Target));
-                drawDragDropHint();
-                ImGui::EndDragDropSource();
+
+        inline std::string CompactNumber(uint64_t number) {
+            double value = static_cast<double>(number);
+            if (value < 1000.0)
+                return std::to_string(number);
+
+            int index = 0;
+            while (value >= 1000.0 && index < 4) {
+                value /= 1000.0;
+                ++index;
             }
-            return hintDrawn;
+
+            const char* suffixes[] = { "", "k", "M", "B", "T" };
+            std::ostringstream stream;
+            stream << std::fixed << std::setprecision(1) << value;
+            stream << ' ' << suffixes[index];
+            return stream.str();
         }
 
-        template <typename Target>
-        inline void AcceptDragDropPayload(const char* type, Target& target) {
-            if (ImGui::BeginDragDropTarget()) {
-                const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(type);
-                if (payload && payload->DataSize == sizeof(Target))
-                    target = *reinterpret_cast<Target*>(payload->Data);
-                ImGui::EndDragDropTarget();
-            }
+        template <typename NumberType>
+        inline std::string PluralizeIfNeeded(const std::string& word, NumberType number, const char* suffix = "s") {
+            return number == 1 ? word : word + suffix;
         }
+
     }
 }
 

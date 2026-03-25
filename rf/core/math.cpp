@@ -58,14 +58,14 @@ glm::mat4 Math::EvaluateModel(const Graphics::Transform& transform) {
     return translation * rotation * scale;
 }
 
-void Math::DirectCameraAtMesh(Graphics::Camera& camera, const Graphics::Mesh& mesh) {
+void Math::DirectCameraAtSphere(Graphics::Camera& camera, glm::vec3 center, float radius) {
     constexpr float CameraFovRadians = glm::radians(Graphics::Camera::PerspectiveFov);
 
     glm::vec3 direction = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
-    float distance = mesh.radius() / std::sin(CameraFovRadians * 0.5f);
-    camera.position = mesh.center() - direction * distance;
+    float distance = radius / std::sin(CameraFovRadians * 0.5f);
+    camera.position = center - direction * distance;
 
-    glm::vec3 lookDirection = glm::normalize(mesh.center() - camera.position);
+    glm::vec3 lookDirection = glm::normalize(center - camera.position);
     camera.rotation.pitch = glm::degrees(std::asin(lookDirection.y));
     camera.rotation.yaw = glm::degrees(std::atan2(lookDirection.x, -lookDirection.z));
     camera.rotation.roll = 0.0f;

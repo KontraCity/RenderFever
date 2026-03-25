@@ -18,7 +18,7 @@ namespace Graphics {
             fs::path lightShaderPath;
             fs::path neutralShaderPath;
             size_t lightSourcesReserve = 100;
-            Dimensions previewFramebufferDimensions = { 100, 100 };
+            Dimensions previewFramebufferDimensions = { 200, 200 };
 
             bool depthTestingMode = true;
             bool faceCullingMode = true;

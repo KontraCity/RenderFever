@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fmt/format.h>
-
 #include <rf/auxiliary/fs.hpp>
 #include <rf/auxiliary/imgui.hpp>
 
@@ -13,7 +11,7 @@ namespace rf {
 
 namespace Ui {
     namespace Tooltips {
-        constexpr float TooltipWidth = 150.0f;
+        constexpr float TooltipWidth = 200.0f;
 
         inline void DrawUnloadedResourceTooltip(const fs::path& path, const char* resourceName) {
             if (!ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
@@ -24,7 +22,7 @@ namespace Ui {
                 path.filename().generic_string().c_str(),
                 TooltipWidth, false
             ).c_str(), 0.5f);
-            ImGui::TextUnformatted(fmt::format("Unloaded {}", resourceName).c_str());
+            ImGui::Text("Unloaded %s", resourceName);
             ImGui::EndTooltip();
         }
 
@@ -48,7 +46,7 @@ namespace Ui {
                 shader.path().filename().generic_string().c_str(),
                 TooltipWidth, false
             ).c_str(), 0.5f);
-            ImGui::TextUnformatted(fmt::format("Shader resource #{}", shader.id()).c_str());
+            ImGui::Text("Shader resource #%d", shader.id());
             ImGui::TextUnformatted(shader->geometryStage() ? "3 stages" : "2 stages");
             ImGui::EndTooltip();
         }
@@ -63,12 +61,12 @@ namespace Ui {
                 texture.path().filename().generic_string().c_str(),
                 TooltipWidth, false
             ).c_str(), 0.5f);
-            ImGui::TextUnformatted(fmt::format("Texture resource #{}", texture.id()).c_str());
-            ImGui::TextUnformatted(fmt::format(
-                "{}x{} pixels",
+            ImGui::Text("Texture resource #%d", texture.id());
+            ImGui::Text(
+                "%dx%d pixels",
                 texture->dimensions().width,
                 texture->dimensions().height
-            ).c_str());
+            );
             ImGui::EndTooltip();
         }
     
@@ -83,12 +81,41 @@ namespace Ui {
                 mesh.path().filename().generic_string().c_str(),
                 TooltipWidth, false
             ).c_str(), 0.5f);
-            ImGui::TextUnformatted(fmt::format("Mesh resource #{}", mesh.id()).c_str());
-            ImGui::TextUnformatted(fmt::format(
-                "{} triangle{}, {} vertices{}",
-                mesh->trianglesCount(), mesh->trianglesCount() == 1 ? "" : "s",
-                mesh->verticesCount(), mesh->verticesCount() == 1 ? "" : "s"
-            ).c_str());
+            ImGui::Text("Mesh resource #%d", mesh.id());
+            ImGui::Text(
+                "%s %s, %s %s",
+                ImUtil::CompactNumber(mesh->trianglesCount()).c_str(),
+                ImUtil::PluralizeIfNeeded("triangle", mesh->trianglesCount()).c_str(),
+                ImUtil::CompactNumber(mesh->verticesCount()).c_str(),
+                ImUtil::PluralizeIfNeeded("vertice", mesh->verticesCount()).c_str()
+            );
+            ImGui::EndTooltip();
+        }
+
+        inline void DrawModelTooltip(const Resources::Model& model) {
+            if (!ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+                return;
+            const Graphics::Texture& modelPreview = Engine::Overlay().previewMap().getModelPreview(model);
+
+            ImGui::BeginTooltip();
+            ImGui::Image(modelPreview.handle(), ImVec2(TooltipWidth, TooltipWidth));
+            ImUtil::TextShifted(ImUtil::TruncateText(
+                model.path().filename().generic_string().c_str(),
+                TooltipWidth, false
+            ).c_str(), 0.5f);
+            ImGui::Text("Model resource #%d", model.id());
+            ImGui::Text(
+                "%s %s",
+                ImUtil::CompactNumber(model->meshes().size()).c_str(),
+                ImUtil::PluralizeIfNeeded("mesh", model->meshes().size(), "es").c_str()
+            );
+            ImGui::Text(
+                "%s %s, %s %s",
+                ImUtil::CompactNumber(model->trianglesCount()).c_str(),
+                ImUtil::PluralizeIfNeeded("triangle", model->trianglesCount()).c_str(),
+                ImUtil::CompactNumber(model->verticesCount()).c_str(),
+                ImUtil::PluralizeIfNeeded("vertice", model->verticesCount()).c_str()
+            );
             ImGui::EndTooltip();
         }
     }

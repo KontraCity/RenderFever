@@ -25,7 +25,7 @@ namespace Graphics {
         size_t m_verticesCount = 0;
         size_t m_indicesCount = 0;
 
-        // Mean vertices center and radius
+        // Mean vertices center and max radius
         glm::vec3 m_center { 0.0f };
         float m_radius = 0.0f;
 

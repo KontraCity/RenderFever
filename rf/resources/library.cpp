@@ -9,6 +9,7 @@
 
 #include <fmt/format.h>
 
+#include <rf/core/engine.hpp>
 #include <rf/core/error.hpp>
 #include <rf/core/fio.hpp>
 #include <rf/core/image.hpp>
@@ -55,31 +56,82 @@ static std::string ReadShaderSource(const fs::path& path) {
     return ReadShaderSource(path, included);
 }
 
-static void ProcessMesh(const aiScene* scene, aiMesh* mesh, std::vector<Graphics::Mesh::Vertice>& vertices, std::vector<Graphics::Mesh::Indice>& indices) {
-    size_t offset = vertices.size();
-    vertices.resize(offset + mesh->mNumVertices);
+static Resources::Texture ProcessModelTexture(const fs::path& path, const aiScene* scene, aiMaterial* material, aiTextureType textureType) {
+    if (material->GetTextureCount(textureType) == 0)
+        return {};
+
+    aiString texturePath;
+    material->GetTexture(textureType, 0, &texturePath);
+    if (*texturePath.C_Str() != '*')
+        // TODO: This is really easy to fix, maybe consider doing that?
+        return {};
+
+    const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(texturePath.C_Str());
+    return Engine::Library().loadTexture(
+        path / texturePath.C_Str(),
+        reinterpret_cast<const uint8_t*>(embeddedTexture->pcData),
+        embeddedTexture->mWidth
+    );
+}
+
+static void ProcessModelMesh(const fs::path& path, const aiScene* scene, aiMesh* mesh, std::vector<Graphics::Model::MatMesh>& meshes, std::vector<Graphics::Material>& materials) {
+    std::vector<Graphics::Mesh::Vertice> vertices(mesh->mNumVertices);
     for (unsigned int index = 0; index < mesh->mNumVertices; ++index) {
-        Graphics::Mesh::Vertice& vertice = vertices[offset + index];
+        Graphics::Mesh::Vertice& vertice = vertices[index];
         vertice.position = { mesh->mVertices[index].x, mesh->mVertices[index].y, mesh->mVertices[index].z };
         vertice.normal = { mesh->mNormals[index].x, mesh->mNormals[index].y, mesh->mNormals[index].z };
         vertice.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][index].x, mesh->mTextureCoords[0][index].y) : glm::vec2(0.0f);
     }
 
+    std::vector<Graphics::Mesh::Indice> indices;
     for (unsigned int faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
-        offset = indices.size();
-        indices.resize(offset + mesh->mFaces[faceIndex].mNumIndices);
-        for (unsigned int indiceIndex = 0; indiceIndex < mesh->mFaces[faceIndex].mNumIndices; ++indiceIndex) {
-            Graphics::Mesh::Indice& indice = indices[offset + indiceIndex];
-            indice = mesh->mFaces[faceIndex].mIndices[indiceIndex];
-        }
+        indices.reserve(indices.size() + mesh->mFaces[faceIndex].mNumIndices);
+        for (unsigned int indiceIndex = 0; indiceIndex < mesh->mFaces[faceIndex].mNumIndices; ++indiceIndex)
+            indices.push_back(mesh->mFaces[faceIndex].mIndices[indiceIndex]);
     }
+
+    unsigned int matIndex = mesh->mMaterialIndex;
+    if (matIndex + 1 > materials.size())
+        materials.resize(matIndex + 1);
+
+    meshes.push_back({
+        .matIndex = static_cast<int>(matIndex),
+        .mesh = { vertices, indices },
+    });
+
+    aiMaterial* material = scene->mMaterials[matIndex];
+    materials[matIndex].diffuse = ProcessModelTexture(path, scene, material, aiTextureType_DIFFUSE);
+    materials[matIndex].specular = ProcessModelTexture(path, scene, material, aiTextureType_SPECULAR);
 }
 
-static void ProcessNode(const aiScene* scene, aiNode* node, std::vector<Graphics::Mesh::Vertice>& vertices, std::vector<Graphics::Mesh::Indice>& indices) {
+static void ProcessModelNode(const fs::path& path, const aiScene* scene, aiNode* node, std::vector<Graphics::Model::MatMesh>& meshes, std::vector<Graphics::Material>& materials) {
     for (unsigned int index = 0; index < node->mNumMeshes; ++index)
-        ProcessMesh(scene, scene->mMeshes[node->mMeshes[index]], vertices, indices);
+        ProcessModelMesh(path, scene, scene->mMeshes[node->mMeshes[index]], meshes, materials);
     for (unsigned int index = 0; index < node->mNumChildren; ++index)
-        ProcessNode(scene, node->mChildren[index], vertices, indices);
+        ProcessModelNode(path, scene, node->mChildren[index], meshes, materials);
+}
+
+static Graphics::Model ProcessModelScene(const fs::path& path, const aiScene* scene) {
+    std::vector<Graphics::Model::MatMesh> meshes;
+    std::vector<Graphics::Material> materials;
+    ProcessModelNode(path, scene, scene->mRootNode, meshes, materials);
+    return { std::move(meshes), std::move(materials) };
+}
+
+static Graphics::Model ProcessModel(const std::vector<uint8_t>& data, const char* formatHint) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(), aiProcess_Triangulate | aiProcess_FlipUVs, formatHint);
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        throw RF_LOCATED_ERROR("Couldn't read memory buffer to process model");
+    return ProcessModelScene("", scene);
+}
+
+static Graphics::Model ProcessModel(const fs::path& path) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        throw RF_LOCATED_ERROR("Couldn't read \"{}\" file to process model", path.string());
+    return ProcessModelScene(path, scene);
 }
 
 static void LogError(const rf::Error& error) {
@@ -105,40 +157,49 @@ Graphics::Shader Resources::Library::LoadShader(const fs::path& path) {
     return { config };
 }
 
+Graphics::Texture Resources::Library::LoadTexture(const uint8_t* data, size_t length) {
+    Image image(data, length);
+    return { image };
+}
+
 Graphics::Texture Resources::Library::LoadTexture(const fs::path& path) {
     Image image(path);
     return { image };
 }
 
-Graphics::Mesh Resources::Library::LoadMesh(const fs::path& path) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-        throw RF_LOCATED_ERROR("Couldn't read \"{}\" file to load model", path.string());
-
-    std::vector<Graphics::Mesh::Vertice> vertices;
-    std::vector<Graphics::Mesh::Indice> indices;
-    ProcessNode(scene, scene->mRootNode, vertices, indices);
-    return { vertices, indices };
+Graphics::Mesh Resources::Library::LoadMesh(const std::vector<uint8_t>& data, const char* formatHint) {
+    Graphics::Model model = ProcessModel(data, formatHint);
+    if (!model.isJustAMesh())
+        throw RF_LOCATED_ERROR("Can't load mesh from a model that's not just a mesh");
+    return model.extractJustAMesh();
 }
 
-Graphics::Mesh Resources::Library::LoadMesh(const std::vector<uint8_t>& data, const char* formatHint) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(), aiProcess_Triangulate | aiProcess_FlipUVs, formatHint);
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-        throw RF_LOCATED_ERROR("Couldn't read memory buffer to load model");
+Graphics::Mesh Resources::Library::LoadMesh(const fs::path& path) {
+    Graphics::Model model = ProcessModel(path);
+    if (!model.isJustAMesh())
+        throw RF_LOCATED_ERROR("Can't load mesh from a model that's not just a mesh");
+    return model.extractJustAMesh();
+}
 
-    std::vector<Graphics::Mesh::Vertice> vertices;
-    std::vector<Graphics::Mesh::Indice> indices;
-    ProcessNode(scene, scene->mRootNode, vertices, indices);
-    return { vertices, indices };
+Graphics::Model Resources::Library::LoadModel(const std::vector<uint8_t>& data, const char* formatHint) {
+    Graphics::Model model = ProcessModel(data, formatHint);
+    if (model.isJustAMesh())
+        throw RF_LOCATED_ERROR("Can't load model that's just a mesh");
+    return model;
+}
+
+Graphics::Model Resources::Library::LoadModel(const fs::path& path) {
+    Graphics::Model model = ProcessModel(path);
+    if (model.isJustAMesh())
+        throw RF_LOCATED_ERROR("Can't load model that's just a mesh");
+    return model;
 }
 
 Resources::Library::Library(const fs::path& rootDirectory)
     : m_rootDirectory(rootDirectory)
 {}
 
-Resources::Shader Resources::Library::loadShader(fs::path path) {
+Resources::Shader Resources::Library::loadShader(const fs::path& path) {
     try {
         fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, path);
         Shader handle = m_shaders->get(path);
@@ -153,7 +214,22 @@ Resources::Shader Resources::Library::loadShader(fs::path path) {
     }
 }
 
-Resources::Texture Resources::Library::loadTexture(fs::path path) {
+Resources::Texture Resources::Library::loadTexture(const fs::path& path, const uint8_t* data, size_t length) {
+    try {
+        fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, path);
+        Texture handle = m_textures->get(path);
+        if (!handle.isValid())
+            handle = m_textures->load(path, LoadTexture(data, length));
+        return handle;
+    }
+    catch (const Error& error) {
+        // TODO: Log error with spdlog
+        LogError(error);
+        return {};
+    }
+}
+
+Resources::Texture Resources::Library::loadTexture(const fs::path& path) {
     try {
         fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, path);
         Texture handle = m_textures->get(path);
@@ -168,12 +244,27 @@ Resources::Texture Resources::Library::loadTexture(fs::path path) {
     }
 }
 
-Resources::Mesh Resources::Library::loadMesh(fs::path path) {
+Resources::Mesh Resources::Library::loadMesh(const fs::path& path) {
     try {
         fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, path);
         Mesh handle = m_meshes->get(path);
         if (!handle.isValid())
             handle = m_meshes->load(path, LoadMesh(fullPath));
+        return handle;
+    }
+    catch (const Error& error) {
+        // TODO: Log error with spdlog
+        LogError(error);
+        return {};
+    }
+}
+
+Resources::Model Resources::Library::loadModel(const fs::path& path) {
+    try {
+        fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, path);
+        Model handle = m_models->get(path);
+        if (!handle.isValid())
+            handle = m_models->load(path, LoadModel(fullPath));
         return handle;
     }
     catch (const Error& error) {
@@ -209,6 +300,17 @@ void Resources::Library::reloadMesh(const Mesh& mesh) {
     try {
         fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, mesh.path());
         m_meshes->reload(mesh, LoadMesh(fullPath));
+    }
+    catch (const Error& error) {
+        // TODO: Log error with spdlog
+        LogError(error);
+    }
+}
+
+void Resources::Library::reloadModel(const Model& model) {
+    try {
+        fs::path fullPath = GetFullPathAndNormalize(m_rootDirectory, model.path());
+        m_models->reload(model, LoadModel(fullPath));
     }
     catch (const Error& error) {
         // TODO: Log error with spdlog

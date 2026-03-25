@@ -120,12 +120,14 @@ void Game::handlesSetup() {
             return;
 
         rf::World::Entity& spawnedLight = scene.newEntity("Spawned Light");
-        spawnedLight.set<rf::World::DrawComponent>({
+        spawnedLight.set<rf::World::TransformComponent>({
             .transform = {
                 .position = camera->position,
                 .rotation = { camera->rotation.pitch, -camera->rotation.yaw, 0.0f },
                 .scale = { 0.1f, 0.1f, 0.4f },
             },
+        });
+        spawnedLight.set<rf::World::MeshDrawComponent>({
             .material = {
                 .shader = rf::Engine::Library().loadShader("shaders/light.rfs"),
             },
@@ -172,38 +174,41 @@ void Game::handlesSetup() {
 
         static bool s_standaloneCameraActive = false;
         if (!s_standaloneCameraActive) {
-            rf::Engine::Scene().setActiveCameraEntity(*standaloneCameraEntity);
+            scene.setActiveCameraEntity(*standaloneCameraEntity);
             s_standaloneCameraActive = true;
         }
         else {
-            rf::Engine::Scene().setActiveCameraEntity(*playerEntity);
+            scene.setActiveCameraEntity(*playerEntity);
             s_standaloneCameraActive = false;
         }
     });
 }
 
 void Game::sceneSetup() {
+    rf::Resources::Library& library = rf::Engine::Library();
     rf::World::Scene& scene = rf::Engine::Scene();
 
     rf::World::Entity& player = scene.newEntity("Player");
     m_playerEntityId = player.id();
     player.add<rf::World::CameraComponent>();
-    player.set<rf::World::DrawComponent>({
+    player.set<rf::World::TransformComponent>({
         .transform = {
             .scale = { 0.4f, 1.0f, 0.4f }
         },
+    });
+    player.set<rf::World::MeshDrawComponent>({
         .material = {
-            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
+            .shader = library.loadShader("shaders/main.rfs"),
         },
-        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
+        .mesh = library.loadMesh("meshes/cube.glb"),
     });
     player.set<rf::World::LogicComponent>({
         .onUpdate = [](rf::World::Entity& entity, float) {
             rf::World::CameraComponent* cameraComponent = entity.get<rf::World::CameraComponent>();
-            rf::World::DrawComponent* drawComponent = entity.get<rf::World::DrawComponent>();
-            if (cameraComponent && drawComponent) {
-                drawComponent->transform.position = cameraComponent->camera.position;
-                drawComponent->transform.rotation.yaw = cameraComponent->camera.rotation.yaw;
+            rf::World::TransformComponent* transformComponent = entity.get<rf::World::TransformComponent>();
+            if (cameraComponent && transformComponent) {
+                transformComponent->transform.position = cameraComponent->camera.position;
+                transformComponent->transform.rotation.yaw = cameraComponent->camera.rotation.yaw;
             }
         }
     });
@@ -221,16 +226,18 @@ void Game::sceneSetup() {
     });
 
     rf::World::Entity& fillLight = scene.newEntity("Fill Light");
-    fillLight.set<rf::World::DrawComponent>({
+    fillLight.set<rf::World::TransformComponent>({
         .transform = {
             .position = { 3.5f, 7.0f, 0.0f },
             .rotation = { -50.0f, 90.0f, 0.0f },
             .scale = { 0.1f, 0.1f, 0.4f },
         },
+    });
+    fillLight.set<rf::World::MeshDrawComponent>({
         .material = {
-            .shader = rf::Engine::Library().loadShader("shaders/light.rfs"),
+            .shader = library.loadShader("shaders/light.rfs"),
         },
-        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
+        .mesh = library.loadMesh("meshes/cube.glb"),
     });
     fillLight.set<rf::World::LightComponent>({
         .light = {
@@ -252,31 +259,44 @@ void Game::sceneSetup() {
     });
 
     rf::World::Entity& mainCube = scene.newEntity("Main Cube");
-    mainCube.set<rf::World::DrawComponent>({
-        .transform = {},
+    mainCube.add<rf::World::TransformComponent>();
+    mainCube.set<rf::World::MeshDrawComponent>({
         .material = {
-            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
-            .diffuse = rf::Engine::Library().loadTexture("textures/container_diffuse.png"),
-            .specular = rf::Engine::Library().loadTexture("textures/container_specular.png"),
+            .shader = library.loadShader("shaders/main.rfs"),
+            .diffuse = library.loadTexture("textures/container_diffuse.png"),
+            .specular = library.loadTexture("textures/container_specular.png"),
             .shininess = 32.0f,
         },
-        .mesh = rf::Engine::Library().loadMesh("meshes/cube.glb"),
+        .mesh = library.loadMesh("meshes/cube.glb"),
+    });
+
+    rf::World::Entity& modelEntity = scene.newEntity("Model Entity");
+    modelEntity.set<rf::World::TransformComponent>({
+        .transform = {
+            .position = { 0.0f, 0.49f, 0.0f },
+            .rotation = { 0.0f, -90.0f, 0.0f },
+        },
+    });
+    modelEntity.set<rf::World::ModelDrawComponent>({
+        .model = library.loadModel("models/sonic.glb"),
     });
 
     rf::World::Entity& neighbouringPlane = scene.newEntity("Neighbouring Plane");
-    neighbouringPlane.set<rf::World::DrawComponent>({
+    neighbouringPlane.set<rf::World::TransformComponent>({
         .transform = {
             .position = { -2.0f, 1.5f, 0.0f },
             .rotation = { 90.0f, 0.0f, 90.0f },
             .scale = { 4.0f, 1.0f, 4.0f }
         },
+    });
+    neighbouringPlane.set<rf::World::MeshDrawComponent>({
         .material = {
-            .shader = rf::Engine::Library().loadShader("shaders/main.rfs"),
-            .diffuse = rf::Engine::Library().loadTexture("textures/container_diffuse.png"),
-            .specular = rf::Engine::Library().loadTexture("textures/container_specular.png"),
+            .shader = library.loadShader("shaders/main.rfs"),
+            .diffuse = library.loadTexture("textures/container_diffuse.png"),
+            .specular = library.loadTexture("textures/container_specular.png"),
             .shininess = 32.0f,
         },
-        .mesh = rf::Engine::Library().loadMesh("meshes/plane.glb"),
+        .mesh = library.loadMesh("meshes/plane.glb"),
     });
 }
 

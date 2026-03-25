@@ -19,7 +19,7 @@ enum class FileType {
     ShaderExtention,
 
     Directory,
-    Mesh,
+    MeshOrModel,
     Shader,
     Texture,
 };
@@ -29,7 +29,7 @@ static FileType GetFileType(const fs::path& path) {
     if (extention == ".glsl" || extention == ".vert" || extention == ".geom" || extention == ".frag")
         return FileType::ShaderExtention;
     if (extention == ".glb")
-        return FileType::Mesh;
+        return FileType::MeshOrModel;
     if (extention == ".rfs")
         return FileType::Shader;
     if (extention == ".jpg" || extention == ".png")
@@ -42,7 +42,7 @@ static ImTextureID GetFileTypeIcon(FileType type, bool tiny) {
     switch (type) {
         case FileType::ShaderExtention: return tiny ? iconMap.tinyFile().handle()       : iconMap.regularFile().handle();
         case FileType::Directory:       return tiny ? iconMap.tinyDirectory().handle()  : iconMap.regularDirectory().handle();
-        case FileType::Mesh:            return tiny ? iconMap.tinyCube().handle()       : iconMap.regularCube().handle();
+        case FileType::MeshOrModel:     return tiny ? iconMap.tinyCube().handle()       : iconMap.regularCube().handle();
         case FileType::Shader:          return tiny ? iconMap.tinyGear().handle()       : iconMap.regularGear().handle();
         case FileType::Texture:         return tiny ? iconMap.tinyImage().handle()      : iconMap.regularImage().handle();
         default:                        return tiny ? iconMap.tinyQuestion().handle()   : iconMap.regularQuestion().handle();
@@ -56,7 +56,7 @@ static bool IsFileTypeLoadable(FileType type) {
         case FileType::Directory:
         case FileType::Shader:
         case FileType::Texture:
-        case FileType::Mesh:
+        case FileType::MeshOrModel:
             return true;
     }
 }
@@ -73,10 +73,13 @@ static ImTextureID GetFileTypePreviewIcon(FileType type, const fs::path& resourc
         if (texture)
             return texture->handle();
     }
-    else if (type == FileType::Mesh) {
+    else if (type == FileType::MeshOrModel) {
         Resources::Mesh mesh = library.meshes().get(resourcePath);
-        if (mesh)
+        Resources::Model model = library.models().get(resourcePath);
+        if (mesh && !model)
             return Engine::Overlay().previewMap().getMeshPreview(mesh).handle();
+        else if (!mesh && model)
+            return Engine::Overlay().previewMap().getModelPreview(model).handle();
     }
     return GetFileTypeIcon(type, false);
 }
@@ -130,19 +133,30 @@ static void DrawResourceContext(FileType fileType, const fs::path& resourcePath,
         else if (!texture)
             Tooltips::DrawUnloadedResourceTooltip(resourcePath, "texture");
     }
-    else if (fileType == FileType::Mesh) {
+    else if (fileType == FileType::MeshOrModel) {
         Resources::Mesh mesh = library.meshes().get(resourcePath);
-        ContextMenus::DrawMeshContextMenu(mesh, false, resourcePath);
+        Resources::Model model = library.models().get(resourcePath);
+        if (!mesh && !model)
+            ContextMenus::DrawModelContextMenu(model, false, resourcePath);
+        else if (mesh && !model)
+            ContextMenus::DrawMeshContextMenu(mesh, false, resourcePath);
+        else if (!mesh && model)
+            ContextMenus::DrawModelContextMenu(model, false, resourcePath);
 
-        if (touch && mesh)
+        if (touch && mesh && !model)
             library.reloadMesh(mesh);
-        else if (touch && !mesh)
-            library.loadMesh(resourcePath);
+        else if (touch && !mesh && model)
+            library.reloadModel(model);
+        else if (touch && !mesh && !model)
+            if (!library.loadModel(resourcePath))
+                library.loadMesh(resourcePath);
 
         if (mesh && !ImUtil::SendDragDropPayload(DragDropTypes::Mesh, mesh, [&mesh]() { Hints::DrawMeshHint(mesh); }))
             Tooltips::DrawMeshTooltip(mesh);
-        else if (!mesh)
-            Tooltips::DrawUnloadedResourceTooltip(resourcePath, "mesh");
+        if (model && !ImUtil::SendDragDropPayload(DragDropTypes::Model, model, [&model]() { Hints::DrawModelHint(model); }))
+            Tooltips::DrawModelTooltip(model);
+        else if (!mesh && !model)
+            Tooltips::DrawUnloadedResourceTooltip(resourcePath, "mesh or model");
     }
 }
 

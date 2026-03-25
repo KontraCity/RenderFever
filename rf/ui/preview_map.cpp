@@ -23,7 +23,7 @@ Graphics::Texture Ui::PreviewMap::renderShaderPreview(const Resources::Shader& s
         World::Entity& observer = s_previewScene.newEntity("Observer");
         observer.add<World::CameraComponent>();
         s_previewScene.setActiveCameraEntity(observer);
-        Math::DirectCameraAtMesh(*s_previewScene.getActiveCamera(), *m_cubeMesh);
+        Math::DirectCameraAtSphere(*s_previewScene.getActiveCamera(), m_cubeMesh->center(), m_cubeMesh->radius());
 
         World::Entity& light = s_previewScene.newEntity("Light");
         light.set<rf::World::LightComponent>({
@@ -34,7 +34,8 @@ Graphics::Texture Ui::PreviewMap::renderShaderPreview(const Resources::Shader& s
         });
 
         World::Entity& object = s_previewScene.newEntity("Object");
-        object.set<World::DrawComponent>({
+        object.add<rf::World::TransformComponent>();
+        object.set<World::MeshDrawComponent>({
             .material = {
                 .diffuse = Resources::Texture(m_containerDiffuseTexture),
                 .specular = Resources::Texture(m_containerSpecularTexture),
@@ -44,7 +45,7 @@ Graphics::Texture Ui::PreviewMap::renderShaderPreview(const Resources::Shader& s
         });
         s_previewEntity = &object;
     }
-    s_previewEntity->get<World::DrawComponent>()->material.shader = shader;
+    s_previewEntity->get<World::MeshDrawComponent>()->material.shader = shader;
 
     Graphics::Renderer& renderer = Engine::Renderer();
     renderer.render(&s_previewScene);
@@ -68,15 +69,45 @@ Graphics::Texture Ui::PreviewMap::renderMeshPreview(const Resources::Mesh& mesh)
         });
 
         World::Entity& object = s_previewScene.newEntity("Object");
-        object.set<World::DrawComponent>({
+        object.add<rf::World::TransformComponent>();
+        object.set<World::MeshDrawComponent>({
             .material = {
                 .shader = Engine::Renderer().mainShader()
             }
         });
         s_previewEntity = &object;
     }
-    Math::DirectCameraAtMesh(*s_previewScene.getActiveCamera(), *mesh);
-    s_previewEntity->get<World::DrawComponent>()->mesh = mesh;
+    Math::DirectCameraAtSphere(*s_previewScene.getActiveCamera(), mesh->center(), mesh->radius());
+    s_previewEntity->get<World::MeshDrawComponent>()->mesh = mesh;
+
+    Graphics::Renderer& renderer = Engine::Renderer();
+    renderer.render(&s_previewScene);
+    return renderer.previewFramebuffer().texture();
+}
+
+Graphics::Texture Ui::PreviewMap::renderModelPreview(const Resources::Model& model) {
+    static World::Scene s_previewScene;
+    static World::Entity* s_previewEntity = nullptr;
+    if (!s_previewEntity) {
+        World::Entity& observer = s_previewScene.newEntity("Observer");
+        observer.add<World::CameraComponent>();
+        s_previewScene.setActiveCameraEntity(observer);
+
+        World::Entity& light = s_previewScene.newEntity("Light");
+        light.set<rf::World::LightComponent>({
+            .light = {
+                .type = rf::Graphics::LightType::DirectionalLight,
+                .direction = { -0.276f, -0.920f, -0.276f },
+            }
+        });
+
+        World::Entity& object = s_previewScene.newEntity("Object");
+        object.add<rf::World::TransformComponent>();
+        object.add<World::ModelDrawComponent>();
+        s_previewEntity = &object;
+    }
+    Math::DirectCameraAtSphere(*s_previewScene.getActiveCamera(), model->center(), model->radius());
+    s_previewEntity->get<World::ModelDrawComponent>()->model = model;
 
     Graphics::Renderer& renderer = Engine::Renderer();
     renderer.render(&s_previewScene);
@@ -89,6 +120,10 @@ bool Ui::PreviewMap::containsShaderPreview(const Resources::Shader& shader) cons
 
 bool Ui::PreviewMap::containsMeshPreview(const Resources::Mesh& mesh) const {
     return m_meshPreviews.find(mesh.id()) != m_meshPreviews.end();
+}
+
+bool Ui::PreviewMap::containsModelPreview(const Resources::Model& model) const {
+    return m_modelPreviews.find(model.id()) != m_modelPreviews.end();
 }
 
 const Graphics::Texture& Ui::PreviewMap::getShaderPreview(const Resources::Shader& shader) {
@@ -105,6 +140,13 @@ const Graphics::Texture& Ui::PreviewMap::getMeshPreview(const Resources::Mesh& m
     return m_meshPreviews.emplace(mesh.id(), renderMeshPreview(mesh)).first->second;
 }
 
+const Graphics::Texture& Ui::PreviewMap::getModelPreview(const Resources::Model& model) {
+    auto entry = m_modelPreviews.find(model.id());
+    if (entry != m_modelPreviews.end())
+        return entry->second;
+    return m_modelPreviews.emplace(model.id(), renderModelPreview(model)).first->second;
+}
+
 void Ui::PreviewMap::resetShaderPreview(const Resources::Shader& shader) {
     auto entry = m_shaderPreviews.find(shader.id());
     if (entry == m_shaderPreviews.end())
@@ -117,6 +159,13 @@ void Ui::PreviewMap::resetMeshPreview(const Resources::Mesh& mesh) {
     if (entry == m_meshPreviews.end())
         return;
     entry->second = std::move(renderMeshPreview(mesh));
+}
+
+void Ui::PreviewMap::resetModelPreview(const Resources::Model& model) {
+    auto entry = m_modelPreviews.find(model.id());
+    if (entry == m_modelPreviews.end())
+        return;
+    entry->second = std::move(renderModelPreview(model));
 }
 
 } // namespace rf

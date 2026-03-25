@@ -45,10 +45,6 @@ Ui::Overlay::Overlay(GLFWwindow* handle)
     m_windows->push_back(std::make_unique<Windows::BindingsHint>());
     m_windows->push_back(std::make_unique<Windows::SceneTree>());
     m_windows->push_back(std::make_unique<Windows::ResourceBrowser>());
-
-    // Make all windows closed by default
-    for (const Window::Instance& window : *m_windows)
-        window->setIsOpen(false);
 }
 
 Ui::Overlay::Overlay(Overlay&& other) noexcept

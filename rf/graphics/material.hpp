@@ -1,5 +1,11 @@
 #pragma once
 
+namespace rf {
+    namespace Graphics {
+        struct Material;
+    }
+}
+
 #include <rf/resources/library.hpp>
 
 namespace rf {
